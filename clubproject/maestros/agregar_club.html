@@ -1,0 +1,22 @@
+<form action="registrar_club.php" method="POST">
+  <label>Tipo de club:</label>
+  <select name="tipo_club" required>
+    <option value="cultural">Cultural</option>
+    <option value="deportivo">Deportivo</option>
+    <option value="asesoria">Asesoría</option>
+  </select>
+
+  <label>Nombre del club:</label>
+  <input type="text" name="nombre_club" required>
+
+  <label>Nombre del responsable:</label>
+  <input type="text" name="nombre" required>
+
+  <label>Apellidos:</label>
+  <input type="text" name="apellidos" required>
+
+  <label>Contraseña del club:</label>
+  <input type="password" name="password" required>
+
+  <button type="submit">Registrar</button>
+</form>
