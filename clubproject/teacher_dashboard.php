@@ -1,119 +1,716 @@
+
 <?php
 require 'config.php';
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') redirect('login.php');
 $user = $_SESSION['user'];
 
-// consultas por tipo
-$sth_cultural = $pdo->prepare("SELECT * FROM club_registrations WHERE club_type = 'cultural' ORDER BY created_at DESC");
-$sth_cultural->execute();
-$cultural = $sth_cultural->fetchAll(PDO::FETCH_ASSOC);
+// Handle flash messages via session and Post-Redirect-Get (solo errores)
+if (isset($_GET['error'])) {
+    $flash = null;
+    if ($_GET['error'] === 'duplicado') {
+        $flash = ['type' => 'error', 'msg' => '⚠️ El ID del club ya está registrado. Usa uno diferente.'];
+    } elseif ($_GET['error'] === 'campos') {
+        $flash = ['type' => 'error', 'msg' => '⚠️ Todos los campos son obligatorios.'];
+    } else {
+        $flash = ['type' => 'error', 'msg' => '⚠️ Ocurrió un error al registrar el club.'];
+    }
+    if ($flash) $_SESSION['flash'] = $flash;
 
-$sth_deportivo = $pdo->prepare("SELECT * FROM club_registrations WHERE club_type = 'deportivo' ORDER BY created_at DESC");
-$sth_deportivo->execute();
-$deportivo = $sth_deportivo->fetchAll(PDO::FETCH_ASSOC);
+    $params = $_GET;
+    unset($params['success'], $params['error']);
+    $redirect = $_SERVER['PHP_SELF'] . (count($params) ? '?' . http_build_query($params) : '');
+    header('Location: ' . $redirect);
+    exit;
+}
 
-$sth_civil = $pdo->prepare("SELECT * FROM club_registrations WHERE club_type = 'civil' ORDER BY created_at DESC");
-$sth_civil->execute();
-$civil = $sth_civil->fetchAll(PDO::FETCH_ASSOC);
+/**
+ * Devuelve valores únicos de una columna (para listas dinámicas)
+ */
+function getUniqueValues(PDO $pdo, string $table, string $column, string $where = null, array $whereParams = []) {
+    $sql = "SELECT DISTINCT `$column` FROM `$table`";
+    if ($where) $sql .= " WHERE $where";
+    $sql .= " ORDER BY `$column` ASC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($whereParams);
+    return array_map(function($r){ return $r[0]; }, $stmt->fetchAll(PDO::FETCH_NUM));
+}
 
-$sth_ases = $pdo->prepare("SELECT * FROM tutoring_registrations ORDER BY created_at DESC");
-$sth_ases->execute();
-$asesorias = $sth_ases->fetchAll(PDO::FETCH_ASSOC);
+/**
+ * Paginación y filtro (usa parámetros preparados)
+ * $whereBase: texto de condición inicial (por ejemplo "club_type = 'cultural'")
+ * $filterValue: valor de filtro extra (se añade AND club_name = ? si está presente)
+ *
+ * IMPORTANTE: bindValue se usa para LIMIT/OFFSET como enteros para evitar que PDO los ponga entre comillas.
+ */
+function getPaginated(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterValue = null) {
+    $page = max(1, intval($_GET[$pageParam] ?? 1));
+    $limit = 10;
+    $offset = ($page - 1) * $limit;
+
+    $params = [];
+    $where = $whereBase;
+    if ($filterValue !== null && $filterValue !== '') {
+        $where .= " AND club_name = ?";
+        $params[] = $filterValue;
+    }
+
+    // contar
+    $countSql = "SELECT COUNT(*) FROM `$table` WHERE $where";
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $total = (int) $stmt->fetchColumn();
+
+    if ($total === 0) {
+        return ['rows' => [], 'total' => 0, 'page' => $page, 'limit' => $limit];
+    }
+
+    // seleccionar con límite, enlazando parámetros y luego bindValue para LIMIT/OFFSET
+    // Nota: NO pasar $params a execute() aquí; usamos bindValue para parámetros dinámicos + LIMIT/OFFSET como enteros
+    $selectSql = "SELECT * FROM `$table` WHERE $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $stmt = $pdo->prepare($selectSql);
+
+    // bind dynamic params (filters)
+    $idx = 1;
+    foreach ($params as $p) {
+        $stmt->bindValue($idx++, $p);
+    }
+    // bind limit/offset como enteros
+    $stmt->bindValue($idx++, (int)$limit, PDO::PARAM_INT);
+    $stmt->bindValue($idx++, (int)$offset, PDO::PARAM_INT);
+
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return ['rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit];
+}
+
+/**
+ * Paginación para tablas que no tienen club_name (ej. tutoring_registrations).
+ * Permite filtrar por una columna arbitraria (por ejemplo materia).
+ */
+function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterColumn = null, ?string $filterValue = null) {
+    $page = max(1, intval($_GET[$pageParam] ?? 1));
+    $limit = 10;
+    $offset = ($page - 1) * $limit;
+
+    $params = [];
+    $where = $whereBase;
+    if ($filterColumn && $filterValue !== null && $filterValue !== '') {
+        $where .= " AND `$filterColumn` = ?";
+        $params[] = $filterValue;
+    }
+
+    $countSql = "SELECT COUNT(*) FROM `$table` WHERE $where";
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $total = (int) $stmt->fetchColumn();
+
+    if ($total === 0) {
+        return ['rows' => [], 'total' => 0, 'page' => $page, 'limit' => $limit];
+    }
+
+    $selectSql = "SELECT * FROM `$table` WHERE $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $stmt = $pdo->prepare($selectSql);
+
+    $idx = 1;
+    foreach ($params as $p) {
+        $stmt->bindValue($idx++, $p);
+    }
+    $stmt->bindValue($idx++, (int)$limit, PDO::PARAM_INT);
+    $stmt->bindValue($idx++, (int)$offset, PDO::PARAM_INT);
+
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return ['rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit];
+}
+
+/* Obtener listas dinámicas para selects - arrays de TODOS los clubes disponibles por tipo,
+   usando la tabla club_registrations (se actualizarán automáticamente cuando se añadan registros). */
+$culturales = getUniqueValues($pdo, 'club_registrations', 'club_name', "club_type = 'cultural'");
+$deportivos = getUniqueValues($pdo, 'club_registrations', 'club_name', "club_type = 'deportivo'");
+$civiles    = getUniqueValues($pdo, 'club_registrations', 'club_name', "club_type = 'civil'");
+$asesorias_clubs = getUniqueValues($pdo, 'club_registrations', 'club_name', "club_type = 'asesoria'");
+
+/* Lista de materias para filtro de asesorías (tutoring_registrations) */
+$materias_asesoria = getUniqueValues($pdo, 'tutoring_registrations', 'materia');
+
+/* Leer filtros desde GET */
+$filter_cultural = trim($_GET['filter_cultural'] ?? '');
+$filter_deportivo = trim($_GET['filter_deportivo'] ?? '');
+$filter_civil     = trim($_GET['filter_civil'] ?? '');
+$filter_asesoria  = trim($_GET['filter_asesoria'] ?? '');
+
+/* Obtener datos paginados aplicando filtros (si existen) */
+$culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'", 'page_cultural', $filter_cultural);
+$deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo);
+$civilData     = getPaginated($pdo, 'club_registrations', "club_type = 'civil'", 'page_civil', $filter_civil);
+$asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $filter_asesoria);
 ?>
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel Maestro</title>
-<style>
-body{font-family:Arial;background:#f5f7fb;padding:20px}
-.container{max-width:1100px;margin:0 auto}
-.card{background:#fff;padding:12px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06);margin-bottom:18px}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
-small.gray{color:#666}
-.logout{float:right}
-</style>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Panel Maestro</title>
+   <style>
+    :root{
+      --bg1: #e0f7fa;
+      --bg2: #fce4ec;
+      --card-bg: rgba(255,255,255,0.9);
+      --primary: #007bff;
+      --muted: #888;
+      --glass: rgba(255,255,255,0.6);
+      --radius: 12px;
+      --edit-highlight: rgba(255, 244, 180, 0.7);
+    }
+    body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    header { background: var(--glass); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header h2 { margin: 0; font-size: 22px; color:#143; }
+    .header-actions { display:flex; align-items:center; gap:12px; }
+    .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
+    a.btn { text-decoration: none; }
+    .container { max-width: 1160px; margin: 0 auto; padding: 28px; }
+    .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; transition: transform 0.18s ease; position: relative; }
+    .card.editing { border: 2px dashed #ffb703; background: linear-gradient(180deg, var(--edit-highlight), rgba(255,255,255,0.9)); }
+    .card h3 { margin-top: 0; font-size: 20px; color: #2b3a42; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .filter-row { display:flex; gap:10px; align-items:center; margin-top:8px; margin-bottom:10px; }
+    .filter-row select, .filter-row input[type="search"] { height:36px; padding:6px 10px; border-radius:8px; border:1px solid #e6e9ef; background:#fff; transition: all 0.2s ease-in-out; }
+    .filter-row select:focus, .filter-row input[type="search"]:focus { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+    .table th { background: #fafafa; color: #555; }
+    small.gray { color: var(--muted); }
+    .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
+    .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
+    .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+    .btn { padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight:600; box-shadow: 0 6px 18px rgba(0,123,255,0.14); text-decoration: none; }
+    .btn.small { padding:6px 10px; font-size:13px; }
+    #editToolbar { display:none; position: sticky; top:72px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .edit-active { display:flex; align-items:center; gap:12px; }
+    .edit-col, .edit-action {display:none;}
+    .edit-col{width:36px;}
+    tr.row-selected{background:#ffe488; font-weight: 600;}
+
+    /* User Icon */
+    .usericon { position: relative; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; }
+    .user-menu {
+      display: block;
+      position: absolute;
+      top: 42px;
+      right: 0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 8px;
+      min-width: 160px;
+      z-index: 110;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    }
+    .usericon:hover .user-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+    .user-menu a { padding: 8px 12px; text-decoration: none; display: block; }
+    .user-menu a:hover { background: #f5f5f5; }
+
+    /* Modal styles */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-panel { background: #fff; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
+    .modal-header h3 { margin: 0; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+    @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Form styles */
+    form { padding: 20px; }
+    .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .field { flex: 1; display: flex; flex-direction: column; }
+    .form-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #444; }
+    input[type="text"], input[type="password"], select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    .helper { font-size: 12px; color: #777; margin-top: 4px; }
+    .actions { text-align: center; margin-top: 24px; }
+    .actions .btn { width: 100%; }
+
+    @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      (function removeFlashParams(){
+        try {
+          const u = new URL(window.location.href);
+          if (u.searchParams.has('success') || u.searchParams.has('error')) {
+            u.searchParams.delete('success');
+            u.searchParams.delete('error');
+            const newUrl = u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '');
+            window.history.replaceState({}, document.title, newUrl);
+            const flash = document.getElementById('flashMessage');
+            if (flash) flash.remove();
+          }
+        } catch(e) { /* ignore */ }
+      })();
+
+      function setFilterParam(param, value) {
+        const u = new URL(window.location.href);
+        if (value === '' || value === null) {
+          u.searchParams.delete(param);
+        } else {
+          u.searchParams.set(param, value);
+        }
+        const pageMap = {
+          'filter_cultural': 'page_cultural',
+          'filter_deportivo': 'page_deportivo',
+          'filter_civil': 'page_civil',
+          'filter_asesoria': 'page_asesoria'
+        };
+        if (pageMap[param]) u.searchParams.set(pageMap[param], '1');
+        
+        const cardMap = {
+          'filter_cultural': 'card-cultural',
+          'filter_deportivo': 'card-deportivo',
+          'filter_civil': 'card-civil',
+          'filter_asesoria': 'card-asesorias'
+        };
+        const hash = cardMap[param] ? '#' + cardMap[param] : '';
+        
+        // Update URL and reload
+        history.pushState(null, '', u.pathname + u.search);
+        location.reload();
+      }
+
+      document.querySelectorAll('.filter-select').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const param = sel.dataset.param;
+          const val = sel.value;
+          setFilterParam(param, val === '__all__' ? '' : val);
+        });
+      });
+
+      const toggleEditBtn = document.getElementById('toggleEditBtn');
+      const editToolbar = document.getElementById('editToolbar');
+      let editMode = false;
+      function setEditMode(on) {
+        editMode = !!on;
+        document.querySelectorAll('.card').forEach(card => {
+          if (on) card.classList.add('editing'); else card.classList.remove('editing');
+        });
+        document.querySelectorAll('.edit-col, .edit-action').forEach(c => {
+          c.style.display = on ? 'table-cell' : 'none';
+        });
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        if (!on) {
+          document.querySelectorAll('tr.row-selected').forEach(tr => tr.classList.remove('row-selected'));
+        }
+        editToolbar.style.display = on ? 'block' : 'none';
+        toggleEditBtn.textContent = on ? 'Salir edición' : 'Editar';
+      }
+      if (toggleEditBtn) toggleEditBtn.addEventListener('click', () => setEditMode(!editMode));
+
+      function getSelectedIds() {
+        const ids = [];
+        document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
+          const id = cb.getAttribute('data-id');
+          if (id) ids.push(id);
+        });
+        return ids;
+      }
+
+      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+      if (bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', async () => {
+        const ids = getSelectedIds();
+        if (!ids.length) return alert('Selecciona al menos un alumno.');
+        if (!confirm('Dar de baja a ' + ids.length + ' alumno(s)? Esta acción no se puede deshacer.')) return;
+        try {
+          const res = await fetch('bulk_delete_members.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ ids })
+          });
+          const data = await res.json();
+          if (data.success) {
+            ids.forEach(id => { const tr = document.querySelector('tr[data-id="'+id+'"]'); if (tr) tr.remove(); });
+            alert('Alumnos dados de baja.');
+          } else {
+            alert(data.message || 'No se pudieron eliminar los registros.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error al eliminar. Revisa la consola.');
+        }
+      });
+
+      document.addEventListener('change', (e) => {
+        const cb = e.target.closest('.row-checkbox');
+        if (!cb) return;
+        const tr = cb.closest('tr');
+        if (!tr) return;
+        tr.classList.toggle('row-selected', cb.checked);
+      });
+      document.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr[data-id]');
+        if (!tr) return;
+        if (e.target.closest('button, input, a, select, textarea')) return;
+        if (!editMode) return;
+        const cb = tr.querySelector('.row-checkbox');
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        tr.classList.toggle('row-selected', cb.checked);
+      });
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-edit');
+        if (!btn) return;
+        document.getElementById('edit_id').value = btn.dataset.id || '';
+        document.getElementById('edit_member_id').value = btn.dataset.memberId || '';
+        document.getElementById('edit_paterno').value = btn.dataset.paterno || '';
+        document.getElementById('edit_materno').value = btn.dataset.materno || '';
+        document.getElementById('edit_nombres').value = btn.dataset.nombres || '';
+        document.getElementById('edit_correo').value = btn.dataset.correo || '';
+        document.getElementById('edit_semestre').value = btn.dataset.semestre || '';
+        document.getElementById('edit_turno').value = btn.dataset.turno || '';
+        document.getElementById('editMemberModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+      });
+
+      document.querySelectorAll('.close-modal, .close-btn').forEach(b => b.addEventListener('click', (e) => {
+        const panel = e.target.closest('.modal');
+        if(panel) panel.classList.remove('show');
+        document.body.style.overflow = '';
+      }));
+
+      const editForm = document.getElementById('editMemberForm');
+      if (editForm) {
+        editForm.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const form = new FormData(editForm);
+          try {
+            const res = await fetch('edit_member.php', { method: 'POST', body: new URLSearchParams([...form]) });
+            const data = await res.json();
+            if (data.success) {
+              alert('Cambios guardados.');
+              const id = form.get('id');
+              const tr = document.querySelector('tr[data-id="'+id+'"]');
+              if (tr) {
+                tr.querySelector('td[data-col="user_id"]').textContent = form.get('member_id') || '';
+                tr.querySelector('td[data-col="nombre"]').textContent = ((form.get('paterno')||'') + ' ' + (form.get('materno')||'') + ' ' + (form.get('nombres')||'')).trim();
+                tr.querySelector('td[data-col="correo"]').textContent = form.get('correo') || '';
+                tr.querySelector('td[data-col="semestre"]').textContent = form.get('semestre') || '';
+                tr.querySelector('td[data-col="turno"]').textContent = form.get('turno') || '';
+                const editBtn = tr.querySelector('.btn-edit');
+                if (editBtn) {
+                  editBtn.dataset.memberId = form.get('member_id') || '';
+                  editBtn.dataset.paterno = form.get('paterno') || '';
+                  editBtn.dataset.materno = form.get('materno') || '';
+                  editBtn.dataset.nombres = form.get('nombres') || '';
+                  editBtn.dataset.correo = form.get('correo') || '';
+                  editBtn.dataset.semestre = form.get('semestre') || '';
+                  editBtn.dataset.turno = form.get('turno') || '';
+                }
+              } else {
+                location.reload();
+              }
+              document.getElementById('editMemberModal').classList.remove('show');
+              document.body.style.overflow = '';
+            } else {
+              alert(data.message || 'No se pudo guardar.');
+            }
+          } catch (err) { console.error(err); alert('Error al guardar.'); }
+        });
+      }
+
+    });
+  </script>
 </head>
 <body>
-<div class="container">
-  <h2>Base de datos de registros <span class="logout"><a href="logout.php">Cerrar sesión</a></span></h2>
+ <header>
+  <h2>Base de datos de registros</h2>
+  <div class="header-actions">
+    <a href="view_clubs.php" class="btn">Ver base de clubs</a>
+    <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'">➕ Agregar club</button>
+    <button id="toggleEditBtn" class="btn" type="button">Editar</button>
+    <div class="usericon">
+      <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
+      <div class="user-menu">
+        <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
+        <a href="logout.php" style="color:#b00; text-decoration: none;">Cerrar sesión</a>
+      </div>
+    </div>
+  </div>
+ </header>
 
-  <div class="card">
-    <h3>Cultural (<?=count($cultural)?>)</h3>
-    <table class="table"><thead><tr><th>Club</th><th>Nombre</th><th>Semestre</th><th>Correo</th><th>Turno</th><th>Registró</th><th>Fecha</th></tr></thead>
-      <tbody>
-        <?php foreach($cultural as $r): ?>
-          <tr>
-            <td><?=htmlspecialchars($r['club_name'])?></td>
-            <td><?=htmlspecialchars($r['paterno'].' '.$r['materno'].' '.$r['nombres'])?></td>
-            <td><?=htmlspecialchars($r['semestre'])?></td>
-            <td><?=htmlspecialchars($r['correo'])?></td>
-            <td><?=htmlspecialchars($r['turno'])?></td>
-            <td><?=htmlspecialchars($r['user_id'])?></td>
-            <td><small class="gray"><?=htmlspecialchars($r['created_at'])?></small></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <div class="container">
+    <div id="editToolbar">
+      <div class="edit-active">
+        <strong>Modo edición activo</strong>
+        <button id="bulkDeleteBtn" class="btn small">Dar de baja</button>
+        <button id="exitEditBtn" class="btn alt small" onclick="(function(){document.getElementById('toggleEditBtn').click();})();">Salir modo edición</button>
+        <small style="margin-left:8px;color:#666;">Selecciona filas para dar de baja o usa el icono de lápiz para editar una fila.</small>
+      </div>
+    </div>
+
+    <?php if (!empty($_SESSION['flash'])):
+        $f = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+    ?>
+      <div id="flashMessage" data-flash-type="<?= htmlspecialchars($f['type']) ?>" style="<?= $f['type'] === 'success' ? 'background:#d4edda;color:#155724;padding:12px;border:1px solid #c3e6cb;border-radius:4px;margin-bottom:20px;display:flex;align-items:center;gap:10px;' : 'background:#f8d7da;color:#721c24;padding:12px;border:1px solid #f5c6cb;border-radius:4px;margin-bottom:20px;' ?>">
+        <?php if ($f['type'] === 'success'): ?>
+          <div style="width:24px;height:24px;border-radius:50%;background:#28a745;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;">✔</div>
+        <?php endif; ?>
+        <span><?= htmlspecialchars($f['msg']) ?></span>
+      </div>
+    <?php endif; ?>
+
+    <?php
+    // Render table with optional filter select
+    function renderTable($title, $data, $columns, $pageParam, $filterParam = null, $filterOptions = []) {
+      $currentParams = $_GET; unset($currentParams['success'], $currentParams['error']);
+      $cardId = strtolower(str_replace(['í', ' '], ['i', '-'], $title));
+      echo "<div class='card' id='card-" . htmlspecialchars($cardId) . "' data-card='" . htmlspecialchars($title) . "'>";
+      echo "<h3><span>$title</span></h3>";
+
+      if ($filterParam !== null) {
+        $selected = $_GET[$filterParam] ?? '';
+        echo "<div class='filter-row'>";
+        echo "<label style='font-size:13px;color:#444;margin-right:6px;'>Filtrar por:</label>";
+        echo "<select class='filter-select' data-param='".htmlspecialchars($filterParam)."'>";
+        echo "<option value='__all__'>Todos</option>";
+        foreach ($filterOptions as $opt) {
+          $sel = ($opt === $selected) ? 'selected' : '';
+          echo "<option value='".htmlspecialchars($opt)."' $sel>".htmlspecialchars($opt)."</option>";
+        }
+        echo "</select>";
+        echo "<div style='margin-left:auto;color:#666;font-size:13px;'>Registros: " . intval($data['total'] ?? 0) . "</div>";
+        echo "</div>";
+      } else {
+        echo "<div style='margin-top:6px;color:#666;font-size:13px;'>Registros: " . intval($data['total'] ?? 0) . "</div>";
+      }
+
+      if (empty($data['rows'])) {
+        echo "<p>No hay registros disponibles.</p>";
+      } else {
+        echo "<table class='table'><thead><tr>";
+        echo "<th class='edit-col'></th>";
+        foreach ($columns as $key => $label) echo "<th>" . htmlspecialchars($label) . "</th>";
+        echo "<th class='edit-action'>Acciones</th>";
+        echo "</tr></thead><tbody>";
+        foreach ($data['rows'] as $r) {
+          $id = htmlspecialchars($r['id'] ?? '');
+          $nombre_full = trim(($r['paterno'] ?? '') . ' ' . ($r['materno'] ?? '') . ' ' . ($r['nombres'] ?? ''));
+          echo "<tr data-id='$id'>";
+          echo "<td class='edit-col'><input type='checkbox' class='row-checkbox' data-id='$id'></td>";
+          foreach ($columns as $key => $label) {
+            if ($key === 'nombre') {
+              echo "<td data-col='nombre'>" . htmlspecialchars($nombre_full) . "</td>";
+            } elseif ($key === 'fecha') {
+              echo "<td><small class='gray'>" . htmlspecialchars($r['created_at'] ?? '') . "</small></td>";
+            } else {
+              echo "<td data-col='".htmlspecialchars($key)."'>" . htmlspecialchars($r[$key] ?? '') . "</td>";
+            }
+          }
+          $btnAttrs = "";
+          if ($id !== '') {
+            $member_id = htmlspecialchars($r['user_id'] ?? '');
+            $paterno = htmlspecialchars($r['paterno'] ?? '');
+            $materno = htmlspecialchars($r['materno'] ?? '');
+            $nombres = htmlspecialchars($r['nombres'] ?? '');
+            $correo = htmlspecialchars($r['correo'] ?? '');
+            $semestre = htmlspecialchars($r['semestre'] ?? '');
+            $turno = htmlspecialchars($r['turno'] ?? '');
+            $btnAttrs = "class='btn-edit btn' data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-turno='$turno' style='padding:6px 8px;margin-right:6px;'";
+            echo "<td class='edit-action' style='white-space:nowrap;'><button $btnAttrs type='button'>✎</button></td>";
+          } else {
+            echo "<td class='edit-action'></td>";
+          }
+          echo "</tr>";
+        }
+        echo "</tbody></table>";
+
+        $totalPages = max(1, ceil(intval($data['total']) / max(1, intval($data['limit'] ?? 10))));
+        $currentPage = max(1, intval($data['page'] ?? 1));
+        if ($totalPages > 1) {
+          echo "<div class='pagination'>";
+          $params = $currentParams;
+          if ($currentPage > 1) {
+            $params[$pageParam] = $currentPage - 1;
+            echo "<a href='?" . http_build_query($params) . "'>&laquo; Anterior</a>";
+          }
+          for ($i = 1; $i <= $totalPages; $i++) {
+            $params[$pageParam] = $i;
+            $active = ($currentPage == $i) ? 'active' : '';
+            echo "<a href='?" . http_build_query($params) . "' class='$active'>$i</a>";
+          }
+          if ($currentPage < $totalPages) {
+            $params[$pageParam] = $currentPage + 1;
+            echo "<a href='?" . http_build_query($params) . "'>Siguiente &raquo;</a>";
+          }
+          echo "</div>";
+        }
+      }
+      echo "</div>";
+    }
+
+    renderTable('Cultural', $culturalData, [
+      'club_name' => 'Club',
+      'nombre' => 'Nombre',
+      'semestre' => 'Semestre',
+      'correo' => 'Correo',
+      'turno' => 'Turno',
+      'user_id' => 'Registró',
+      'fecha' => 'Fecha'
+    ], 'page_cultural', 'filter_cultural', $culturales);
+
+    renderTable('Deportivo', $deportivoData, [
+      'club_name' => 'Club',
+      'nombre' => 'Nombre',
+      'semestre' => 'Semestre',
+      'correo' => 'Correo',
+      'turno' => 'Turno',
+      'user_id' => 'Registró',
+      'fecha' => 'Fecha'
+    ], 'page_deportivo', 'filter_deportivo', $deportivos);
+
+    renderTable('Civil', $civilData, [
+      'club_name' => 'Club',
+      'nombre' => 'Nombre',
+      'semestre' => 'Semestre',
+      'correo' => 'Correo',
+      'turno' => 'Turno',
+      'user_id' => 'Registró',
+      'fecha' => 'Fecha'
+    ], 'page_civil', 'filter_civil', $civiles);
+
+    // Asesorías: registros de tutoría (filtro por materia). El select de clubes de tipo 'asesoria' está disponible en $asesorias_clubs si se necesita.
+    renderTable('Asesorías', $asesoriasData, [
+      'materia' => 'Materia',
+      'nombre' => 'Nombre',
+      'carrera' => 'Carrera',
+      'maestro' => 'Maestro',
+      'telefono' => 'Teléfono',
+      'user_id' => 'Registró',
+      'fecha' => 'Fecha'
+    ], 'page_asesoria', 'filter_asesoria', $materias_asesoria);
+    ?>
   </div>
 
-  <div class="card">
-    <h3>Deportivo (<?=count($deportivo)?>)</h3>
-    <table class="table"><thead><tr><th>Club</th><th>Nombre</th><th>Semestre</th><th>Correo</th><th>Turno</th><th>Registró</th><th>Fecha</th></tr></thead>
-      <tbody>
-        <?php foreach($deportivo as $r): ?>
-          <tr>
-            <td><?=htmlspecialchars($r['club_name'])?></td>
-            <td><?=htmlspecialchars($r['paterno'].' '.$r['materno'].' '.$r['nombres'])?></td>
-            <td><?=htmlspecialchars($r['semestre'])?></td>
-            <td><?=htmlspecialchars($r['correo'])?></td>
-            <td><?=htmlspecialchars($r['turno'])?></td>
-            <td><?=htmlspecialchars($r['user_id'])?></td>
-            <td><small class="gray"><?=htmlspecialchars($r['created_at'])?></small></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <!-- Modal Agregar Club -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h3 id="modal-title">➕ Nuevo Club</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form method="post" action="agregar_club.php" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Nombre del club</label>
+            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica">
+          </div>
+          <div class="field">
+            <label class="form-label">ID del club</label>
+            <input type="text" name="club_id" required placeholder="ID único">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" required placeholder="Contraseña segura">
+            <div class="helper">Usa al menos 6 caracteres.</div>
+          </div>
+          <div class="field">
+            <label class="form-label">Tipo de club</label>
+            <select name="club_type" required>
+              <option value="">Selecciona una opción</option>
+              <option value="cultural">Cultural</option>
+              <option value="deportivo">Deportivo</option>
+              <option value="asesoria">Asesorías</option>
+              <option value="civil">Civil</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field" style="flex:1;">
+            <label class="form-label">Nombre del creador</label>
+            <input type="text" name="creator_name" required placeholder="Nombre completo">
+          </div>
+          <div class="field" style="flex:0 0 120px; align-self:flex-end;">
+            <button type="button" class="btn alt close-modal" style="width:100%;">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">Guardar club</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Civil (<?=count($civil)?>)</h3>
-    <table class="table"><thead><tr><th>Club</th><th>Nombre</th><th>Semestre</th><th>Correo</th><th>Turno</th><th>Registró</th><th>Fecha</th></tr></thead>
-      <tbody>
-        <?php foreach($civil as $r): ?>
-          <tr>
-            <td><?=htmlspecialchars($r['club_name'])?></td>
-            <td><?=htmlspecialchars($r['paterno'].' '.$r['materno'].' '.$r['nombres'])?></td>
-            <td><?=htmlspecialchars($r['semestre'])?></td>
-            <td><?=htmlspecialchars($r['correo'])?></td>
-            <td><?=htmlspecialchars($r['turno'])?></td>
-            <td><?=htmlspecialchars($r['user_id'])?></td>
-            <td><small class="gray"><?=htmlspecialchars($r['created_at'])?></small></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <!-- Edit member modal -->
+  <div id="editMemberModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="modal-header">
+        <h3 id="editTitle">Editar miembro</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="editMemberForm" novalidate>
+        <input type="hidden" id="edit_id" name="id" value="">
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">ID socio</label>
+            <input id="edit_member_id" name="member_id" type="text" required readonly>
+          </div>
+          <div class="field">
+            <label class="form-label">Paterno</label>
+            <input id="edit_paterno" name="paterno" type="text">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Materno</label>
+            <input id="edit_materno" name="materno" type="text">
+          </div>
+          <div class="field">
+            <label class="form-label">Nombres</label>
+            <input id="edit_nombres" name="nombres" type="text">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Correo</label>
+            <input id="edit_correo" name="correo" type="text">
+          </div>
+          <div class="field">
+            <label class="form-label">Semestre</label>
+            <input id="edit_semestre" name="semestre" type="text">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Turno</label>
+            <input id="edit_turno" name="turno" type="text">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Asesorías (<?=count($asesorias)?>)</h3>
-    <table class="table"><thead><tr><th>Materia</th><th>Nombre</th><th>Carrera</th><th>Maestro</th><th>Teléfono</th><th>Registró</th><th>Fecha</th></tr></thead>
-      <tbody>
-        <?php foreach($asesorias as $r): ?>
-          <tr>
-            <td><?=htmlspecialchars($r['materia'])?></td>
-            <td><?=htmlspecialchars($r['paterno'].' '.$r['materno'].' '.$r['nombres'])?></td>
-            <td><?=htmlspecialchars($r['carrera'])?></td>
-            <td><?=htmlspecialchars($r['maestro'])?></td>
-            <td><?=htmlspecialchars($r['telefono'])?></td>
-            <td><?=htmlspecialchars($r['user_id'])?></td>
-            <td><small class="gray"><?=htmlspecialchars($r['created_at'])?></small></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-
-</div>
 </body>
 </html>
