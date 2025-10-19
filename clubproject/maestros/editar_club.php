@@ -1,72 +1,37 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require '../config.php';
+header('Content-Type: application/json');
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-$conn = new mysqli("localhost", "root", "", "usuarios");
-$conn->set_charset("utf8");
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+    exit;
+}
 
-$bajas = $_POST['baja'] ?? [];
-$nombres = $_POST['nombre'] ?? [];
-$correos = $_POST['correo'] ?? [];
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') {
+    echo json_encode(['success' => false, 'message' => 'Acceso no autorizado.']);
+    exit;
+}
 
-$exito = false;
+$club_id = $_POST['club_id'] ?? '';
+$club_name = trim($_POST['club_name'] ?? '');
+$creator_name = trim($_POST['creator_name'] ?? '');
+$club_type = trim($_POST['club_type'] ?? '');
 
-// Dar de baja usuarios
-if (!empty($bajas)) {
-    foreach ($bajas as $id_usuario) {
-        $stmt = $conn->prepare("DELETE FROM usuarios_club WHERE id_usuario = ?");
-        $stmt->bind_param("s", $id_usuario);
-        $stmt->execute();
-        $stmt->close();
+if (empty($club_id) || empty($club_name) || empty($creator_name) || empty($club_type)) {
+    echo json_encode(['success' => false, 'message' => 'Todos los campos son obligatorios.']);
+    exit;
+}
+
+try {
+    $stmt = $pdo->prepare("UPDATE clubs SET club_name = ?, creator_name = ?, club_type = ? WHERE club_id = ?");
+    $stmt->execute([$club_name, $creator_name, $club_type, $club_id]);
+    
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['success' => true, 'message' => 'Club actualizado correctamente.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'No se realizaron cambios o el club no fue encontrado.']);
     }
-    $exito = true;
+} catch (PDOException $e) {
+    // Log error here if needed
+    echo json_encode(['success' => false, 'message' => 'Error en la base de datos al actualizar el club.']);
 }
-
-// Editar información de usuarios
-foreach ($nombres as $id => $nuevo_nombre) {
-    $nuevo_correo = $correos[$id];
-    $stmt = $conn->prepare("UPDATE usuarios_club SET nombre_usuario = ?, correo = ? WHERE id_usuario = ?");
-    $stmt->bind_param("sss", $nuevo_nombre, $nuevo_correo, $id);
-    $stmt->execute();
-    $stmt->close();
-    $exito = true;
-}
-
-$conn->close();
-?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Edición de Club</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-<script>
-<?php if ($exito): ?>
-Swal.fire({
-    icon: 'success',
-    title: 'Cambios aplicados',
-    text: 'Los datos han sido actualizados correctamente.',
-    confirmButtonText: 'Volver',
-    confirmButtonColor: '#ff0000de'
-}).then(() => {
-    window.location.href = 'maestros.html';
-});
-<?php else: ?>
-Swal.fire({
-    icon: 'info',
-    title: 'Sin cambios',
-    text: 'No se realizaron modificaciones.',
-    confirmButtonText: 'Volver',
-    confirmButtonColor: '#ff0000de'
-}).then(() => {
-    window.location.href = 'maestros.html';
-});
-<?php endif; ?>
-</script>
-</body>
-</html>

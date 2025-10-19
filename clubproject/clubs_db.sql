@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-10-2025 a las 11:07:55
+-- Tiempo de generación: 19-10-2025 a las 19:23:12
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -41,12 +41,30 @@ CREATE TABLE `clubs` (
 --
 
 INSERT INTO `clubs` (`club_id`, `club_name`, `password`, `creator_name`, `club_type`, `created_at`) VALUES
-('1', '1', '$2y$10$ddB9DI9Rmf4A5scgqREWy.HlNdUDHJihx/7yKIE/e.0XkV4OimK0G', '1', 'cultural', '2025-10-18 15:45:10'),
-('1212', 'Club de robotica', '$2y$10$ODJhvCwziiQAQnvDRKp/..8bwfulzM0aRpWKCE1aF8Kw/YfRoTodS', 'Alberto Jaret Vazquez Tovar', 'cultural', '2025-10-18 17:02:52'),
-('2', '12', '$2y$10$3DN/96u.oLyo6rXlW28pr.s0HHgRGhy0r3zuNvZpR8Eg82EFlibi6', '2', 'cultural', '2025-10-18 16:48:18'),
-('3', '3', '$2y$10$UsI1fWswEyh2U8oqf5IStu7LJIXDUgdX9rqOPS/oapaSJs5uRPpQG', '3', 'cultural', '2025-10-18 16:48:40'),
-('4', '4', '$2y$10$HUOCWkdit08INREsWNptzupW/OExnrxDVh767FEqFHKWWfy32owUK', '4', 'cultural', '2025-10-18 16:53:23'),
-('club1', 'Club de robotica', '$2y$10$mDFw5Ut6HkkQc6VaSscK8ecjBJNEeHK3T14.LtKh8rI.QS1Nqtkeu', 'Alberto Jaret Vazquez Tovar', 'deportivo', '2025-10-18 15:20:23');
+('ase001', 'Matemáticas 1', '$2y$10$hashMate1', 'Profe Rubén', 'asesoria', '2025-10-19 10:52:00'),
+('ase002', 'Matemáticas 2', '$2y$10$hashMate2', 'Profe Rubén', 'asesoria', '2025-10-19 10:52:00'),
+('ase003', 'Matemáticas 3', '$2y$10$hashMate3', 'Profe Rubén', 'asesoria', '2025-10-19 10:52:00'),
+('ase004', 'Inglés', '$2y$10$hashIngles', 'Profe Mariana', 'asesoria', '2025-10-19 10:52:00'),
+('civ001', 'Banda de guerra', '$2y$10$hashBanda', 'Profe Héctor', 'civil', '2025-10-19 10:52:00'),
+('civ002', 'Escolta', '$2y$10$hashEscolta', 'Profe Brenda', 'civil', '2025-10-19 10:52:00'),
+('club1', 'Club de robotica', '$2y$10$mDFw5Ut6HkkQc6VaSscK8ecjBJNEeHK3T14.LtKh8rI.QS1Nqtkeu', 'Alberto Jaret Vazquez Tovar', 'deportivo', '2025-10-18 15:20:23'),
+('cult001', 'Fotografía/Video', '$2y$10$hashFoto', 'Profe Laura', 'cultural', '2025-10-19 10:52:00'),
+('cult002', 'Danza y baile', '$2y$10$hashDanza', 'Profe Miguel', 'cultural', '2025-10-19 10:52:00'),
+('cult003', 'Música/Rondalla', '$2y$10$hashRondalla', 'Profe Ana', 'cultural', '2025-10-19 10:52:00'),
+('cult004', 'Música grupo norteño', '$2y$10$hashNorteño', 'Profe Luis', 'cultural', '2025-10-19 10:52:00'),
+('cult005', 'Arte manual', '$2y$10$hashArte', 'Profe Karla', 'cultural', '2025-10-19 10:52:00'),
+('cult006', 'Oratoria y declamación', '$2y$10$hashOratoria', 'Profe Iván', 'cultural', '2025-10-19 10:52:00'),
+('cult007', 'Pintura/Dibujo', '$2y$10$hashPintura', 'Profe Sonia', 'cultural', '2025-10-19 10:52:00'),
+('cult008', 'Teatro', '$2y$10$hashTeatro', 'Profe Andrés', 'cultural', '2025-10-19 10:52:00'),
+('cult009', 'Creación literaria', '$2y$10$hashLiteraria', 'Profe Diana', 'cultural', '2025-10-19 10:52:00'),
+('dep001', 'Ajedrez', '$2y$10$hashAjedrez', 'Profe Jorge', 'deportivo', '2025-10-19 10:52:00'),
+('dep002', 'Atletismo', '$2y$10$hashAtletismo', 'Profe Carla', 'deportivo', '2025-10-19 10:52:00'),
+('dep003', 'Basquetbol', '$2y$10$hashBasket', 'Profe Raúl', 'deportivo', '2025-10-19 10:52:00'),
+('dep004', 'Defensa personal', '$2y$10$hashDefensa', 'Profe Erika', 'deportivo', '2025-10-19 10:52:00'),
+('dep005', 'Fútbol femenil', '$2y$10$hashFutFem', 'Profe Nancy', 'deportivo', '2025-10-19 10:52:00'),
+('dep006', 'Fútbol varonil', '$2y$10$hashFutVar', 'Profe Mario', 'deportivo', '2025-10-19 10:52:00'),
+('dep007', 'Voleibol femenil', '$2y$10$hashVoleiFem', 'Profe Silvia', 'deportivo', '2025-10-19 10:52:00'),
+('dep008', 'Voleibol varonil', '$2y$10$hashVoleiVar', 'Profe Tomás', 'deportivo', '2025-10-19 10:52:00');
 
 -- --------------------------------------------------------
 
@@ -273,7 +291,9 @@ INSERT INTO `users` (`id`, `user_id`, `email`, `username`, `password_hash`, `rol
 (94, '@alp_2025_021', 'ajarettovar@gmail.com', 'jaret', '$2y$10$w4LXiJ4HK/lOWKeeDTqACuAxyQkgO/nns0cbMKXnC7Enqv8sVX5dy', 'student', '2025-10-18 20:05:56'),
 (95, '@alp_2025_022', 'alberto.alp@cbtis258.edu.mx', 'jaretvzz_1', '$2y$10$vuJK62K9abfL7Q9pml0PGu0u9A6rsQEsHWmnv.vz6jdQaYaHz0nAu', 'student', '2025-10-19 04:39:40'),
 (96, '@tea_2025_0111', 'asd@gmail.com', 'asd', '$2y$10$groMeM9yM69tKJ5vRLw6H.qEOlZJ1i./es5ysqpOk7m4JgVnY6wt6', 'teacher', '2025-10-19 06:36:15'),
-(97, '@tea_2025_01111', '123@gmail.com', 'asd', '$2y$10$H2K5ICXbISCjbEW0QBAk..ik/HWiPzr2bm6zLeCh/xT50hJJoWtwS', 'teacher', '2025-10-19 06:36:50');
+(97, '@tea_2025_01111', '123@gmail.com', 'asd', '$2y$10$H2K5ICXbISCjbEW0QBAk..ik/HWiPzr2bm6zLeCh/xT50hJJoWtwS', 'teacher', '2025-10-19 06:36:50'),
+(98, '@alp_2025_777', 'vegetta777@gmail.com', 'vegetta777', '$2y$10$ZCmPDjhQ7PivyiXdIEzq8.PsaL6HE38UWC69ALaUMWtsH2hL00hdG', 'student', '2025-10-19 16:38:22'),
+(99, '@tea_2025_willy', 'willy@gmail.com', 'willyrex', '$2y$10$F1.nd3H1I4YiwK36FXWVGet2pv/FXLLrte9L8RI4ZRi.5c8hrmwh6', 'teacher', '2025-10-19 16:53:30');
 
 --
 -- Índices para tablas volcadas
@@ -336,7 +356,7 @@ ALTER TABLE `tutoring_registrations`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

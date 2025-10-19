@@ -9,47 +9,56 @@ $errors = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // si es asesoría
-    if ($_POST['type'] === 'asesoria') {
-        $paterno = trim($_POST['paterno'] ?? '');
-        $materno = trim($_POST['materno'] ?? '');
-        $nombres = trim($_POST['nombres'] ?? '');
-        $carrera = trim($_POST['carrera'] ?? '');
-        $turno = trim($_POST['turno'] ?? '');
-        $maestro = trim($_POST['maestro'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
+    $club_name = $_POST['club'] ?? '';
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM clubs WHERE club_name = ?");
+    $stmt->execute([$club_name]);
+    if ($stmt->fetchColumn() == 0) {
+        $errors[] = "El club no está registrado y no se puede procesar la inscripción.";
+    }
 
-        if (!preg_match('/^\d{10}$/', $telefono)) $errors[] = "El teléfono debe tener exactamente 10 dígitos.";
-        if (!$paterno || !$materno || !$nombres) $errors[] = "Nombre completo es requerido.";
+    if (empty($errors)) {
+        // si es asesoría
+        if ($_POST['type'] === 'asesoria') {
+            $paterno = trim($_POST['paterno'] ?? '');
+            $materno = trim($_POST['materno'] ?? '');
+            $nombres = trim($_POST['nombres'] ?? '');
+            $carrera = trim($_POST['carrera'] ?? '');
+            $turno = trim($_POST['turno'] ?? '');
+            $maestro = trim($_POST['maestro'] ?? '');
+            $telefono = trim($_POST['telefono'] ?? '');
 
-        if (empty($errors)) {
-            $stmt = $pdo->prepare("INSERT INTO tutoring_registrations (materia,paterno,materno,nombres,carrera,turno,maestro,telefono,user_id) VALUES (?,?,?,?,?,?,?,?,?)");
-            $stmt->execute([$_POST['club'],$paterno,$materno,$nombres,$carrera,$turno,$maestro,$telefono,$user['user_id']]);
-            $success = true;
-        }
-    } else {
-        // cultural/deportivo/civil
-        $paterno = trim($_POST['paterno'] ?? '');
-        $materno = trim($_POST['materno'] ?? '');
-        $nombres = trim($_POST['nombres'] ?? '');
-        $semestre = trim($_POST['semestre'] ?? '');
-        $correo = trim($_POST['correo'] ?? '');
-        $turno = trim($_POST['turno'] ?? '');
+            if (!preg_match('/^\d{10}$/', $telefono)) $errors[] = "El teléfono debe tener exactamente 10 dígitos.";
+            if (!$paterno || !$materno || !$nombres) $errors[] = "Nombre completo es requerido.";
 
-        // validar correo (permitir gmail y edu.mx y tener @)
-        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido.";
-        else {
-            $host = substr(strrchr($correo, "@"), 1);
-            if (strtolower($host) !== 'gmail.com' && substr(strtolower($host), -6) !== 'edu.mx') {
-                $errors[] = "Solo se permiten correos Gmail o institucionales .edu.mx.";
+            if (empty($errors)) {
+                $stmt = $pdo->prepare("INSERT INTO tutoring_registrations (materia,paterno,materno,nombres,carrera,turno,maestro,telefono,user_id) VALUES (?,?,?,?,?,?,?,?,?)");
+                $stmt->execute([$_POST['club'],$paterno,$materno,$nombres,$carrera,$turno,$maestro,$telefono,$user['user_id']]);
+                $success = true;
             }
-        }
-        if (!$paterno || !$materno || !$nombres) $errors[] = "Nombre completo es requerido.";
+        } else {
+            // cultural/deportivo/civil
+            $paterno = trim($_POST['paterno'] ?? '');
+            $materno = trim($_POST['materno'] ?? '');
+            $nombres = trim($_POST['nombres'] ?? '');
+            $semestre = trim($_POST['semestre'] ?? '');
+            $correo = trim($_POST['correo'] ?? '');
+            $turno = trim($_POST['turno'] ?? '');
 
-        if (empty($errors)) {
-            $stmt = $pdo->prepare("INSERT INTO club_registrations (club_type,club_name,paterno,materno,nombres,semestre,correo,turno,user_id) VALUES (?,?,?,?,?,?,?,?,?)");
-            $stmt->execute([$_POST['type'],$_POST['club'],$paterno,$materno,$nombres,$semestre,$correo,$turno,$user['user_id']]);
-            $success = true;
+            // validar correo (permitir gmail y edu.mx y tener @)
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido.";
+            else {
+                $host = substr(strrchr($correo, "@"), 1);
+                if (strtolower($host) !== 'gmail.com' && substr(strtolower($host), -6) !== 'edu.mx') {
+                    $errors[] = "Solo se permiten correos Gmail o institucionales .edu.mx.";
+                }
+            }
+            if (!$paterno || !$materno || !$nombres) $errors[] = "Nombre completo es requerido.";
+
+            if (empty($errors)) {
+                $stmt = $pdo->prepare("INSERT INTO club_registrations (club_type,club_name,paterno,materno,nombres,semestre,correo,turno,user_id) VALUES (?,?,?,?,?,?,?,?,?)");
+                $stmt->execute([$_POST['type'],$_POST['club'],$paterno,$materno,$nombres,$semestre,$correo,$turno,$user['user_id']]);
+                $success = true;
+            }
         }
     }
 }
