@@ -25,31 +25,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Iniciar sesión</title>
-<style>
-body{font-family:Arial;background:#f5f7fb;padding:20px}
-.container{max-width:480px;margin:30px auto;background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,0.06)}
-input,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
-.error{color:#b00020;background:#ffecec;padding:8px;border-radius:6px}
-a.link{display:inline-block;margin-top:8px;color:#2b6ef6;text-decoration:none}
-</style>
+    <link rel="stylesheet" href="css/auth-modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="container">
-  <h2>Iniciar sesión</h2>
-  <?php if($errors): ?><div class="error"><?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?></div><?php endif; ?>
-  <form method="post">
-    <label>ID de usuario</label>
-    <input name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
-    <label>Correo (el mismo con el que te registraste)</label>
-    <input name="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
-    <label>Contraseña</label>
-    <input name="password" type="password" required>
-    <a class="link" href="password_reset_request.php">Olvidé mi contraseña</a>
-    <button type="submit">Entrar</button>
-  </form>
-  <p><a href="index.php">Volver</a></p>
+<div class="auth-wrapper">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="auth-container">
+        <h2><i class="fas fa-sign-in-alt"></i> Iniciar sesión</h2>
+    <?php if($errors): ?>
+        <div class="message error">
+            <?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?>
+        </div>
+    <?php endif; ?>
+    <form method="post">
+        <div class="form-group">
+            <label for="user_id">ID de usuario</label>
+            <i class="fas fa-user icon"></i>
+            <input id="user_id" name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
+        </div>
+        <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <i class="fas fa-envelope icon"></i>
+            <input id="email" name="email" type="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <i class="fas fa-lock icon"></i>
+            <input id="password" name="password" type="password" required>
+        </div>
+        <button type="submit" class="auth-btn">Entrar</button>
+        <div class="auth-links">
+            <a class="auth-link" href="password_reset_request.php">¿Olvidaste tu contraseña?</a>
+            <a class="auth-link" href="register.php">Crear una cuenta</a>
+            <a class="auth-link" href="index.php">Volver al inicio</a>
+        </div>
+    </form>
+</div>
 </div>
 </body>
 </html>

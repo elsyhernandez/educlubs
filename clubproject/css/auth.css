@@ -1,0 +1,160 @@
+ /* auth.css - es para el css de las paginas del login y el crear cuenta */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #007bff;
+    --primary-color-hover: #0056b3;
+    --secondary-color: #f8f9fa;
+    --text-color: #333;
+    --border-color: #ddd;
+    --error-color: #dc3545;
+    --error-bg-color: #f8d7da;
+    --success-color: #28a745;
+    --success-bg-color: #d4edda;
+    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--secondary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.auth-container {
+    max-width: 400px;
+    width: 100%;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 24px;
+}
+
+.auth-container p {
+    margin-bottom: 30px;
+    color: #666;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* Add padding for icon */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.form-group .icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    margin-top: 12px; /* Adjust for label height */
+}
+
+
+.auth-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 10px;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.auth-btn:hover {
+    background-color: var(--primary-color-hover);
+    transform: translateY(-2px);
+}
+
+.auth-btn.auth-btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    margin-top: 10px;
+}
+
+.auth-btn.auth-btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.auth-link {
+    display: block;
+    margin-top: 15px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.error {
+    color: var(--error-color);
+    background-color: var(--error-bg-color);
+    border: 1px solid var(--error-color);
+}
+
+.success {
+    color: var(--success-color);
+    background-color: var(--success-bg-color);
+    border: 1px solid var(--success-color);
+}
+
+.note {
+    font-size: 13px;
+    color: #666;
+    margin-top: 15px;
+    text-align: left;
+}

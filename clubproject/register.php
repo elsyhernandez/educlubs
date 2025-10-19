@@ -45,39 +45,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Crear cuenta</title>
-<style>
-body{font-family:Arial;background:#f5f7fb;padding:20px}
-.container{max-width:520px;margin:30px auto;background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,0.06)}
-input,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
-.error{color:#b00020;background:#ffecec;padding:8px;border-radius:6px}
-.note{font-size:13px;color:#444}
-</style>
+    <link rel="stylesheet" href="css/auth-modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="container">
-  <h2>Crear cuenta</h2>
-
-  <?php if(!empty($errors)): ?>
-    <div class="error">
-      <?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?>
-    </div>
-  <?php endif; ?>
-
-  <form method="post" id="registerForm">
-    <label>ID de usuario (ej: @alp_2025_01 o @tea_2025_01)</label>
-    <input name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
-    <label>Correo (solo Gmail o .edu.mx)</label>
-    <input name="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
-    <label>Nombre de usuario</label>
-    <input name="username" required value="<?=htmlspecialchars($_POST['username'] ?? '')?>">
-    <label>Contraseña</label>
-    <input name="password" type="password" required>
-    <p class="note">Si pones un ID que empieza con <code>@tea_2025</code> la cuenta quedará como maestro.</p>
-    <button type="submit">Crear cuenta</button>
-  </form>
-  <p><a href="index.php">Volver</a></p>
+<div class="auth-wrapper">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="auth-container">
+        <h2><i class="fas fa-user-plus"></i> Crear cuenta</h2>
+    <?php if(!empty($errors)): ?>
+        <div class="message error">
+            <?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?>
+        </div>
+    <?php endif; ?>
+    <form method="post" id="registerForm">
+        <div class="form-group">
+            <label for="user_id">ID de usuario</label>
+            <i class="fas fa-id-card icon"></i>
+            <input id="user_id" name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>" placeholder="ej: @alp_2025_01">
+        </div>
+        <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <i class="fas fa-envelope icon"></i>
+            <input id="email" name="email" type="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>" placeholder="Solo Gmail o .edu.mx">
+        </div>
+        <div class="form-group">
+            <label for="username">Nombre de usuario</label>
+            <i class="fas fa-user icon"></i>
+            <input id="username" name="username" required value="<?=htmlspecialchars($_POST['username'] ?? '')?>">
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <i class="fas fa-lock icon"></i>
+            <input id="password" name="password" type="password" required>
+        </div>
+        <p class="note" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 15px;">Si tu ID empieza con <code>@tea_2025</code>, tu cuenta será de maestro.</p>
+        <button type="submit" class="auth-btn">Crear cuenta</button>
+        <div class="auth-links">
+            <a class="auth-link" href="login.php">¿Ya tienes cuenta? Inicia sesión</a>
+            <a class="auth-link" href="index.php">Volver al inicio</a>
+        </div>
+    </form>
+</div>
 </div>
 </body>
 </html>

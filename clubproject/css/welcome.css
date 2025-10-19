@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary-color: #3a7bd5;
+    --secondary-color: #00d2ff;
+    --text-color: #ffffff;
+    --container-bg: rgba(255, 255, 255, 0.1);
+    --button-bg: #ffffff;
+    --button-text-color: #3a7bd5;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-color);
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+.welcome-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.shape {
+    position: absolute;
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+    border-radius: 50%;
+    opacity: 0.15;
+    filter: blur(50px);
+}
+
+.shape-1 {
+    width: 400px;
+    height: 400px;
+    top: -100px;
+    left: -100px;
+}
+
+.shape-2 {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    right: -150px;
+}
+
+.welcome-container {
+    text-align: center;
+    padding: 40px 50px;
+    background: var(--container-bg);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
+    z-index: 1;
+    max-width: 450px;
+    width: 90%;
+}
+
+.welcome-container h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.welcome-container p {
+    font-size: 1rem;
+    font-weight: 300;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.welcome-btn {
+    text-decoration: none;
+    color: var(--button-text-color);
+    background-color: var(--button-bg);
+    padding: 15px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.welcome-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-btn.primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-color);
+    border: 1px solid transparent;
+}
+
+.welcome-btn.primary:hover {
+    background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+}
+
+@media (min-width: 576px) {
+    .welcome-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+    .welcome-btn {
+        padding: 15px 30px;
+    }
+}
