@@ -35,31 +35,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Recuperar contraseña</title>
-    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/auth-modern.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="auth-container">
-    <h2>Recuperar Contraseña</h2>
-    <?php if($info): ?>
-        <div class="message success">
-            <?= $info ?>
-        </div>
-    <?php endif; ?>
-    <form method="post">
-        <div class="form-group">
-            <label for="user_id">ID de usuario</label>
-            <i class="fas fa-user icon"></i>
-            <input id="user_id" name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
-        </div>
-        <div class="form-group">
-            <label for="email">Correo Electrónico</label>
-            <i class="fas fa-envelope icon"></i>
-            <input id="email" name="email" type="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
-        </div>
-        <button type="submit" class="auth-btn">Solicitar recuperación</button>
-        <a class="auth-link" href="login.php">Volver a iniciar sesión</a>
-    </form>
+<div class="auth-wrapper">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="auth-container">
+        <h2><i class="fas fa-key"></i> Recuperar Contraseña</h2>
+        <?php if($info): ?>
+            <div class="message success" style="background-color: rgba(33, 147, 176, 0.1); color: #2193b0; border: 1px solid #2193b0; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                <?= $info ?>
+            </div>
+        <?php endif; ?>
+        <form method="post">
+            <div class="form-group">
+                <label for="user_id">ID de usuario</label>
+                <i class="fas fa-user icon"></i>
+                <input id="user_id" name="user_id" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <i class="fas fa-envelope icon"></i>
+                <input id="email" name="email" type="email" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
+            </div>
+            <button type="submit" class="auth-btn">Solicitar recuperación</button>
+            <div class="auth-links">
+                <a class="auth-link" href="login.php">Volver a iniciar sesión</a>
+                <a class="auth-link" href="index.php">Volver al inicio</a>
+            </div>
+        </form>
+    </div>
 </div>
 </body>
 </html>

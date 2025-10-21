@@ -155,18 +155,23 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <title>Panel Maestro</title>
    <style>
     :root{
-      --bg1: #e0f7fa;
-      --bg2: #fce4ec;
+      --primary-color: #6dd5ed;
+      --secondary-color: #2193b0;
+      --bg1: #e8fcffff;
+      --bg2: #aedde1ff;
       --card-bg: rgba(255,255,255,0.9);
-      --primary: #007bff;
+      --primary: var(--secondary-color);
+      --button-bg: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+      --button-hover-bg: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6);
+      --glass2: linear-gradient(90deg, rgba(13, 157, 190, 0.6), rgba(151, 182, 190, 0.6));
       --radius: 12px;
       --edit-highlight: rgba(255, 244, 180, 0.7);
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    header { background: var(--glass); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    header h2 { margin: 0; font-size: 22px; color:#143; }
+    header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header h2 { margin: 0; font-size: 22px; color:#fff; }
     .header-actions { display:flex; align-items:center; gap:12px; }
     .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
@@ -184,7 +189,23 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
-    .btn { padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight:600; box-shadow: 0 6px 18px rgba(0,123,255,0.14); text-decoration: none; }
+    .btn { 
+        padding: 10px 20px; 
+        background: var(--button-bg); 
+        color: #fff; 
+        border: none; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight:600; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        text-decoration: none; 
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        background: var(--button-hover-bg);
+    }
     .btn.small { padding:6px 10px; font-size:13px; }
     #editToolbar { display:none; position: sticky; top:72px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
     .edit-active { display:flex; align-items:center; gap:12px; }
@@ -241,6 +262,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
 
     @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
   </style>
+  <link rel="stylesheet" href="css/table-styles.css">
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -474,8 +496,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       $currentParams = $_GET; unset($currentParams['success'], $currentParams['error']);
       $cardId = strtolower(str_replace(['í', ' '], ['i', '-'], $title));
       echo "<div class='card' id='card-" . htmlspecialchars($cardId) . "' data-card='" . htmlspecialchars($title) . "'>";
-      echo "<h3><span>$title</span></h3>";
-
+      
       if ($filterParam !== null) {
         $selected = $_GET[$filterParam] ?? '';
         echo "<div class='filter-row'>";
@@ -496,7 +517,9 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       if (empty($data['rows'])) {
         echo "<p>No hay registros disponibles.</p>";
       } else {
-        echo "<table class='table'><thead><tr>";
+        echo "<div class='table-container'>";
+        echo "<div class='table-header'><h4>" . htmlspecialchars($title) . "</h4></div>";
+        echo "<table class='styled-table'><thead><tr>";
         echo "<th class='edit-col'></th>";
         foreach ($columns as $key => $label) echo "<th>" . htmlspecialchars($label) . "</th>";
         echo "<th class='edit-action'>Acciones</th>";
@@ -508,11 +531,11 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
           echo "<td class='edit-col'><input type='checkbox' class='row-checkbox' data-id='$id'></td>";
           foreach ($columns as $key => $label) {
             if ($key === 'nombre') {
-              echo "<td data-col='nombre'>" . htmlspecialchars($nombre_full) . "</td>";
+              echo "<td data-label='" . htmlspecialchars($label) . "' data-col='nombre'>" . htmlspecialchars($nombre_full) . "</td>";
             } elseif ($key === 'fecha') {
-              echo "<td><small class='gray'>" . htmlspecialchars($r['created_at'] ?? '') . "</small></td>";
+              echo "<td data-label='" . htmlspecialchars($label) . "'><small class='gray'>" . htmlspecialchars($r['created_at'] ?? '') . "</small></td>";
             } else {
-              echo "<td data-col='".htmlspecialchars($key)."'>" . htmlspecialchars($r[$key] ?? '') . "</td>";
+              echo "<td data-label='" . htmlspecialchars($label) . "' data-col='".htmlspecialchars($key)."'>" . htmlspecialchars($r[$key] ?? '') . "</td>";
             }
           }
           $btnAttrs = "";
@@ -525,13 +548,14 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
             $semestre = htmlspecialchars($r['semestre'] ?? '');
             $turno = htmlspecialchars($r['turno'] ?? '');
             $btnAttrs = "class='btn-edit btn' data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-turno='$turno' style='padding:6px 8px;margin-right:6px;'";
-            echo "<td class='edit-action' style='white-space:nowrap;'><button $btnAttrs type='button'>✎</button></td>";
+            echo "<td class='edit-action' data-label='Acciones' style='white-space:nowrap;'><button $btnAttrs type='button'>✎</button></td>";
           } else {
-            echo "<td class='edit-action'></td>";
+            echo "<td class='edit-action' data-label='Acciones'></td>";
           }
           echo "</tr>";
         }
         echo "</tbody></table>";
+        echo "</div>";
 
         $totalPages = max(1, ceil(intval($data['total']) / max(1, intval($data['limit'] ?? 10))));
         $currentPage = max(1, intval($data['page'] ?? 1));

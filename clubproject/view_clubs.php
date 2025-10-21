@@ -58,24 +58,52 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Base de Datos de Clubs</title>
   <style>
     :root{
+      --primary-color: #6dd5ed;
+      --secondary-color: #2193b0;
+      --jeje: #136d81ff;
       --bg1: #e0f7fa;
       --bg2: #fce4ec;
       --card-bg: rgba(255,255,255,0.9);
-      --primary: #007bff;
+      --primary: var(--secondary-color);
+      --button-bg: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+      --button-hover-bg: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6);
+      --glass2: linear-gradient(90deg, rgba(13, 157, 190, 0.6), rgba(151, 182, 190, 0.6));
       --radius: 12px;
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    header { background: var(--glass); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    header h2 { margin: 0; font-size: 22px; color:#143; }
+    header { background: var(--glass2);   backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header h2 { margin: 0; font-size: 22px; color: #ffffffff;; }
     .container { max-width: 1160px; margin: 0 auto; padding: 28px; }
     .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; }
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
     .table th { background: #fafafa; color: #555; }
-    .btn { padding: 10px 16px; background: var(--primary); color: #fff !important; border: none; border-radius: 8px; cursor: pointer; font-weight:600; text-decoration: none; display: inline-block; text-shadow: 1px 1px 1px rgba(0,0,0,0.1); }
-    .btn.alt { background:#007bff;color:#fafafa !important;border:1px solid #e6e9ef; box-shadow:none; }
+    .btn { 
+        padding: 10px 20px; 
+        background: var(--button-bg); 
+        color: #fff !important; 
+        border: none; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight:600; 
+        text-decoration: none; 
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        background: var(--button-hover-bg);
+    }
+    .btn.alt { 
+        background: #6c757d;
+        color:#fff !important;
+        border:1px solid #e6e9ef; 
+        box-shadow:none; 
+    }
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
@@ -132,13 +160,14 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .user-menu a { padding: 8px 12px; text-decoration: none; display: block; }
     .user-menu a:hover { background: #f5f5f5; }
   </style>
+  <link rel="stylesheet" href="css/table-styles.css">
 </head>
 <body>
  <header>
   <h2>Base de Datos de Clubs</h2>
   <div class="header-actions">
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
-    <a href="teacher_dashboard.php" class="btn alt">&laquo; Volver al Panel</a>
+    <a href="teacher_dashboard.php" class="btn">&laquo; Volver al Panel</a>
     <div class="usericon">
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
       <div class="user-menu">
@@ -174,41 +203,43 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php if (empty($clubs)): ?>
         <p>No se encontraron clubs con los filtros seleccionados.</p>
       <?php else: ?>
-        <table class="table">
-          <thead>
-            <tr>
-              <th class="edit-col"></th>
-              <th>ID del Club</th>
-              <th>Nombre del Club</th>
-              <th>Creador</th>
-              <th>Tipo</th>
-              <th>Fecha de Creación</th>
-              <th class="edit-action">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($clubs as $club): ?>
-              <tr data-id="<?= htmlspecialchars($club['club_id']) ?>" data-name="<?= htmlspecialchars($club['club_name']) ?>">
-                <td class="edit-col"><input type="checkbox" class="row-checkbox" data-id="<?= htmlspecialchars($club['club_id']) ?>" data-name="<?= htmlspecialchars($club['club_name']) ?>"></td>
-                <td data-col="club_id"><?= htmlspecialchars($club['club_id']) ?></td>
-                <td data-col="club_name"><?= htmlspecialchars($club['club_name']) ?></td>
-                <td data-col="creator_name"><?= htmlspecialchars($club['creator_name']) ?></td>
-                <td data-col="club_type"><?= htmlspecialchars($club['club_type']) ?></td>
-                <td><?= htmlspecialchars($club['created_at']) ?></td>
-                <td class="edit-action">
-                  <button class="btn btn-edit" 
-                          style="padding:6px 8px;"
-                          data-id="<?= htmlspecialchars($club['club_id']) ?>"
-                          data-name="<?= htmlspecialchars($club['club_name']) ?>"
-                          data-creator="<?= htmlspecialchars($club['creator_name']) ?>"
-                          data-type="<?= htmlspecialchars($club['club_type']) ?>">
-                    ✎
-                  </button>
-                </td>
+        <div class="table-container">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="edit-col"></th>
+                <th>ID del Club</th>
+                <th>Nombre del Club</th>
+                <th>Creador</th>
+                <th>Tipo</th>
+                <th>Fecha de Creación</th>
+                <th class="edit-action">Acciones</th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <?php foreach ($clubs as $club): ?>
+                <tr data-id="<?= htmlspecialchars($club['club_id']) ?>" data-name="<?= htmlspecialchars($club['club_name']) ?>">
+                  <td class="edit-col"><input type="checkbox" class="row-checkbox" data-id="<?= htmlspecialchars($club['club_id']) ?>" data-name="<?= htmlspecialchars($club['club_name']) ?>"></td>
+                  <td data-label="ID del Club" data-col="club_id"><?= htmlspecialchars($club['club_id']) ?></td>
+                  <td data-label="Nombre del Club" data-col="club_name"><?= htmlspecialchars($club['club_name']) ?></td>
+                  <td data-label="Creador" data-col="creator_name"><?= htmlspecialchars($club['creator_name']) ?></td>
+                  <td data-label="Tipo" data-col="club_type"><?= htmlspecialchars($club['club_type']) ?></td>
+                  <td data-label="Fecha de Creación"><?= htmlspecialchars($club['created_at']) ?></td>
+                  <td class="edit-action" data-label="Acciones">
+                    <button class="btn btn-edit" 
+                            style="padding:6px 8px;"
+                            data-id="<?= htmlspecialchars($club['club_id']) ?>"
+                            data-name="<?= htmlspecialchars($club['club_name']) ?>"
+                            data-creator="<?= htmlspecialchars($club['creator_name']) ?>"
+                            data-type="<?= htmlspecialchars($club['club_type']) ?>">
+                      ✎
+                    </button>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       <?php endif; ?>
 
       <?php

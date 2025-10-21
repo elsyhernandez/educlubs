@@ -4,10 +4,12 @@
     --primary-color: #3a7bd5;
     --secondary-color: #00d2ff;
     --text-color: #ffffff;
-    --container-bg: rgba(255, 255, 255, 0.1);
+    --container-bg: rgba(217, 229, 230, 0.493);
     --button-bg: #ffffff;
     --button-text-color: #3a7bd5;
     --shadow-color: rgba(0, 0, 0, 0.2);
+    --bg1: #e8fcff;
+    --bg2: #aedde1;
 }
 
 * {
@@ -17,9 +19,9 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: var(--text-color);
+    font-family: 'Poppins', sans-serif; 
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: #333;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
@@ -93,32 +95,25 @@ body {
 
 .welcome-btn {
     text-decoration: none;
-    color: var(--button-text-color);
-    background-color: var(--button-bg);
-    padding: 15px 20px;
-    border-radius: 50px;
+    color: var(--text-color);
+    background: linear-gradient(90deg, #2193b0, #6dd5ed);
+    padding: 15px;
+    border-radius: 100px;
     font-weight: 600;
-    font-size: 1rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px var(--shadow-color);
+    font-size: 1.1rem;
+    text-align: center;
 }
 
 .welcome-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(90deg, #6dd5ed, #2193b0);
 }
 
-.welcome-btn.primary {
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: var(--text-color);
-    border: 1px solid transparent;
-}
-
-.welcome-btn.primary:hover {
-    background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-}
 
 @media (min-width: 576px) {
     .welcome-actions {

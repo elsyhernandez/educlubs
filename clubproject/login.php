@@ -56,8 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="form-group">
             <label for="password">Contraseña</label>
-            <i class="fas fa-lock icon"></i>
-            <input id="password" name="password" type="password" required>
+            <div class="password-wrapper">
+                <i class="fas fa-lock icon"></i>
+                <input id="password" name="password" type="password" required>
+                <span class="toggle-password"><i class="fas fa-eye"></i></span>
+            </div>
         </div>
         <button type="submit" class="auth-btn">Entrar</button>
         <div class="auth-links">
@@ -68,5 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </div>
 </div>
+<script>
+    document.querySelector('.toggle-password').addEventListener('click', function () {
+        const passwordInput = document.getElementById('password');
+        const icon = this.querySelector('i');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+</script>
 </body>
 </html>
