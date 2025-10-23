@@ -2,8 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-color: #007bff;
-    --primary-color-hover: #0056b3;
+    --primary-color: #4D0011; /* Guinda oscuro profundo */
+    --primary-color-hover: #800020; /* Guinda medio */
     --secondary-color: #f8f9fa;
     --text-color: #333;
     --border-color: #ddd;
@@ -74,7 +74,7 @@ body {
 .form-group input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(77, 0, 17, 0.2);
 }
 
 .form-group .icon {

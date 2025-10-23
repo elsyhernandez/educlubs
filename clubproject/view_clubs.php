@@ -57,19 +57,19 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Base de Datos de Clubs</title>
   <style>
-    :root{
-      --primary-color: #6dd5ed;
-      --secondary-color: #2193b0;
-      --jeje: #136d81ff;
-      --bg1: #e0f7fa;
-      --bg2: #fce4ec;
+:root{
+      --primary-color: #4D0011; /* Guinda más oscuro (para header) */
+      --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
+      --accent-color: #952f57; /* Guinda medio (para tablas y botones) */
+      --bg1: #f9e6e6; /* Fondo claro complementario */
+      --bg2: #e8d1d1; /* Fondo claro complementario */
       --card-bg: rgba(255,255,255,0.9);
       --primary: var(--secondary-color);
-      --button-bg: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
-      --button-hover-bg: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6);
-      --glass2: linear-gradient(90deg, rgba(13, 157, 190, 0.6), rgba(151, 182, 190, 0.6));
+      --glass2: linear-gradient(90deg, rgba(77, 0, 17, 0.6), rgba(128, 0, 32, 0.6));
       --radius: 12px;
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }

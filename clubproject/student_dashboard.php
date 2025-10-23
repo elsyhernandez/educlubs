@@ -22,27 +22,27 @@ $user = $_SESSION['user'];
 
   <div class="main-container">
     <h2>Selecciona un tipo de club</h2>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-      <a href="club.php?type=cultural" style="text-decoration: none; color: inherit;">
-        <div style="padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; background: white;">
+    <div class="club-grid">
+      <a href="club.php?type=cultural" class="club-card">
+        <div>
           <h3><i class="fas fa-palette"></i> Cultural</h3>
           <p>Fotografía, danza, música, teatro...</p>
         </div>
       </a>
-      <a href="club.php?type=deportivo" style="text-decoration: none; color: inherit;">
-        <div style="padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; background: white;">
+      <a href="club.php?type=deportivo" class="club-card">
+        <div>
           <h3><i class="fas fa-futbol"></i> Deportivo</h3>
           <p>Fútbol, voleibol, atletismo, etc.</p>
         </div>
       </a>
-      <a href="club.php?type=civil" style="text-decoration: none; color: inherit;">
-        <div style="padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; background: white;">
+      <a href="club.php?type=civil" class="club-card">
+        <div>
           <h3><i class="fas fa-flag"></i> Civil</h3>
           <p>Banda de guerra, escolta</p>
         </div>
       </a>
-      <a href="club.php?type=asesoria" style="text-decoration: none; color: inherit;">
-        <div style="padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; background: white;">
+      <a href="club.php?type=asesoria" class="club-card">
+        <div>
           <h3><i class="fas fa-chalkboard-teacher"></i> Asesoría</h3>
           <p>Matemáticas, inglés, etc.</p>
         </div>

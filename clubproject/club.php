@@ -36,9 +36,9 @@ if (!isset($lists[$type])) {
 
   <div class="main-container">
     <h2>Selecciona un club para registrarte</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="club-list-grid">
       <?php foreach($lists[$type] as $club): ?>
-        <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+        <div class="club-list-item">
           <span><?=htmlspecialchars($club)?></span>
           <a class="btn" href="register_club.php?type=<?=urlencode($type)?>&club=<?=urlencode($club)?>">Registrarme</a>
         </div>

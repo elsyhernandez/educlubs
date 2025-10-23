@@ -1,9 +1,9 @@
 :root {
-    --table-header-bg: #e0f7fa; /* Light blue background */
+    --table-header-bg: #f9e6e6; /* Light maroon background */
     --table-border-color: #e0e0e0;
     --table-row-hover-bg: #f1f1f1;
-    --primary-color: #6dd5ed;
-    --secondary-color: #2193b0;
+    --primary-color: #62152d; /* Guinda oscuro profundo */
+    --secondary-color: #952f57; /* Guinda medio */
 }
 
 .table-container {
@@ -46,6 +46,7 @@
 }
 
 .styled-table tbody tr {
+    position: relative; /* Para posicionar el botón de edición */
     transition: background-color 0.3s ease;
 }
 
@@ -71,7 +72,35 @@
     border-radius: 6px;
 }
 
+.edit-action {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.2s linear;
+}
+
+.styled-table tbody tr:hover .edit-action {
+    visibility: visible;
+    opacity: 1;
+}
+
+.edit-action .btn {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
 @media screen and (max-width: 768px) {
+    .edit-action {
+        position: static;
+        transform: none;
+        display: flex;
+        justify-content: flex-end;
+    }
+
     .styled-table {
         display: block;
         overflow-x: auto;
@@ -115,7 +144,7 @@
 }
 
 .table-header {
-    background: var(--glass2, linear-gradient(90deg, rgba(13, 157, 190, 0.6), rgba(151, 182, 190, 0.6)));
+    background: var(--glass2, linear-gradient(90deg, rgba(163, 14, 46, 0.6), rgba(128, 0, 32, 0.6)));
     color: #fff;
     padding: 12px 20px;
     border-top-left-radius: 8px;

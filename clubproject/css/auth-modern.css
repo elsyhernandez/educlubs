@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 :root {
-    --primary-color: #6dd5ed;
-    --secondary-color: #2193b0;
+    --primary-color: #62152d; /* Guinda oscuro profundo */
+    --secondary-color: #952f57; /* Guinda medio */
     --text-color: #333;
     --container-bg: rgba(255, 255, 255, 0.6);
     --input-bg: rgba(255, 255, 255, 0.7);
@@ -11,8 +11,8 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --error-color: #e74c3c;
     --white-color: #ffffff;
-    --bg1: #e8fcff;
-    --bg2: #aedde1;
+    --bg1: #f9e6e6; /* Fondo claro complementario */
+    --bg2: #e8d1d1; /* Fondo claro complementario */
 }
 
 * {
@@ -23,7 +23,10 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    background-image: url('https://scontent.fntr5-1.fna.fbcdn.net/v/t39.30808-6/482022860_2433056860381845_1449795817268118012_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=hBSsGmkqgfEQ7kNvwGLthw4&_nc_oc=AdmoQ-0T0rra84V3Krk6m8aIbRrI3N7VXNXxyDJg8TQOAD4YQOuYKVkaP7NG_WgFXbMYXW-0wF4Gml4qQAwe2Pc0&_nc_zt=23&_nc_ht=scontent.fntr5-1.fna&_nc_gid=dGli6kfTS6MIkRofOnIquQ&oh=00_AfcxsQIlyxt6VupM9Wof1j8rumUERy4x2Ya3WQA3MypUqw&oe=68FF5CCC');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: var(--text-color);
     overflow-x: hidden;
     position: relative;
@@ -84,7 +87,7 @@ body {
     font-weight: 700;
     margin-bottom: 25px;
     letter-spacing: 1px;
-    color: #2c3e50;
+    color: var(--primary-color);
 }
 
 .message.error {

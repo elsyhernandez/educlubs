@@ -7,7 +7,7 @@ $user = $_SESSION['user'];
 if (isset($_GET['error']) || isset($_GET['success'])) {
     $flash = null;
     if (isset($_GET['success'])) {
-        $flash = ['type' => 'success', 'msg' => '✅ ¡Club registrado con éxito!'];
+        $flash = ['type' => 'success', 'msg' => '¡Club registrado con éxito!'];
     } elseif (isset($_GET['error'])) {
         if ($_GET['error'] === 'duplicado') {
             $flash = ['type' => 'error', 'msg' => '⚠️ El ID del club ya está registrado. Usa uno diferente.'];
@@ -161,18 +161,19 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Panel Maestro</title>
    <style>
-    :root{
-      --primary-color: #6dd5ed;
-      --secondary-color: #2193b0;
-      --bg1: #e8fcffff;
-      --bg2: #aedde1ff;
+:root{
+      --primary-color: #4D0011; /* Guinda más oscuro (para header) */
+      --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
+      --accent-color: #952f57; /* Guinda medio (para tablas y botones) */
+      --bg1: #f9e6e6; /* Fondo claro complementario */
+      --bg2: #e8d1d1; /* Fondo claro complementario */
       --card-bg: rgba(255,255,255,0.9);
       --primary: var(--secondary-color);
-      --button-bg: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
-      --button-hover-bg: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
-      --glass: rgba(255,255,255,0.6);
-      --glass2: linear-gradient(90deg, rgba(13, 157, 190, 0.6), rgba(151, 182, 190, 0.6));
+      --glass: rgba(255,255,255,0.6); 
+      --glass2: #5c1536d8;
       --radius: 12px;
       --edit-highlight: rgba(255, 244, 180, 0.7);
     }
@@ -214,9 +215,23 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
         background: var(--button-hover-bg);
     }
     .btn.small { padding:6px 10px; font-size:13px; }
+    .btn-icon {
+        padding: 6px 8px;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    .styled-table .btn.btn-icon {
+        padding: 0 !important;
+        font-size: 16px;
+        line-height: 1;
+    }
     #editToolbar { display:none; position: sticky; top:72px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
     .edit-active { display:flex; align-items:center; gap:12px; }
-    .edit-col, .edit-action {display:none;}
+    .edit-col, .edit-action {display:none; text-align: center;}
     .edit-col{width:36px;}
     tr.row-selected{background:#ffe488; font-weight: 600;}
 
@@ -259,6 +274,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     /* Form styles */
+    #modal form { background-color: transparent; }
     form { padding: 20px; }
     .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
     .field { flex: 1; display: flex; flex-direction: column; }
@@ -507,7 +523,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <h2>Base de datos de registros</h2>
   <div class="header-actions">
     <a href="view_clubs.php" class="btn">Ver base de clubs</a>
-    <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'">➕ Agregar club</button>
+    <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <div class="usericon">
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
@@ -597,8 +613,8 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
             $correo = htmlspecialchars($r['correo'] ?? '');
             $semestre = htmlspecialchars($r['semestre'] ?? '');
             $turno = htmlspecialchars($r['turno'] ?? '');
-            $btnAttrs = "class='btn-edit btn' data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-turno='$turno' style='padding:6px 8px;margin-right:6px;'";
-            echo "<td class='edit-action' data-label='Acciones' style='white-space:nowrap;'><button $btnAttrs type='button'>✎</button></td>";
+$btnAttrs = "class='btn-edit btn btn-icon' data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-turno='$turno'";
+            echo "<td class='edit-action' data-label='Acciones'><button $btnAttrs type='button'>✎</button></td>";
           } else {
             echo "<td class='edit-action' data-label='Acciones'></td>";
           }
@@ -678,7 +694,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <div id="modal" class="modal" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-header">
-        <h3 id="modal-title">➕ Nuevo Club</h3>
+        <h3 id="modal-title">Nuevo Club</h3>
         <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
       </div>
 
@@ -805,41 +821,3 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
 
 </body>
 </html>
-<environment_details>
-# Visual Studio Code Visible Files
-clubproject/teacher_dashboard.php
-
-# Visual Studio Code Open Tabs
-clubproject/agregar_club.php
-clubproject/edit_member.php
-clubproject/maestros/editar_club.php
-clubproject/maestros/bulk_delete_clubs.php
-clubproject/index.php
-clubproject/login.php
-clubproject/register.php
-clubproject/password_reset.php
-clubproject/password_reset_request.php
-clubproject/view_clubs.php
-clubproject/css/table-styles.css
-clubproject/js/notification.js
-clubproject/bulk_delete_members.php
-clubproject/css/notification.css
-clubproject/teacher_dashboard.php
-clubproject/student_dashboard.php
-clubproject/club.php
-clubproject/css/auth-modern.css
-clubproject/css/main-modern.css
-clubproject/css/welcome.css
-clubproject/register_club.php
-clubproject/css/auth.css
-.git/COMMIT_EDITMSG
-
-# Current Time
-10/21/2025, 9:34:29 PM (America/Mexico_City, UTC-6:00)
-
-# Context Window Usage
-142,183 / 1,048.576K tokens used (14%)
-
-# Current Mode
-ACT MODE
-</environment_details>

@@ -1,18 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 :root {
-    --primary-color: #6dd5ed;
-    --secondary-color: #2193b0;
+    --primary-color: #952f57; /* Guinda medio (para tablas y botones) */
+    --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
+    --accent-color: #4D0011; /* Guinda más oscuro (para header) */
     --text-color-light: #ffffff;
     --text-color-dark: #333;
     --bg-color: #f4f7fa;
     --container-bg: rgba(255, 255, 255, 0.6);
     --header-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    --button-primary-bg: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
-    --button-primary-hover-bg: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    --button-primary-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+    --button-primary-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --bg1: #e8fcff;
-    --bg2: #aedde1;
+    --bg1: #f9e6e6; /* Fondo claro complementario */
+    --bg2: #e8d1d1; /* Fondo claro complementario */
 }
 
 * {
@@ -27,13 +28,14 @@ body {
     color: var(--text-color-dark);
     line-height: 1.6;
     min-height: 100vh;
+    background-image: url('../maestros/assets/img/img-3.png'); /* Imagen de fondo difuminada */
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 .main-header {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--text-color-dark);
+    background: var(--primary-color);
+    color: var(--text-color-light);
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
@@ -48,7 +50,7 @@ body {
 }
 
 .main-header nav a {
-    color: var(--text-color-dark);
+    color: var(--text-color-light);
     text-decoration: none;
     margin-left: 20px;
     font-weight: 500;
@@ -83,21 +85,21 @@ body {
     text-decoration: none;
     color: var(--text-color-light);
     background: var(--button-primary-bg);
-    padding: 15px;
-    border-radius: 10px;
+    padding: 12px 25px;
+    border-radius: 25px;
     font-weight: 600;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px var(--shadow-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     display: inline-block;
-    font-size: 1.1rem;
+    font-size: 1rem;
     text-align: center;
 }
 
 .btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     background: var(--button-primary-hover-bg);
 }
 
@@ -141,10 +143,78 @@ table th, table td {
 }
 
 table th {
-    background-color: #e9ecef;
+    background-color: var(--accent-color);
+    color: var(--text-color-light);
     font-weight: 600;
 }
 
 table tbody tr:hover {
     background-color: #f8f9fa;
+}
+
+.club-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.club-card {
+    text-decoration: none;
+    color: inherit;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.club-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.club-card h3 {
+    color: var(--primary-color);
+}
+
+.club-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.club-list-item {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-color-dark);
+}
+
+.form-group input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
 }

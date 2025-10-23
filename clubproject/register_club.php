@@ -67,51 +67,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Registro club</title>
-<style>
-body{font-family:Arial;background:#f6f8ff;padding:20px}
-.container{max-width:700px;margin:30px auto;background:#fff;padding:20px;border-radius:10px}
-input,select{width:100%;padding:8px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
-.success{background:#e6ffef;padding:12px;border-radius:8px;color:#064}
-.error{background:#ffecec;padding:12px;border-radius:8px;color:#900}
-</style>
+<link rel="stylesheet" href="css/main-modern.css">
 </head>
 <body>
-<div class="container">
+<div class="main-container">
   <h2>Registro - <?=htmlspecialchars($club)?> (<?=htmlspecialchars($type)?>)</h2>
 
   <?php if($success): ?>
-    <div class="success">Tu registro ha sido exitoso. <a href="student_dashboard.php">Volver a inicio</a></div>
+    <div class="message success">Tu registro ha sido exitoso. <a href="student_dashboard.php">Volver a inicio</a></div>
   <?php else: ?>
-    <?php if($errors): ?><div class="error"><?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?></div><?php endif; ?>
+    <?php if($errors): ?><div class="message error"><?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?></div><?php endif; ?>
 
     <?php if($type === 'asesoria'): ?>
-      <form method="post">
+      <form method="post" class="form-grid">
         <input type="hidden" name="type" value="asesoria">
         <input type="hidden" name="club" value="<?=htmlspecialchars($club)?>">
-        <label>Apellido paterno</label><input name="paterno" required value="<?=htmlspecialchars($_POST['paterno'] ?? '')?>">
-        <label>Apellido materno</label><input name="materno" required value="<?=htmlspecialchars($_POST['materno'] ?? '')?>">
-        <label>Nombres</label><input name="nombres" required value="<?=htmlspecialchars($_POST['nombres'] ?? '')?>">
-        <label>Carrera</label><input name="carrera" value="<?=htmlspecialchars($_POST['carrera'] ?? '')?>">
-        <label>Turno</label><input name="turno" value="<?=htmlspecialchars($_POST['turno'] ?? '')?>">
-        <label>Maestro</label><input name="maestro" value="<?=htmlspecialchars($_POST['maestro'] ?? '')?>">
-        <label>Teléfono (10 dígitos)</label><input name="telefono" value="<?=htmlspecialchars($_POST['telefono'] ?? '')?>">
-        <button type="submit">Enviar registro</button>
+        <div class="form-group"><label>Apellido paterno</label><input name="paterno" required value="<?=htmlspecialchars($_POST['paterno'] ?? '')?>"></div>
+        <div class="form-group"><label>Apellido materno</label><input name="materno" required value="<?=htmlspecialchars($_POST['materno'] ?? '')?>"></div>
+        <div class="form-group"><label>Nombres</label><input name="nombres" required value="<?=htmlspecialchars($_POST['nombres'] ?? '')?>"></div>
+        <div class="form-group"><label>Carrera</label><input name="carrera" value="<?=htmlspecialchars($_POST['carrera'] ?? '')?>"></div>
+        <div class="form-group"><label>Turno</label><input name="turno" value="<?=htmlspecialchars($_POST['turno'] ?? '')?>"></div>
+        <div class="form-group"><label>Maestro</label><input name="maestro" value="<?=htmlspecialchars($_POST['maestro'] ?? '')?>"></div>
+        <div class="form-group"><label>Teléfono (10 dígitos)</label><input name="telefono" value="<?=htmlspecialchars($_POST['telefono'] ?? '')?>"></div>
+        <button type="submit" class="btn">Enviar registro</button>
       </form>
     <?php else: ?>
-      <form method="post">
+      <form method="post" class="form-grid">
         <input type="hidden" name="type" value="<?=htmlspecialchars($type)?>">
         <input type="hidden" name="club" value="<?=htmlspecialchars($club)?>">
-        <label>Apellido paterno</label><input name="paterno" required value="<?=htmlspecialchars($_POST['paterno'] ?? '')?>">
-        <label>Apellido materno</label><input name="materno" required value="<?=htmlspecialchars($_POST['materno'] ?? '')?>">
-        <label>Nombres</label><input name="nombres" required value="<?=htmlspecialchars($_POST['nombres'] ?? '')?>">
-        <label>Semestre</label><input name="semestre" value="<?=htmlspecialchars($_POST['semestre'] ?? '')?>">
-        <label>Correo (Gmail o .edu.mx)</label><input name="correo" required value="<?=htmlspecialchars($_POST['correo'] ?? '')?>">
-        <label>Turno</label><input name="turno" value="<?=htmlspecialchars($_POST['turno'] ?? '')?>">
-        <button type="submit">Enviar registro</button>
+        <div class="form-group"><label>Apellido paterno</label><input name="paterno" required value="<?=htmlspecialchars($_POST['paterno'] ?? '')?>"></div>
+        <div class="form-group"><label>Apellido materno</label><input name="materno" required value="<?=htmlspecialchars($_POST['materno'] ?? '')?>"></div>
+        <div class="form-group"><label>Nombres</label><input name="nombres" required value="<?=htmlspecialchars($_POST['nombres'] ?? '')?>"></div>
+        <div class="form-group"><label>Semestre</label><input name="semestre" value="<?=htmlspecialchars($_POST['semestre'] ?? '')?>"></div>
+        <div class="form-group"><label>Correo (Gmail o .edu.mx)</label><input name="correo" required value="<?=htmlspecialchars($_POST['correo'] ?? '')?>"></div>
+        <div class="form-group"><label>Turno</label><input name="turno" value="<?=htmlspecialchars($_POST['turno'] ?? '')?>"></div>
+        <button type="submit" class="btn">Enviar registro</button>
       </form>
     <?php endif; ?>
   <?php endif; ?>
   <p><a href="club.php?type=<?=urlencode($type)?>">Volver</a></p>
 </div>
 </body>
+>>>>>>> Stashed changes
 </html>
