@@ -1,25 +1,32 @@
-
 <?php
 require 'config.php';
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') redirect('login.php');
 $user = $_SESSION['user'];
 
-// Handle flash messages via session and Post-Redirect-Get (solo errores)
-if (isset($_GET['error'])) {
+// Handle flash messages via session and Post-Redirect-Get
+if (isset($_GET['error']) || isset($_GET['success'])) {
     $flash = null;
-    if ($_GET['error'] === 'duplicado') {
-        $flash = ['type' => 'error', 'msg' => '⚠️ El ID del club ya está registrado. Usa uno diferente.'];
-    } elseif ($_GET['error'] === 'campos') {
-        $flash = ['type' => 'error', 'msg' => '⚠️ Todos los campos son obligatorios.'];
-    } else {
-        $flash = ['type' => 'error', 'msg' => '⚠️ Ocurrió un error al registrar el club.'];
+    if (isset($_GET['success'])) {
+        $flash = ['type' => 'success', 'msg' => '✅ ¡Club registrado con éxito!'];
+    } elseif (isset($_GET['error'])) {
+        if ($_GET['error'] === 'duplicado') {
+            $flash = ['type' => 'error', 'msg' => '⚠️ El ID del club ya está registrado. Usa uno diferente.'];
+        } elseif ($_GET['error'] === 'campos') {
+            $flash = ['type' => 'error', 'msg' => '⚠️ Todos los campos son obligatorios.'];
+        } else {
+            $flash = ['type' => 'error', 'msg' => '⚠️ Ocurrió un error al registrar el club.'];
+        }
     }
-    if ($flash) $_SESSION['flash'] = $flash;
+    
+    if ($flash) {
+        $_SESSION['flash'] = $flash;
+    }
 
+    // Clean up URL
     $params = $_GET;
     unset($params['success'], $params['error']);
-    $redirect = $_SERVER['PHP_SELF'] . (count($params) ? '?' . http_build_query($params) : '');
-    header('Location: ' . $redirect);
+    $redirectUrl = $_SERVER['PHP_SELF'] . (count($params) > 0 ? '?' . http_build_query($params) : '');
+    header('Location: ' . $redirectUrl);
     exit;
 }
 
@@ -248,6 +255,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
     .modal-header h3 { margin: 0; }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+    #confirmationModalMessage { color: #333; font-size: 16px; line-height: 1.5; }
     @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     /* Form styles */
@@ -263,6 +271,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
   </style>
   <link rel="stylesheet" href="css/table-styles.css">
+  <link rel="stylesheet" href="css/notification.css">
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -346,28 +355,69 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       }
 
       const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-      if (bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', async () => {
+      if (bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', () => {
         const ids = getSelectedIds();
-        if (!ids.length) return alert('Selecciona al menos un alumno.');
-        if (!confirm('Dar de baja a ' + ids.length + ' alumno(s)? Esta acción no se puede deshacer.')) return;
-        try {
-          const res = await fetch('bulk_delete_members.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ ids })
-          });
-          const data = await res.json();
-          if (data.success) {
-            ids.forEach(id => { const tr = document.querySelector('tr[data-id="'+id+'"]'); if (tr) tr.remove(); });
-            alert('Alumnos dados de baja.');
-          } else {
-            alert(data.message || 'No se pudieron eliminar los registros.');
-          }
-        } catch (err) {
-          console.error(err);
-          alert('Error al eliminar. Revisa la consola.');
+        if (!ids.length) {
+          showNotification('Selecciona al menos un alumno.', 'error');
+          return;
         }
+        
+        showConfirmationModal(
+          'Confirmar eliminación',
+          `¿Estás seguro de que quieres dar de baja a ${ids.length} alumno(s)? Esta acción no se puede deshacer.`,
+          async () => {
+            try {
+              const res = await fetch('bulk_delete_members.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ ids })
+              });
+              const data = await res.json();
+              if (data.success) {
+                ids.forEach(id => { const tr = document.querySelector('tr[data-id="'+id+'"]'); if (tr) tr.remove(); });
+                showNotification('Alumno(s) eliminado(s) correctamente.');
+              } else {
+                showNotification(data.message || 'No se pudieron eliminar los registros.', 'error');
+              }
+            } catch (err) {
+              console.error(err);
+              showNotification('Error al eliminar. Revisa la consola.', 'error');
+            }
+          }
+        );
       });
+
+      function showConfirmationModal(title, message, onConfirm) {
+        const modal = document.getElementById('confirmationModal');
+        if (!modal) return;
+
+        modal.querySelector('#confirmationModalTitle').textContent = title;
+        modal.querySelector('#confirmationModalMessage').textContent = message;
+
+        const confirmBtn = modal.querySelector('.btn-confirm');
+        const cancelBtn = modal.querySelector('.btn-cancel');
+
+        const confirmHandler = () => {
+          onConfirm();
+          closeModal();
+        };
+
+        const closeModal = () => {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+          confirmBtn.removeEventListener('click', confirmHandler);
+        };
+
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', closeModal, { once: true });
+        
+        modal.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', closeModal, { once: true });
+        });
+
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
 
       document.addEventListener('change', (e) => {
         const cb = e.target.closest('.row-checkbox');
@@ -417,7 +467,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
             const res = await fetch('edit_member.php', { method: 'POST', body: new URLSearchParams([...form]) });
             const data = await res.json();
             if (data.success) {
-              alert('Cambios guardados.');
+              showNotification('Cambios guardados exitosamente.');
               const id = form.get('id');
               const tr = document.querySelector('tr[data-id="'+id+'"]');
               if (tr) {
@@ -442,14 +492,15 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
               document.getElementById('editMemberModal').classList.remove('show');
               document.body.style.overflow = '';
             } else {
-              alert(data.message || 'No se pudo guardar.');
+              showNotification(data.message || 'No se pudo guardar.', 'error');
             }
-          } catch (err) { console.error(err); alert('Error al guardar.'); }
+          } catch (err) { console.error(err); showNotification('Error al guardar.', 'error'); }
         });
       }
 
     });
   </script>
+  <script src="js/notification.js"></script>
 </head>
 <body>
  <header>
@@ -482,12 +533,11 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
         $f = $_SESSION['flash'];
         unset($_SESSION['flash']);
     ?>
-      <div id="flashMessage" data-flash-type="<?= htmlspecialchars($f['type']) ?>" style="<?= $f['type'] === 'success' ? 'background:#d4edda;color:#155724;padding:12px;border:1px solid #c3e6cb;border-radius:4px;margin-bottom:20px;display:flex;align-items:center;gap:10px;' : 'background:#f8d7da;color:#721c24;padding:12px;border:1px solid #f5c6cb;border-radius:4px;margin-bottom:20px;' ?>">
-        <?php if ($f['type'] === 'success'): ?>
-          <div style="width:24px;height:24px;border-radius:50%;background:#28a745;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;">✔</div>
-        <?php endif; ?>
-        <span><?= htmlspecialchars($f['msg']) ?></span>
-      </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showNotification("<?= htmlspecialchars($f['msg']) ?>", "<?= htmlspecialchars($f['type']) ?>");
+        });
+    </script>
     <?php endif; ?>
 
     <?php
@@ -736,5 +786,60 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     </div>
   </div>
 
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="confirmationModalTitle">
+      <div class="modal-header">
+        <h3 id="confirmationModalTitle">Confirmar acción</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div style="padding: 20px;">
+        <p id="confirmationModalMessage">¿Estás seguro?</p>
+        <div class="actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn alt btn-cancel">Cancelar</button>
+          <button type="button" class="btn btn-confirm">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
+<environment_details>
+# Visual Studio Code Visible Files
+clubproject/teacher_dashboard.php
+
+# Visual Studio Code Open Tabs
+clubproject/agregar_club.php
+clubproject/edit_member.php
+clubproject/maestros/editar_club.php
+clubproject/maestros/bulk_delete_clubs.php
+clubproject/index.php
+clubproject/login.php
+clubproject/register.php
+clubproject/password_reset.php
+clubproject/password_reset_request.php
+clubproject/view_clubs.php
+clubproject/css/table-styles.css
+clubproject/js/notification.js
+clubproject/bulk_delete_members.php
+clubproject/css/notification.css
+clubproject/teacher_dashboard.php
+clubproject/student_dashboard.php
+clubproject/club.php
+clubproject/css/auth-modern.css
+clubproject/css/main-modern.css
+clubproject/css/welcome.css
+clubproject/register_club.php
+clubproject/css/auth.css
+.git/COMMIT_EDITMSG
+
+# Current Time
+10/21/2025, 9:34:29 PM (America/Mexico_City, UTC-6:00)
+
+# Context Window Usage
+142,183 / 1,048.576K tokens used (14%)
+
+# Current Mode
+ACT MODE
+</environment_details>

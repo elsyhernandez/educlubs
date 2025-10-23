@@ -26,12 +26,11 @@ try {
     $stmt = $pdo->prepare("UPDATE clubs SET club_name = ?, creator_name = ?, club_type = ? WHERE club_id = ?");
     $stmt->execute([$club_name, $creator_name, $club_type, $club_id]);
     
-    if ($stmt->rowCount() > 0) {
-        echo json_encode(['success' => true, 'message' => 'Club actualizado correctamente.']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No se realizaron cambios o el club no fue encontrado.']);
-    }
+    // Consider it a success as long as no exception is thrown.
+    // The rowCount() check can be confusing if the user saves without making changes.
+    echo json_encode(['success' => true, 'message' => 'Club actualizado correctamente.']);
+
 } catch (PDOException $e) {
-    // Log error here if needed
+    error_log("Error al actualizar el club: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error en la base de datos al actualizar el club.']);
 }

@@ -107,9 +107,9 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
     .modal.show { display: flex; }
-    .modal-panel { background: #fff; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
+    .modal-panel { background: rgba(255, 255, 255, 0.95); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
     .modal-header h3 { margin: 0; }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
@@ -161,6 +161,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .user-menu a:hover { background: #f5f5f5; }
   </style>
   <link rel="stylesheet" href="css/table-styles.css">
+  <link rel="stylesheet" href="css/notification.css">
 </head>
 <body>
  <header>
@@ -260,6 +261,23 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
           echo '</div>';
       }
       ?>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="confirmationModalTitle">
+      <div class="modal-header">
+        <h3 id="confirmationModalTitle">Confirmar acción</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div style="padding: 20px;">
+        <p id="confirmationModalMessage">¿Estás seguro?</p>
+        <div class="actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn alt btn-cancel">Cancelar</button>
+          <button type="button" class="btn btn-confirm">Confirmar</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -375,6 +393,38 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.body.style.overflow = '';
       }));
 
+      function showConfirmationModal(title, message, onConfirm) {
+        const modal = document.getElementById('confirmationModal');
+        if (!modal) return;
+
+        modal.querySelector('#confirmationModalTitle').textContent = title;
+        modal.querySelector('#confirmationModalMessage').textContent = message;
+
+        const confirmBtn = modal.querySelector('.btn-confirm');
+        const cancelBtn = modal.querySelector('.btn-cancel');
+
+        const confirmHandler = () => {
+          onConfirm();
+          closeModal();
+        };
+
+        const closeModal = () => {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+          confirmBtn.removeEventListener('click', confirmHandler);
+        };
+
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', closeModal, { once: true });
+        
+        modal.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', closeModal, { once: true });
+        });
+
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
       const editForm = document.getElementById('editClubForm');
       if (editForm) {
         editForm.addEventListener('submit', async (ev) => {
@@ -384,7 +434,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             const res = await fetch('maestros/editar_club.php', { method: 'POST', body: new URLSearchParams([...form]) });
             const data = await res.json();
             if (data.success) {
-              alert('Club actualizado correctamente.');
+              showNotification('Club actualizado correctamente.');
               const id = form.get('club_id');
               const tr = document.querySelector(`tr[data-id="${id}"]`);
               if (tr) {
@@ -409,40 +459,45 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
       if (bulkDeleteBtn) {
-        bulkDeleteBtn.addEventListener('click', async () => {
+        bulkDeleteBtn.addEventListener('click', () => {
           const selected = document.querySelectorAll('.row-checkbox:checked');
           if (selected.length === 0) {
-            return alert('Selecciona al menos un club para eliminar.');
+            showNotification('Selecciona al menos un club para eliminar.', 'error');
+            return;
           }
           
           const clubNames = Array.from(selected).map(cb => cb.dataset.name);
-          if (!confirm(`¿Estás seguro de que quieres eliminar ${selected.length} club(s)? Esto también eliminará a todos los miembros registrados en este(os) club(es).`)) {
-            return;
-          }
-
-          try {
-            const res = await fetch('maestros/bulk_delete_clubs.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ club_names: clubNames })
-            });
-            const data = await res.json();
-            if (data.success) {
-              alert('Club(es) eliminado(s) correctamente.');
-              selected.forEach(cb => {
-                const tr = cb.closest('tr');
-                if (tr) tr.remove();
-              });
-            } else {
-              alert(data.message || 'No se pudieron eliminar los clubes.');
+          
+          showConfirmationModal(
+            'Confirmar eliminación',
+            `¿Estás seguro de que quieres eliminar ${selected.length} club(s)? Esto también eliminará a todos los miembros registrados.`,
+            async () => {
+              try {
+                const res = await fetch('maestros/bulk_delete_clubs.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ club_names: clubNames })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  showNotification('Club(es) eliminado(s) correctamente.');
+                  selected.forEach(cb => {
+                    const tr = cb.closest('tr');
+                    if (tr) tr.remove();
+                  });
+                } else {
+                  showNotification(data.message || 'No se pudieron eliminar los clubes.', 'error');
+                }
+              } catch (err) {
+                console.error(err);
+                showNotification('Error al procesar la solicitud de eliminación.', 'error');
+              }
             }
-          } catch (err) {
-            console.error(err);
-            alert('Error al procesar la solicitud de eliminación.');
-          }
+          );
         });
       }
     });
   </script>
+  <script src="js/notification.js"></script>
 </body>
 </html>
