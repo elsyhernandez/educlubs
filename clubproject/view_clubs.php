@@ -69,12 +69,21 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6);
-      --glass2: linear-gradient(90deg, rgba(77, 0, 17, 0.6), rgba(128, 0, 32, 0.6));
+      --glass2: #5c1536d8;
+      --glass3: #5c153630;
       --radius: 12px;
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     header { background: var(--glass2);   backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    header h2 { margin: 0; font-size: 22px; color: #ffffffff;; }
+    header h2 { margin: 0; font-size: 28px; color: #ffffffff;; }
+    .header-actions .btn {
+        font-size: 16px;
+        background: transparent;
+        box-shadow: none;
+    }
+    .header-actions .btn:hover {
+        background: transparent;
+    }
     .container { max-width: 1160px; margin: 0 auto; padding: 28px; }
     .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; }
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
@@ -109,16 +118,16 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
     .modal.show { display: flex; }
-    .modal-panel { background: rgba(255, 255, 255, 0.95); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
+    .modal-panel { background: #fff; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
-    .modal-header h3 { margin: 0; }
+    .modal-header h3 { margin: 0; color: #333; }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
     @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     form { padding: 20px; }
     .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
     .field { flex: 1; display: flex; flex-direction: column; }
     .form-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #444; }
-    input[type="text"], input[type="password"], select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    input[type="text"], input[type="password"], select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background: #fff; color: #333; }
     .actions { text-align: center; margin-top: 24px; }
     .actions .btn { width: 100%; }
     .btn.small { padding: 6px 10px; font-size: 13px; }
