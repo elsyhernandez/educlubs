@@ -1,0 +1,250 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #fdfaff;
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background-color: #4D0011;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 50px;
+    margin-right: 15px;
+}
+
+.logo span {
+    font-size: 26px;
+    font-weight: 700;
+    color: #f8f8f8;
+}
+
+.btn {
+    text-decoration: none;
+    color: #4D0011;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn2 {
+    text-decoration: none;
+    color: #ffffff;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-header {
+    background-color: #ffffff;
+    box-shadow: 0 4px 15px rgba(149, 47, 87, 0.3);
+}
+
+.btn-header:hover {
+    background-color: #4D0011;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(98, 21, 45, 0.4);
+    color: #ffffff;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #f4e8f0 0%, #e5d9f2 100%);
+    padding: 80px 5%;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.content-text {
+    max-width: 50%;
+    animation: slideInLeft 1s ease-out;
+}
+
+.content-text h1 {
+    font-size: 48px;
+    font-weight: 700;
+    color: #6a1a4a;
+    margin-bottom: 20px;
+}
+
+.content-text p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.btn-main {
+    background-color: #4D0011;
+    font-size: 18px;
+    padding: 15px 35px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px #4d0011b3;
+}
+
+.btn-main:hover {
+    background-color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(98, 21, 45, 0.4);
+    color: #4D0011;
+}
+
+.content-illustration img {
+    max-width: 450px;
+    border-radius: 20px;
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Features Section */
+.features {
+    padding: 80px 5%;
+    text-align: center;
+    background-color: #fff;
+}
+
+.features h2 {
+    font-size: 36px;
+    color: #6a1a4a;
+    margin-bottom: 50px;
+}
+
+.feature-cards {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+}
+
+.card i {
+    font-size: 48px;
+    color: #952f57;
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    font-size: 22px;
+    color: #6a1a4a;
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Footer */
+.main-footer {
+    background-color: #333;
+    color: #f4f4f4;
+    padding: 50px 5%;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.contact-info h3, .social-media h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.contact-info p {
+    margin: 5px 0;
+}
+
+.contact-info i, .social-media i {
+    margin-right: 10px;
+}
+
+.social-media a {
+    font-size: 24px;
+    margin: 0 10px;
+    color: #f4f4f4;
+    transition: color 0.3s ease;
+}
+
+.social-media a:hover {
+    color: #952f57;
+}
+
+.copyright {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #555;
+}
+
+/* Animations */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .content-text {
+        max-width: 100%;
+    }
+}

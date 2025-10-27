@@ -85,7 +85,7 @@ body {
 .auth-container h2 {
     font-size: 2.2rem;
     font-weight: 700;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     letter-spacing: 1px;
     color: var(--primary-color);
 }
@@ -101,9 +101,18 @@ body {
     font-size: 0.9rem;
 }
 
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
 .form-group {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     text-align: left;
 }
 
@@ -184,6 +193,13 @@ body {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
+.auth-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .auth-links {
     margin-top: 25px;
     display: flex;
@@ -203,6 +219,48 @@ body {
     text-decoration: underline;
 }
 
+#password-requirements {
+    margin-top: 15px;
+}
+
+.requirements-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.requirements-list li {
+    font-size: 0.8rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+.requirements-list li i {
+    margin-right: 8px;
+    color: var(--error-color);
+    transition: color 0.3s ease;
+}
+
+.requirements-list li.valid {
+    color: #27ae60;
+}
+
+.requirements-list li.valid i {
+    color: #27ae60;
+}
+
 @media (max-width: 480px) {
     .auth-container {
         padding: 30px 25px;
@@ -211,4 +269,31 @@ body {
     .auth-container h2 {
         font-size: 1.8rem;
     }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+@keyframes scroll-placeholder {
+  0%, 10% {
+    transform: translateX(0%);
+  }
+  50%, 60% {
+    transform: translateX(calc(-100% + 160px)); /* Adjust 160px if needed */
+  }
+  90%, 100% {
+    transform: translateX(0%);
+  }
+}
+
+#user_id {
+    text-overflow: clip;
+}
+
+#user_id::placeholder {
+    display: inline-block; /* Ensures transform works */
+    white-space: nowrap; /* Prevents text wrapping */
+    animation: scroll-placeholder 10s ease-in-out infinite;
 }

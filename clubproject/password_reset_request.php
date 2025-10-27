@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit" class="auth-btn">Solicitar recuperación</button>
             <div class="auth-links">
-                <a class="auth-link" href="login.php">Volver a iniciar sesión</a>
-                <a class="auth-link" href="index.php">Volver al inicio</a>
+                <a class="auth-link" href="auth.php">Volver a iniciar sesión</a>
+                <a class="auth-link" href="index0.php">Volver al inicio</a>
             </div>
         </form>
     </div>

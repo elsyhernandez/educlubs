@@ -160,7 +160,23 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Panel Maestro</title>
+  <link rel="stylesheet" href="css/main-modern.css">
    <style>
+    .main-header .logo {
+        display: flex;
+        align-items: center;
+    }
+
+    .main-header .logo img {
+        height: 50px;
+        margin-right: 15px;
+    }
+
+    .main-header .logo span {
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+    }
 :root{
       --primary-color: #4D0011; /* Guinda más oscuro (para header) */
       --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
@@ -173,7 +189,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6); 
-      --glass2: #5c1536d8;
+      --glass2: #4D0011d7; /* Guinda con transparencia */
       --radius: 12px;
       --edit-highlight: rgba(255, 244, 180, 0.7);
     }
@@ -267,9 +283,10 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       visibility: visible;
       transform: translateY(0);
     }
-    .user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
-    .user-menu a { padding: 8px 12px; text-decoration: none; display: block; }
+    .user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    .user-menu a { padding: 8px 12px; text-decoration: none; display: block; color: #333; }
     .user-menu a:hover { background: #f5f5f5; }
+    .user-menu a.logout { color: #d93025; font-weight: 500; }
 
     /* Modal styles */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -302,9 +319,28 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     .actions { text-align: center; margin-top: 24px; }
     .actions .btn { width: 100%; }
 
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      header h2 {
+        font-size: 22px;
+      }
+      .header-actions {
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .container {
+        padding: 16px;
+      }
+    }
+
     @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
   </style>
-  <link rel="stylesheet" href="css/table-styles.css">
+  <link rel="stylesheet" href="css/table-styles.css?v=<?= time() ?>">
   <link rel="stylesheet" href="css/notification.css">
 
   <script>
@@ -364,11 +400,9 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       let editMode = false;
       function setEditMode(on) {
         editMode = !!on;
+        document.body.classList.toggle('edit-mode-active', on);
         document.querySelectorAll('.card').forEach(card => {
-          if (on) card.classList.add('editing'); else card.classList.remove('editing');
-        });
-        document.querySelectorAll('.edit-col, .edit-action').forEach(c => {
-          c.style.display = on ? 'table-cell' : 'none';
+          card.classList.toggle('editing', on);
         });
         document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
         if (!on) {
@@ -537,8 +571,11 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <script src="js/notification.js"></script>
 </head>
 <body>
- <header>
-  <h2>Base de datos de registros</h2>
+ <header class="main-header">
+    <div class="logo">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+        <span>EduClubs - Panel de Maestro</span>
+    </div>
   <div class="header-actions">
     <a href="view_clubs.php" class="btn">Ver base de clubs</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
@@ -547,7 +584,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
       <div class="user-menu">
         <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="logout.php" style="color:#b00; text-decoration: none;">Cerrar sesión</a>
+        <a href="logout.php?redirect=index0.php" class="logout">Cerrar sesión</a>
       </div>
     </div>
   </div>
@@ -563,16 +600,35 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       </div>
     </div>
 
-    <?php if (!empty($_SESSION['flash'])):
-        $f = $_SESSION['flash'];
+    <?php 
+    if (!empty($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
         unset($_SESSION['flash']);
+        $type = $flash['type'] ?? 'info';
+        $message_html = '';
+
+        if (!empty($flash['messages'])) {
+            // Handle array of messages
+            $message_html = '<ul>';
+            foreach ($flash['messages'] as $msg) {
+                $message_html .= '<li>' . htmlspecialchars($msg) . '</li>';
+            }
+            $message_html .= '</ul>';
+        } elseif (!empty($flash['msg'])) {
+            // Handle single message
+            $message_html = htmlspecialchars($flash['msg']);
+        }
+
+        if ($message_html) {
+            echo "<script>";
+            echo "document.addEventListener('DOMContentLoaded', () => {";
+            // Use JSON encoding to safely pass the HTML string to JavaScript
+            echo "showNotification(" . json_encode($message_html) . ", '" . htmlspecialchars($type) . "');";
+            echo "});";
+            echo "</script>";
+        }
+    }
     ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            showNotification("<?= htmlspecialchars($f['msg']) ?>", "<?= htmlspecialchars($f['type']) ?>");
-        });
-    </script>
-    <?php endif; ?>
 
     <?php
     // Render table with optional filter select
@@ -720,19 +776,7 @@ $btnAttrs = "class='btn-edit btn btn-icon' data-id='$id' data-member-id='$member
         <div class="form-row">
           <div class="field">
             <label class="form-label">Nombre del club</label>
-            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica">
-          </div>
-          <div class="field">
-            <label class="form-label">ID del club</label>
-            <input type="text" name="club_id" required placeholder="ID único">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label class="form-label">Contraseña</label>
-            <input type="password" name="password" required placeholder="Contraseña segura">
-            <div class="helper">Usa al menos 6 caracteres.</div>
+            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica" pattern=".*[a-zA-Z]+.*" title="El nombre del club debe contener al menos una letra.">
           </div>
           <div class="field">
             <label class="form-label">Tipo de club</label>
@@ -747,9 +791,9 @@ $btnAttrs = "class='btn-edit btn btn-icon' data-id='$id' data-member-id='$member
         </div>
 
         <div class="form-row">
-          <div class="field" style="flex:1;">
+          <div class="field">
             <label class="form-label">Nombre del creador</label>
-            <input type="text" name="creator_name" required placeholder="Nombre completo">
+            <input type="text" name="creator_name" required placeholder="Nombre completo" pattern="[a-zA-Z\s]+" title="El nombre del creador solo puede contener letras y espacios.">
           </div>
           <div class="field" style="flex:0 0 120px; align-self:flex-end;">
             <button type="button" class="btn alt close-modal" style="width:100%;">Cancelar</button>

@@ -18,7 +18,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    min-width: 600px;
+    /* min-width: 600px; */ /* Eliminado para permitir que la tabla se encoja */
 }
 
 .styled-table thead th {
@@ -94,79 +94,104 @@
 }
 
 @media screen and (max-width: 768px) {
-    .edit-action {
-        position: static;
-        transform: none;
-        display: flex;
-        justify-content: flex-end;
+    .table-container {
+        box-shadow: none;
+        border-radius: 0;
     }
 
     .styled-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    .styled-table thead, .styled-table tbody, .styled-table tr, .styled-table th, .styled-table td {
-        display: block;
+        min-width: 100%;
     }
 
     .styled-table thead {
         display: none;
     }
 
+    .styled-table tbody, .styled-table tr, .styled-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     .styled-table tr {
+        margin-bottom: 15px;
         border: 1px solid var(--table-border-color);
         border-radius: 8px;
-        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #fff;
+    }
+    
+    .styled-table tr:last-child {
+        margin-bottom: 0;
     }
 
     .styled-table td {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 15px;
-        border-bottom: 1px dotted var(--table-border-color);
+        padding: 10px 5px;
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
         text-align: right;
         position: relative;
+        padding-left: 50%; /* Espacio para la etiqueta */
+        white-space: normal;
+        line-height: 1.4;
     }
 
     .styled-table td:before {
         content: attr(data-label);
-        font-weight: bold;
-        text-align: left;
+        position: absolute;
+        left: 10px;
+        width: 45%;
         padding-right: 10px;
         white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--primary-color);
     }
 
     .styled-table td:last-child {
         border-bottom: none;
     }
+
+    .styled-table td.edit-action:before {
+        content: none;
+    }
+
+    /* Hide edit controls by default with higher specificity */
+    .styled-table .edit-col,
+    .styled-table .edit-action {
+        display: none;
+    }
+
+    /* Show them when edit mode is active */
+    .card.editing .styled-table .edit-col,
+    .card.editing .styled-table .edit-action {
+        display: block;
+    }
+
+    /* Specific styling for the checkbox column in edit mode */
+    .card.editing .styled-table .edit-col {
+        padding: 5px 5px 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    /* Specific styling for the action column in edit mode */
+    .card.editing .styled-table .edit-action {
+        text-align: right;
+        padding: 10px 5px;
+    }
 }
 
 .table-header {
-    background: var(--glass2, linear-gradient(90deg, rgba(163, 14, 46, 0.6), rgba(128, 0, 32, 0.6)));
+    background: var(--secondary-color);
     color: #fff;
     padding: 12px 20px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    text-align: center;
+    text-align: left;
 }
 
 .table-header h4 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
-}
-.table-container {
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    overflow: hidden; /* Ensures the header and table corners are rounded together */
-}
-.styled-table thead th:first-child {
-    border-top-left-radius: 0;
-}
-
-.styled-table thead th:last-child {
-    border-top-right-radius: 0;
 }

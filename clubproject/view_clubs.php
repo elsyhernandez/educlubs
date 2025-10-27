@@ -69,13 +69,29 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6);
-      --glass2: #5c1536d8;
+      --glass2: #4d0011d7;;
       --glass3: #5c153630;
       --radius: 12px;
     }
-    body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    header { background: var(--glass2);   backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    header h2 { margin: 0; font-size: 28px; color: #ffffffff;; }
+    .main-header .logo {
+        display: flex;
+        align-items: center;
+    }
+
+    .main-header .logo img {
+        height: 50px;
+        margin-right: 15px;
+    }
+
+    .main-header .logo span {
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+    }
+    body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header h2 { margin: 0; font-size: 28px; color: #fff; }
+    .header-actions { display:flex; align-items:center; gap:12px; }
     .header-actions .btn {
         font-size: 16px;
         background: transparent;
@@ -84,6 +100,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .header-actions .btn:hover {
         background: transparent;
     }
+    a.btn { text-decoration: none; }
     .container { max-width: 1160px; margin: 0 auto; padding: 28px; }
     .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; }
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
@@ -92,13 +109,12 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .btn { 
         padding: 10px 20px; 
         background: var(--button-bg); 
-        color: #fff !important; 
+        color: #fff; 
         border: none; 
         border-radius: 10px; 
         cursor: pointer; 
         font-weight:600; 
         text-decoration: none; 
-        display: inline-block;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
         transition: all 0.3s ease;
     }
@@ -107,12 +123,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         background: var(--button-hover-bg);
     }
-    .btn.alt { 
-        background: #6c757d;
-        color:#fff !important;
-        border:1px solid #e6e9ef; 
-        box-shadow:none; 
-    }
+    .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
@@ -165,16 +176,20 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       visibility: visible;
       transform: translateY(0);
     }
-    .user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
-    .user-menu a { padding: 8px 12px; text-decoration: none; display: block; }
+    .user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    .user-menu a { padding: 8px 12px; text-decoration: none; display: block; color: #333; }
     .user-menu a:hover { background: #f5f5f5; }
+    .user-menu a.logout { color: #d93025; font-weight: 500; }
   </style>
   <link rel="stylesheet" href="css/table-styles.css">
   <link rel="stylesheet" href="css/notification.css">
 </head>
 <body>
- <header>
-  <h2>Base de Datos de Clubs</h2>
+ <header class="main-header">
+  <div class="logo">
+    <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+    <span>EduClubs - Base de Datos</span>
+  </div>
   <div class="header-actions">
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <a href="teacher_dashboard.php" class="btn">&laquo; Volver al Panel</a>
@@ -182,7 +197,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
       <div class="user-menu">
         <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="logout.php" style="color:#b00; text-decoration: none;">Cerrar sesión</a>
+        <a href="logout.php" class="logout">Cerrar sesión</a>
       </div>
     </div>
   </div>

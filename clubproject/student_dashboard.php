@@ -14,9 +14,12 @@ $user = $_SESSION['user'];
 </head>
 <body>
   <header class="main-header">
-    <h1>Panel de Alumno</h1>
+    <div class="logo">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+        <span>EduClubs</span>
+    </div>
     <nav>
-      <a href="logout.php">Cerrar Sesión</a>
+      <a href="logout.php" class="btn">Cerrar Sesión</a>
     </nav>
   </header>
 
