@@ -52,15 +52,16 @@
                     <p>Descubre la variedad de clubes disponibles, desde deportes hasta ciencias, y únete a los que más te gusten.</p>
                 </div>
             </div>
-            <div class="social-media">
-                <h3>S&iacute;guenos</h3>
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-            </div>
+            
         </div>
         <div class="copyright">
             <p>&copy; EduClubs CBTis 258.</p>
+            <div class="social-media">
+                <h3>S&iacute;guenos</h3>
+                <a href="https://www.facebook.com/CBTIS258NL/"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"   ></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
         </div>
     </footer>
 

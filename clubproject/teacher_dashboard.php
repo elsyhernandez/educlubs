@@ -258,6 +258,12 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     .edit-col, .edit-action {display:none; text-align: center;}
     .edit-col{width:36px;}
     tr.row-selected{background:#ffe488; font-weight: 600;}
+    
+    /* Mostrar columnas de edición cuando el modo está activo */
+    body.edit-mode-active .edit-col,
+    body.edit-mode-active .edit-action {
+        display: table-cell;
+    }
 
     /* User Icon */
     .usericon { position: relative; }
@@ -443,7 +449,22 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
               const data = await res.json();
               if (data.success) {
                 ids.forEach(id => { const tr = document.querySelector('tr[data-id="'+id+'"]'); if (tr) tr.remove(); });
-                showNotification('Alumno(s) eliminado(s) correctamente.');
+                
+                // Crear mensaje con nombres
+                let mensaje = '';
+                if (data.nombres && data.nombres.length > 0) {
+                  if (data.nombres.length === 1) {
+                    mensaje = data.nombres[0] + ' eliminado';
+                  } else if (data.nombres.length <= 3) {
+                    mensaje = data.nombres.join(', ') + ' eliminados';
+                  } else {
+                    mensaje = data.nombres.slice(0, 3).join(', ') + '... eliminados';
+                  }
+                } else {
+                  mensaje = 'Eliminado(s) correctamente';
+                }
+                
+                showNotification(mensaje);
               } else {
                 showNotification(data.message || 'No se pudieron eliminar los registros.', 'error');
               }
