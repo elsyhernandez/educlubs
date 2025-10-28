@@ -1,6 +1,6 @@
 <?php
-require 'config.php';
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') redirect('login.php');
+require 'includes/config.php';
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') redirect('auth/index.php');
 $user = $_SESSION['user'];
 
 // Filter and Search logic
@@ -180,6 +180,21 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .user-menu a { padding: 8px 12px; text-decoration: none; display: block; color: #333; }
     .user-menu a:hover { background: #f5f5f5; }
     .user-menu a.logout { color: #d93025; font-weight: 500; }
+/* Animación de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-content {
+    animation: fadeIn 0.6s ease-out forwards;
+}
   </style>
   <link rel="stylesheet" href="css/table-styles.css">
   <link rel="stylesheet" href="css/notification.css">
@@ -192,18 +207,18 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div class="header-actions">
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
-    <a href="teacher_dashboard.php" class="btn">&laquo; Volver al Panel</a>
+    <a href="teacher/dashboard.php" class="btn">&laquo; Volver al Panel</a>
     <div class="usericon">
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
       <div class="user-menu">
         <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="logout.php" class="logout">Cerrar sesión</a>
+        <a href="auth/logout.php" class="logout">Cerrar sesión</a>
       </div>
     </div>
   </div>
  </header>
 
-  <div class="container">
+  <div class="container fade-in-content">
     <div id="editToolbar">
       <div class="edit-active">
         <strong>Modo edición activo</strong>
@@ -455,7 +470,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
           ev.preventDefault();
           const form = new FormData(editForm);
           try {
-            const res = await fetch('maestros/editar_club.php', { method: 'POST', body: new URLSearchParams([...form]) });
+            const res = await fetch('admin/editar_club.php', { method: 'POST', body: new URLSearchParams([...form]) });
             const data = await res.json();
             if (data.success) {
               showNotification('Club actualizado correctamente.');
@@ -497,7 +512,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             `¿Estás seguro de que quieres eliminar ${selected.length} club(s)? Esto también eliminará a todos los miembros registrados.`,
             async () => {
               try {
-                const res = await fetch('maestros/bulk_delete_clubs.php', {
+                const res = await fetch('admin/bulk_delete_clubs.php', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ club_names: clubNames })

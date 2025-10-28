@@ -1,6 +1,6 @@
 <?php
-require 'config.php';
-if (!isset($_SESSION['user'])) redirect('login.php');
+require 'includes/config.php';
+if (!isset($_SESSION['user'])) redirect('auth/index.php');
 $type = $_GET['type'] ?? '';
 $user = $_SESSION['user'];
 
@@ -12,7 +12,7 @@ $lists = [
 ];
 
 if (!isset($lists[$type])) {
-    echo "Tipo inválido. <a href='student_dashboard.php'>Volver</a>";
+    echo "Tipo inválido. <a href='student/dashboard.php'>Volver</a>";
     exit;
 }
 ?>
@@ -29,18 +29,18 @@ if (!isset($lists[$type])) {
   <header class="main-header">
     <h1>Clubs de tipo <?=htmlspecialchars(ucfirst($type))?></h1>
     <nav>
-      <a href="student_dashboard.php">Volver al Panel</a>
-      <a href="logout.php">Cerrar Sesión</a>
+      <a href="student/dashboard.php">Volver al Panel</a>
+      <a href="auth/logout.php">Cerrar Sesión</a>
     </nav>
   </header>
 
-  <div class="main-container">
+  <div class="main-container fade-in-content">
     <h2>Selecciona un club para registrarte</h2>
     <div class="club-list-grid">
       <?php foreach($lists[$type] as $club): ?>
         <div class="club-list-item">
           <span><?=htmlspecialchars($club)?></span>
-          <a class="btn" href="register_club.php?type=<?=urlencode($type)?>&club=<?=urlencode($club)?>">Registrarme</a>
+          <a class="btn" href="actions/register_club.php?type=<?=urlencode($type)?>&club=<?=urlencode($club)?>">Registrarme</a>
         </div>
       <?php endforeach; ?>
     </div>

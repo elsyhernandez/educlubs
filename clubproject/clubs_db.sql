@@ -30,7 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `clubs` (
   `club_id` varchar(50) NOT NULL,
   `club_name` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `creator_name` varchar(100) NOT NULL,
   `club_type` enum('cultural','deportivo','civil','asesoria') NOT NULL,
   `created_at` datetime DEFAULT current_timestamp()
@@ -236,7 +236,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `user_id`, `email`, `username`, `password_hash`, `role`, `created_at`) VALUES
 (1, '@alp_2025', 'elsy.hernandez.alp@cbtis258.edu.mx', 'elsy ignacio', '$2y$10$wyi.3lfBbDCv1sPkFObRTOTbKkxH20OKRKULyg.H2bLgUvQCXI4Y.', 'student', '2025-10-17 14:33:10'),
-(2, '@tea_2025', 'ilse.hernandez.alp@cbtis258.edu.mx', 'maestra maria', '$2y$10$IezmucrghF/Jv2RGGKuZGOlqngTbCv6cedVC7j395lWoMqZMmZs7O', 'teacher', '2025-10-17 14:36:28'),
+(2, '@tea_2025', 'ilse.hernandez.alp@cbtis258.edu.mx', 'maestra maria', '$2y$10$jelPdf5hzi0PZ6zzNEhDsKe1YjtkchZxW7GUMWWAUpUTEnh5mNfG5ma', 'teacher', '2025-10-17 14:36:28'),
 (3, '@tea_2025_11', 'alberto.vazquez.alp@cbtis258.edu.mx', 'jaretvzz_', '$2y$10$yX3aOtxTw8wDxq2cNUZaBukKDui7bO/knZWjtryIdy3noYIjdgGse', 'teacher', '2025-10-18 19:14:48'),
 (4, '@alp_2025_01', 'ana.gomez@cbtis258.edu.mx', 'Ana Gómez', '$2y$10$Yz1xv9ZQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzU', 'student', '2025-10-18 19:21:51'),
 (5, '@alp_2025_02', 'luis.martinez@gmail.com', 'Luis Martínez', '$2y$10$Yz1xv9ZQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzU', 'student', '2025-10-18 19:21:51'),

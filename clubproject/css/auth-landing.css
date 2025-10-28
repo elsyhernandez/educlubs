@@ -155,40 +155,61 @@ select.error {
 }
 
 .user-id-display {
+    width: 100%;
     margin: 8px 0;
-    padding: 8px 12px;
-    background-color: #e9ecef;
-    border-radius: 5px;
-    border: 1px solid #ced4da;
+    text-align: left;
 }
 
 .user-id-display label {
-    display: block;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    color: #495057;
-    margin-bottom: 4px;
+    color: var(--dark-text-color);
+    margin-bottom: 8px;
+    display: block;
 }
 
-.user-id-display input {
-    background-color: white !important;
+.user-id-field-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-id-display input.readonly-field {
+    padding-right: 40px; /* Space for the copy icon */
+    background-color: var(--white-color) !important;
     border: 1px solid #ced4da !important;
     font-family: 'Courier New', monospace;
     font-weight: bold;
     text-align: center;
+    color: var(--primary-color) !important;
+}
+
+.copy-user-id {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.copy-user-id:hover {
+    color: var(--primary-color);
 }
 
 button {
     border-radius: 20px;
-    border: 1px solid #6c757d;
-    background-color: #6c757d;
+    border: 1px solid var(--primary-color);
+    background-color: var(--primary-color);
     color: var(--white-color);
     font-size: 12px;
     font-weight: bold;
     padding: 12px 45px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    transition: transform 80ms ease-in, background-color 0.3s;
+    transition: transform 0.2s ease-out, background-color 0.3s ease;
     cursor: pointer;
     position: relative;
     display: inline-flex;
@@ -198,16 +219,9 @@ button {
 }
 
 button:hover {
-    background-color: #5a6268;
-}
-
-button:hover::before {
-    content: "🔒";
-    position: absolute;
-    right: 15px;
-    font-size: 1.2em;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transform: scale(1.05);
 }
 
 button:active {
@@ -228,6 +242,25 @@ a {
     font-size: 14px;
     text-decoration: none;
     margin: 15px 0;
+}
+
+.links-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.links-container a {
+    margin: 0;
+    font-size: 13px;
+    transition: color 0.3s ease;
+}
+
+.links-container a:hover {
+    text-decoration: underline;
+    color: var(--primary-color);
 }
 
 .overlay-container {
@@ -330,6 +363,11 @@ a {
     text-decoration: none;
     font-weight: bold;
     z-index: 110;
+    transition: text-decoration 0.3s ease;
+}
+
+.back-button:hover {
+    text-decoration: underline;
 }
 
 .shape {
@@ -376,6 +414,26 @@ a {
     right: -150px;
 }
 
+#password-requirements .requirements-title {
+    color: var(--dark-text-color);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+#password-requirements .requirements-list li {
+    color: #a94442; /* Darker red for better contrast */
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+#password-requirements .requirements-list li i {
+    margin-right: 8px;
+}
+
+#password-requirements .requirements-list li.valid {
+    color: #3c763d; /* Darker green for better contrast */
+}
+
 /* Responsive adjustments for mobile devices */
 @media (max-width: 768px) {
     .container {
@@ -392,10 +450,6 @@ a {
         font-size: 11px;
     }
 
-    button:hover::before {
-        right: 12px;
-        font-size: 1.1em;
-    }
 
     .user-id-display {
         padding: 6px 10px;
@@ -427,10 +481,6 @@ a {
         font-size: 10px;
     }
 
-    button:hover::before {
-        right: 10px;
-        font-size: 1em;
-    }
 
     .user-id-display {
         padding: 5px 8px;
@@ -445,4 +495,20 @@ a {
         font-size: 10px;
         padding: 6px 8px;
     }
+}
+
+/* Animación de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-content {
+    animation: fadeIn 0.6s ease-out forwards;
 }
