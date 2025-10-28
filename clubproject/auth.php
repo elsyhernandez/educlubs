@@ -44,11 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = trim($_POST['email'] ?? '');
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
-        $role = 'student'; // Rol por defecto
+        $role = isset($_POST['user_role']) ? $_POST['user_role'] : 'student';
 
-        if (stripos($user_id, '@tea_2025') === 0) $role = 'teacher';
-        elseif (stripos($user_id, '@alp_2025') === 0) $role = 'student';
-        else $errors[] = "El ID debe comenzar con @alp_2025 (alumno) o @tea_2025 (maestro).";
+        // Validar que el rol sea válido
+        if (!in_array($role, ['student', 'teacher'])) {
+            $errors[] = "Tipo de usuario inválido.";
+        }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido.";
         else {
@@ -75,16 +76,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (user_id, email, username, password_hash, role) VALUES (?, ?, ?, ?, ?)");
             if ($stmt->execute([$user_id, $email, $username, $hash, $role])) {
+                $roleText = $role === 'teacher' ? 'maestro' : 'alumno';
+                $success_message = "¡Registro exitoso! Tu ID de usuario es: <strong>$user_id</strong> (como $roleText). Ahora puedes iniciar sesión.";
+
                 if ($is_ajax) {
-                    echo json_encode(['success' => true, 'message' => '¡Registro exitoso! Ahora puedes iniciar sesión.']);
+                    echo json_encode([
+                        'success' => true,
+                        'message' => "¡Registro exitoso! Tu ID de usuario es: <strong>$user_id</strong> (como $roleText). Ahora puedes iniciar sesión.",
+                        'user_id' => $user_id,
+                        'role' => $role
+                    ]);
                     exit();
                 }
-                $success_message = "¡Registro exitoso! Ahora puedes iniciar sesión.";
             } else {
                 $errors[] = "Error en el registro. Por favor, inténtalo de nuevo.";
             }
         }
-        
+
         if ($is_ajax && !empty($errors)) {
             echo json_encode(['success' => false, 'errors' => $errors]);
             exit();
@@ -121,7 +129,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form action="auth.php" method="post" id="registerForm">
                 <input type="hidden" name="register" value="1">
                 <h1>Crear Cuenta</h1>
-                <input type="text" name="user_id" placeholder="ID de Usuario (ej: @alp_2025_01)" required value="<?= htmlspecialchars($_POST['user_id'] ?? '') ?>" />
+                <select name="user_role" id="userRole" required>
+                    <option value="">Selecciona tu tipo</option>
+                    <option value="student" <?= (isset($_POST['user_role']) && $_POST['user_role'] === 'student') ? 'selected' : '' ?>>Alumno</option>
+                    <option value="teacher" <?= (isset($_POST['user_role']) && $_POST['user_role'] === 'teacher') ? 'selected' : '' ?>>Maestro</option>
+                </select>
+                <div class="user-id-display" id="userIdDisplay" style="display: none;">
+                    <label>Tu ID de usuario:</label>
+                    <input type="text" id="userId" readonly class="readonly-field" />
+                    <input type="hidden" name="user_id" id="userIdHidden" value="" />
+                </div>
                 <input type="text" name="username" placeholder="Nombre de Usuario" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" />
                 <input type="email" name="email" placeholder="Correo (Gmail o .edu.mx)" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" />
                 <div class="password-wrapper">
@@ -171,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>EduClubs</span>
                     </div>
                     <h1>&iexcl;Hola, Amigo!</h1>
-                    <p>Introduce tus datos personales y comienza tu aventura con nosotros</p>
+                    <p>Selecciona si eres alumno o maestro y obtén tu ID automáticamente</p>
                     <button class="ghost" id="signUp">Crear Cuenta</button>
                 </div>
             </div>
@@ -245,9 +262,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         const registerForm = document.getElementById('registerForm');
+        const userRoleSelect = document.getElementById('userRole');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const userIdInput = document.getElementById('userId');
+        const userIdHidden = document.getElementById('userIdHidden');
+
         if (registerForm) {
+            // Generar ID automáticamente cuando se selecciona el rol
+            if (userRoleSelect) {
+                userRoleSelect.addEventListener('change', function() {
+                    const selectedRole = this.value;
+                    if (selectedRole) {
+                        // Generar ID único basado en el rol y timestamp
+                        const timestamp = Date.now();
+                        const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                        let userId = '';
+
+                        if (selectedRole === 'student') {
+                            userId = `@alp_2025_${timestamp.toString().slice(-6)}${randomNum}`;
+                        } else if (selectedRole === 'teacher') {
+                            userId = `@tea_2025_${timestamp.toString().slice(-6)}${randomNum}`;
+                        }
+
+                        userIdInput.value = userId;
+                        userIdHidden.value = userId;
+                        userIdDisplay.style.display = 'block';
+                        this.classList.remove('error');
+                    } else {
+                        userIdDisplay.style.display = 'none';
+                        userIdInput.value = '';
+                        userIdHidden.value = '';
+                    }
+                });
+            }
+
+            // Remover clase de error cuando el usuario empiece a escribir
+            const inputs = registerForm.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], select');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('error');
+                });
+                input.addEventListener('change', function() {
+                    this.classList.remove('error');
+                });
+            });
+
             registerForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+
+                // Validar campos vacíos antes de enviar
+                const userRole = userRoleSelect.value;
+                const userId = userIdHidden.value.trim();
+                const username = this.querySelector('input[name="username"]').value.trim();
+                const email = this.querySelector('input[name="email"]').value.trim();
+                const password = this.querySelector('input[name="password"]').value.trim();
+
+                // Verificar si algún campo está vacío
+                if (!userRole || !userId || !username || !email || !password) {
+                    let emptyFields = [];
+                    if (!userRole) emptyFields.push('Tipo de usuario');
+                    if (!userId) emptyFields.push('ID de Usuario');
+                    if (!username) emptyFields.push('Nombre de Usuario');
+                    if (!email) emptyFields.push('Correo Electrónico');
+                    if (!password) emptyFields.push('Contraseña');
+
+                    const message = 'Por favor completa los siguientes campos: ' + emptyFields.join(', ');
+                    showNotification(message, 'error');
+
+                    // Resaltar campos vacíos con borde rojo
+                    userRoleSelect.classList.toggle('error', !userRole);
+                    userIdInput.classList.toggle('error', !userId);
+                    this.querySelector('input[name="username"]').classList.toggle('error', !username);
+                    this.querySelector('input[name="email"]').classList.toggle('error', !email);
+                    this.querySelector('input[name="password"]').classList.toggle('error', !password);
+
+                    return; // Detener el envío del formulario
+                }
+
                 const formData = new FormData(this);
                 const submitBtn = this.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;

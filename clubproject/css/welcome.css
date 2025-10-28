@@ -110,12 +110,35 @@ body {
     box-shadow: 0 4px 15px var(--shadow-color);
     font-size: 1.1rem;
     text-align: center;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.welcome-btn.primary {
+    background: #6c757d;
+    color: white;
+}
+
+.welcome-btn.primary:hover {
+    background: #5a6268;
 }
 
 .welcome-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.welcome-btn.primary:hover::before {
+    content: "🔒";
+    position: absolute;
+    right: 15px;
+    font-size: 1.2em;
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
 
@@ -126,5 +149,20 @@ body {
     }
     .welcome-btn {
         padding: 15px 30px;
+    }
+    .welcome-btn.primary {
+        background: #6c757d;
+        color: white;
+    }
+    .welcome-btn.primary:hover {
+        background: #5a6268;
+    }
+    .welcome-btn.primary:hover::before {
+        content: "🔒";
+        position: absolute;
+        right: 15px;
+        font-size: 1.2em;
+        opacity: 1;
+        transition: opacity 0.3s ease;
     }
 }
