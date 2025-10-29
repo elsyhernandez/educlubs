@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($errors)) {
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE user_id = ? OR email = ?");
             $stmt->execute([$user_id, $email]);
-            if ($stmt->fetchColumn() > 0) $errors[] = "El ID o el correo ya están registrados.";
+            if ($stmt->fetchColumn() > 0) $errors[] = "El correo ya está registrado.";
         }
 
         if (empty($errors)) {
@@ -364,9 +364,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     loginForm.querySelector('input[name="email"]').value = email;
                                 }
 
+                                // Reset the form immediately
+                                registerForm.reset();
+                                userIdDisplay.style.display = 'none';
+
                                 setTimeout(() => {
                                     document.getElementById('signIn').click();
-                                    registerForm.reset();
                                 }, 2000);
                             } else {
                                 data.errors.forEach(error => {

@@ -160,6 +160,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Panel Maestro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="../css/main-modern.css">
    <style>
     .main-header .logo {
@@ -253,7 +254,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
         font-size: 16px;
         line-height: 1;
     }
-    #editToolbar { display:none; position: sticky; top:72px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    #editToolbar { display:none; position: sticky; top: 120px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
     .edit-active { display:flex; align-items:center; gap:12px; }
     .edit-col, .edit-action {display:none; text-align: center;}
     .edit-col{width:36px;}
@@ -369,7 +370,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     }
   </style>
   <link rel="stylesheet" href="../css/table-styles.css?v=<?= time() ?>">
-  <link rel="stylesheet" href="../css/notification.css">
+  <link rel="stylesheet" href="../css/notification.css?v=<?= time() ?>">
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -611,7 +612,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
 
     });
   </script>
-  <script src="../js/notification.js"></script>
+  <script src="../js/notification.js?v=<?= time() ?>"></script>
   <?php
     // Recuperar datos del formulario y errores si existen
     $form_data = $_SESSION['form_data'] ?? [];
@@ -644,7 +645,8 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
   </script>
  <header class="main-header">
     <div class="logo">
-        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 50px; margin-right: 15px;">
+<img src="../admin/assets/img/logo1.png" alt="Logo EduClubs" style="height: 80px; margin-right: 15px;">
         <span>EduClubs - Panel de Maestro</span>
     </div>
   <div class="header-actions">
@@ -665,8 +667,8 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     <div id="editToolbar">
       <div class="edit-active">
         <strong>Modo edición activo</strong>
-        <button id="bulkDeleteBtn" class="btn small">Dar de baja</button>
         <button id="exitEditBtn" class="btn alt small" onclick="(function(){document.getElementById('toggleEditBtn').click();})();">Salir modo edición</button>
+        <button id="bulkDeleteBtn" class="btn btn-icon" title="Dar de baja seleccionados" style="background-color: #c62828; color: white;"><i class="fas fa-trash-alt"></i></button>
         <small style="margin-left:8px;color:#666;">Selecciona filas para dar de baja o usa el icono de lápiz para editar una fila.</small>
       </div>
     </div>

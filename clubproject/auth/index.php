@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/landing.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../admin/assets/css/swiper-bundle.min.css">
 </head>
 <body>
     <header class="main-header">
@@ -24,7 +25,7 @@
             <div class="hero-content">
                 <div class="content-text">
                     <h1>Bienvenido a EduClubs</h1>
-                    <p>La plataforma para la gesti&oacute;n de clubes escolares en el CBTis 258. Inscr&iacute;bete, participa y organiza actividades de forma sencilla y centralizada.</p>
+                    <p>La plataforma definitiva para la gesti&oacute;n de clubes escolares en el CBTis 258. Inscr&iacute;bete, participa y organiza actividades de forma sencilla y centralizada. Descubre un universo de oportunidades para desarrollar tus pasiones y talentos.</p>
                     <a href="auth.php" class="btn2 btn-main">Explorar Clubes</a>
                 </div>
                 <div class="content-illustration">
@@ -49,21 +50,55 @@
                 <div class="card">
                     <i class="fas fa-search-plus"></i>
                     <h3>Explora y Participa</h3>
-                    <p>Descubre la variedad de clubes disponibles, desde deportes hasta ciencias, y únete a los que más te gusten.</p>
+                    <p>Descubre la gran variedad de clubes disponibles, desde deportes y artes hasta ciencias y tecnolog&iacute;a. &Uacute;nete a los que m&aacute;s te apasionen y conoce a otros estudiantes con tus mismos intereses.</p>
                 </div>
             </div>
-            
-        </div>
-        <div class="copyright">
-            <p>&copy; EduClubs CBTis 258.</p>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="contact-info">
+                <h3>Contacto</h3>
+                <p><i class="fas fa-map-marker-alt"></i> CBTis 258, Cd. Ju&aacute;rez, Chihuahua</p>
+                <p><i class="fas fa-phone"></i> (656) 123-4567</p>
+                <p><i class="fas fa-envelope"></i> contacto@cbtis258.edu.mx</p>
+            </div>
             <div class="social-media">
                 <h3>S&iacute;guenos</h3>
-                <a href="https://www.facebook.com/CBTIS258NL/"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-twitter"   ></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/CBTIS258NL/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
             </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 EduClubs CBTis 258. Todos los derechos reservados.</p>
         </div>
     </footer>
 
+    <script src="../admin/assets/js/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".club-swiper", {
+            effect: "coverflow",
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: "auto",
+            coverflowEffect: {
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+            },
+            loop: true,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+            },
+        });
+    </script>
 </body>
 </html>

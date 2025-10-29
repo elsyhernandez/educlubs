@@ -71,6 +71,7 @@ a {
 .hero {
     background: linear-gradient(135deg, #f4e8f0 0%, #e5d9f2 100%);
     padding: 80px 5%;
+    border-bottom: 1px solid #ddd;
 }
 
 .hero-content {
@@ -170,6 +171,59 @@ a {
     color: #555;
 }
 
+/* Club Gallery Section */
+.club-gallery {
+    padding: 80px 0;
+    background-color: #f9f5f7;
+}
+
+.club-gallery h2 {
+    font-size: 36px;
+    color: #6a1a4a;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.club-swiper {
+    width: 100%;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.swiper-slide {
+    background-position: center;
+    background-size: cover;
+    width: 300px;
+    height: 300px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.swiper-slide .overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.swiper-slide .overlay h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
 /* Footer */
 .main-footer {
     background-color: #333;
@@ -214,6 +268,11 @@ a {
     text-align: center;
     padding-top: 20px;
     border-top: 1px solid #555;
+}
+
+.social-media a i:hover {
+    color: #952f57;
+    transform: scale(1.2);
 }
 
 /* Animations */

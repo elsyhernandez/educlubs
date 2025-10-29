@@ -23,7 +23,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-image: url('https://scontent.fntr5-1.fna.fbcdn.net/v/t39.30808-6/482022860_2433056860381845_1449795817268118012_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=hBSsGmkqgfEQ7kNvwGLthw4&_nc_oc=AdmoQ-0T0rra84V3Krk6m8aIbRrI3N7VXNXxyDJg8TQOAD4YQOuYKVkaP7NG_WgFXbMYXW-0wF4Gml4qQAwe2Pc0&_nc_zt=23&_nc_ht=scontent.fntr5-1.fna&_nc_gid=dGli6kfTS6MIkRofOnIquQ&oh=00_AfcxsQIlyxt6VupM9Wof1j8rumUERy4x2Ya3WQA3MypUqw&oe=68FF5CCC');
+    background-image: url('../admin/assets/img/fondo.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

@@ -1,31 +1,65 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../vendor/autoload.php';
 require '../includes/config.php';
+require '../includes/mail_config.php';
+
 $info = '';
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = trim($_POST['user_id'] ?? '');
     $email = trim($_POST['email'] ?? '');
 
     $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ? AND email = ?");
-    $stmt->execute([$user_id,$email]);
+    $stmt->execute([$user_id, $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        $info = "Si existe una cuenta con esos datos, se ha enviado un enlace de recuperación.";
+        // Mensaje genérico para no revelar si un usuario existe o no
+        $info = "Si existe una cuenta con esos datos, se ha enviado un código de recuperación a tu correo.";
     } else {
-        // generar token
-        $token = bin2hex(random_bytes(16));
-        $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hora
-        $stmt = $pdo->prepare("INSERT INTO password_resets (user_id,token,expires_at) VALUES (?,?,?)");
-        $stmt->execute([$user_id,$token,$expires]);
+        // Generar un código de 6 dígitos
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expires = date('Y-m-d H:i:s', time() + 600); // 10 minutos de validez
 
-        // Simulación de envío de correo
-        $reset_link = "http://localhost/proyecto/educlubs/clubproject/auth/password_reset.php?token=$token";
-        
-        // En un entorno real, aquí se usaría una librería como PHPMailer para enviar el correo.
-        // mail($email, "Recuperación de contraseña", "Para restablecer tu contraseña, haz clic en el siguiente enlace: $reset_link");
+        // Guardar el código en la base de datos
+        $stmt = $pdo->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)");
+        $stmt->execute([$user_id, $code, $expires]);
 
-        // Para fines de prueba en local, mostramos el enlace directamente.
-        $info = "<strong>Modo de prueba:</strong> En un entorno real, se enviaría un correo. Por favor, usa el siguiente enlace para restablecer tu contraseña:<br><a href='$reset_link'>Restablecer contraseña</a>";
+        // Enviar el correo con PHPMailer
+        $mail = new PHPMailer(true);
+        try {
+            // Configuración del servidor
+            $mail->isSMTP();
+            $mail->Host       = SMTP_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USERNAME;
+            $mail->Password   = SMTP_PASSWORD;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = SMTP_PORT;
+
+            // Destinatarios
+            $mail->setFrom(SMTP_USERNAME, 'EduClubs');
+            $mail->addAddress($email, $user['username']);
+
+            // Contenido
+            $mail->isHTML(true);
+            $mail->Subject = 'Tu codigo de recuperacion de contrasena';
+            $mail->Body    = "Hola,<br><br>Tu código para restablecer la contraseña es: <b>$code</b><br><br>Este código expirará en 10 minutos.<br><br>Si no solicitaste esto, puedes ignorar este correo.";
+            $mail->AltBody = "Tu código de recuperación es: $code";
+
+            $mail->send();
+            
+            // Redirigir a la página de verificación
+            header("Location: verify_code.php?user_id=" . urlencode($user_id));
+            exit();
+
+        } catch (Exception $e) {
+            $error = "No se pudo enviar el correo. Error: {$mail->ErrorInfo}";
+        }
     }
 }
 ?>
@@ -46,7 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2><i class="fas fa-key"></i> Recuperar Contraseña</h2>
         <?php if($info): ?>
             <div class="message success" style="background-color: rgba(33, 147, 176, 0.1); color: #2193b0; border: 1px solid #2193b0; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-                <?= $info ?>
+                <?= htmlspecialchars($info) ?>
+            </div>
+        <?php endif; ?>
+        <?php if($error): ?>
+            <div class="message error">
+                <?= htmlspecialchars($error) ?>
             </div>
         <?php endif; ?>
         <form method="post">

@@ -9,13 +9,19 @@ function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
 
-    const icon = document.createElement('span');
-    icon.className = 'icon';
-    icon.textContent = type === 'success' ? '✔️' : '⚠️';
+    // Create icon element using Font Awesome
+    const icon = document.createElement('i');
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-times-circle',
+        info: 'fas fa-info-circle',
+        warning: 'fas fa-exclamation-triangle'
+    };
+    icon.className = `icon ${icons[type] || icons.info}`;
 
     const messageSpan = document.createElement('span');
     messageSpan.className = 'message';
-    messageSpan.textContent = message;
+    messageSpan.innerHTML = message; // Use innerHTML to allow for simple HTML like lists
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'close-btn';
@@ -36,10 +42,10 @@ function showNotification(message, type = 'success') {
         notification.classList.add('show');
     }, 10);
 
-    // Automatically hide after 5 seconds
+    // Automatically hide after 4.5 seconds to match CSS animation
     setTimeout(() => {
         if (document.body.contains(notification)) {
             closeBtn.onclick();
         }
-    }, 5000);
+    }, 4500);
 }

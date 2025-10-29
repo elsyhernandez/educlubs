@@ -1,21 +1,17 @@
 <?php
 require '../includes/config.php';
-$token = $_GET['token'] ?? ($_POST['token'] ?? null);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Verificar si el usuario ha pasado por la verificación del código
+if (!isset($_SESSION['reset_verified']) || $_SESSION['reset_verified'] !== true) {
+    die("Acceso no autorizado. Por favor, verifica tu código primero.");
+}
+
+$user_id = $_SESSION['reset_user_id'];
 $errors = [];
 $success = '';
-
-if (!$token) {
-    die("Token de restablecimiento no proporcionado.");
-}
-
-// Validar token
-$stmt = $pdo->prepare("SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > NOW()");
-$stmt->execute([$token]);
-$reset_request = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$reset_request) {
-    die("El token es inválido, ha expirado o ya fue utilizado.");
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
@@ -33,13 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Actualizar contraseña del usuario
         $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE user_id = ?");
-        $stmt->execute([$new_hash, $reset_request['user_id']]);
+        $stmt->execute([$new_hash, $user_id]);
 
-        // Marcar token como usado
-        $stmt = $pdo->prepare("UPDATE password_resets SET used = 1 WHERE id = ?");
-        $stmt->execute([$reset_request['id']]);
+        // Limpiar la sesión para que no se pueda reutilizar
+        unset($_SESSION['reset_verified']);
+        unset($_SESSION['reset_user_id']);
 
-        $success = "¡Tu contraseña ha sido actualizada con éxito! Ahora puedes <a href='index.php' class='auth-link'>iniciar sesión</a>.";
+        $success = "¡Tu contraseña ha sido actualizada con éxito! Ahora puedes <a href='auth.php' class='auth-link'>iniciar sesión</a>.";
     }
 }
 ?>
@@ -73,8 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php else: ?>
             <form method="post">
-                <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
-                
                 <div class="form-group">
                     <label for="password">Nueva Contraseña</label>
                     <div class="password-wrapper">

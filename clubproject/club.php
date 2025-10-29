@@ -27,6 +27,10 @@ if (!isset($lists[$type])) {
 </head>
 <body>
   <header class="main-header">
+    <div class="logo">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 50px; margin-right: 15px;">
+<img src="admin/assets/img/logo1.png" alt="Logo EduClubs" style="height: 80px; margin-right: 15px;">
+    </div>
     <h1>Clubs de tipo <?=htmlspecialchars(ucfirst($type))?></h1>
     <nav>
       <a href="student/dashboard.php">Volver al Panel</a>
