@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-10-2025 a las 19:23:12
+-- Tiempo de generación: 30-10-2025 a las 19:25:00
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -92,66 +92,17 @@ CREATE TABLE `club_registrations` (
 
 INSERT INTO `club_registrations` (`id`, `club_type`, `club_name`, `paterno`, `materno`, `nombres`, `semestre`, `correo`, `turno`, `user_id`, `created_at`) VALUES
 (1, 'cultural', 'Fotografía/Video', 'hernandez', 'ignacio', 'elso', '5to', 'elsy.hernandez.alp@cbtis258.edu.mx', 'matutino', '@alp_2025', '2025-10-17 14:34:05'),
-(2, 'cultural', 'Teatro', 'gomez', 'lopez', 'ana', '4to', 'ana.gomez@cbtis258.edu.mx', 'matutino', '@alp_2025_01', '2025-10-18 19:21:51'),
-(3, 'cultural', 'Música', 'martinez', 'rojas', 'luis', '5to', 'luis.martinez@gmail.com', 'vespertino', '@alp_2025_02', '2025-10-18 19:21:51'),
-(4, 'cultural', 'Danza', 'lopez', 'garcia', 'karla', '6to', 'karla.lopez@cbtis258.edu.mx', 'matutino', '@alp_2025_03', '2025-10-18 19:21:51'),
-(5, 'cultural', 'Fotografía', 'mendez', 'lopez', 'sofia', '4to', 'sofia.mendez@cbtis258.edu.mx', 'vespertino', '@alp_2025_04', '2025-10-18 19:21:51'),
-(6, 'cultural', 'Pintura', 'torres', 'garcia', 'diego', '6to', 'diego.torres@gmail.com', 'matutino', '@alp_2025_05', '2025-10-18 19:21:51'),
-(7, 'cultural', 'Coro', 'ramos', 'fernandez', 'fernando', '5to', 'fernando.ramos@cbtis258.edu.mx', 'vespertino', '@alp_2025_06', '2025-10-18 19:21:51'),
-(8, 'cultural', 'Teatro', 'nunez', 'santos', 'valeria', '3ro', 'valeria.nunez@gmail.com', 'matutino', '@alp_2025_07', '2025-10-18 19:21:51'),
-(9, 'cultural', 'Música', 'santos', 'vera', 'ricardo', '2do', 'ricardo.santos@cbtis258.edu.mx', 'vespertino', '@alp_2025_08', '2025-10-18 19:21:51'),
-(10, 'cultural', 'Danza', 'vera', 'molina', 'diana', '1ro', 'diana.vera@gmail.com', 'matutino', '@alp_2025_09', '2025-10-18 19:21:51'),
 (11, 'cultural', 'Fotografía', 'molina', 'gomez', 'jose', '6to', 'jose.molina@cbtis258.edu.mx', 'vespertino', '@alp_2025_10', '2025-10-18 19:21:51'),
-(12, 'deportivo', 'Fútbol', 'gomez', 'lopez', 'ana', '4to', 'ana.gomez@cbtis258.edu.mx', 'matutino', '@alp_2025_01', '2025-10-18 19:21:51'),
-(13, 'deportivo', 'Voleibol', 'martinez', 'rojas', 'luis', '5to', 'luis.martinez@gmail.com', 'vespertino', '@alp_2025_02', '2025-10-18 19:21:51'),
-(14, 'deportivo', 'Atletismo', 'lopez', 'garcia', 'karla', '6to', 'karla.lopez@cbtis258.edu.mx', 'matutino', '@alp_2025_03', '2025-10-18 19:21:51'),
-(15, 'deportivo', 'Basquetbol', 'mendez', 'lopez', 'sofia', '4to', 'sofia.mendez@cbtis258.edu.mx', 'vespertino', '@alp_2025_04', '2025-10-18 19:21:51'),
-(16, 'deportivo', 'Natación', 'torres', 'garcia', 'diego', '6to', 'diego.torres@gmail.com', 'matutino', '@alp_2025_05', '2025-10-18 19:21:51'),
-(17, 'deportivo', 'Fútbol', 'ramos', 'fernandez', 'fernando', '5to', 'fernando.ramos@cbtis258.edu.mx', 'vespertino', '@alp_2025_06', '2025-10-18 19:21:51'),
-(18, 'deportivo', 'Voleibol', 'nunez', 'santos', 'valeria', '3ro', 'valeria.nunez@gmail.com', 'matutino', '@alp_2025_07', '2025-10-18 19:21:51'),
-(19, 'deportivo', 'Atletismo', 'santos', 'vera', 'ricardo', '2do', 'ricardo.santos@cbtis258.edu.mx', 'vespertino', '@alp_2025_08', '2025-10-18 19:21:51'),
-(20, 'deportivo', 'Basquetbol', 'vera', 'molina', 'diana', '1ro', 'diana.vera@gmail.com', 'matutino', '@alp_2025_09', '2025-10-18 19:21:51'),
-(21, 'deportivo', 'Natación', 'molina', 'gomez', 'jose', '6to', 'jose.molina@cbtis258.edu.mx', 'vespertino', '@alp_2025_10', '2025-10-18 19:21:51'),
-(22, 'civil', 'Escolta', 'gomez', 'lopez', 'ana', '4to', 'ana.gomez@cbtis258.edu.mx', 'matutino', '@alp_2025_01', '2025-10-18 19:21:51'),
-(23, 'civil', 'Banda de guerra', 'martinez', 'rojas', 'luis', '5to', 'luis.martinez@gmail.com', 'vespertino', '@alp_2025_02', '2025-10-18 19:21:51'),
-(24, 'civil', 'Escolta', 'lopez', 'garcia', 'karla', '6to', 'karla.lopez@cbtis258.edu.mx', 'matutino', '@alp_2025_03', '2025-10-18 19:21:51'),
-(25, 'civil', 'Banda de guerra', 'mendez', 'lopez', 'sofia', '4to', 'sofia.mendez@cbtis258.edu.mx', 'vespertino', '@alp_2025_04', '2025-10-18 19:21:51'),
 (26, 'civil', 'Escolta', 'torres', 'garcia', 'diego', '6to', 'diego.torres@gmail.com', 'matutino', '@alp_2025_05', '2025-10-18 19:21:51'),
 (27, 'civil', 'Banda de guerra', 'ramos', 'fernandez', 'fernando', '5to', 'fernando.ramos@cbtis258.edu.mx', 'vespertino', '@alp_2025_06', '2025-10-18 19:21:51'),
-(28, 'civil', 'Escolta', 'nunez', 'santos', 'valeria', '3ro', 'valeria.nunez@gmail.com', 'matutino', '@alp_2025_07', '2025-10-18 19:21:51'),
 (29, 'civil', 'Banda de guerra', 'santos', 'vera', 'ricardo', '2do', 'ricardo.santos@cbtis258.edu.mx', 'vespertino', '@alp_2025_08', '2025-10-18 19:21:51'),
 (30, 'civil', 'Escolta', 'vera', 'molina', 'diana', '1ro', 'diana.vera@gmail.com', 'matutino', '@alp_2025_09', '2025-10-18 19:21:51'),
 (31, 'civil', 'Banda de guerra', 'molina', 'gomez', 'jose', '6to', 'jose.molina@cbtis258.edu.mx', 'vespertino', '@alp_2025_10', '2025-10-18 19:21:51'),
-(32, 'cultural', 'Teatro', 'rojas', 'soto', 'emma', '4to', 'emma.rojas@cbtis258.edu.mx', 'matutino', '@alp_2025_21', '2025-10-18 19:30:40'),
-(33, 'cultural', 'Música', 'soto', 'mendez', 'daniel', '5to', 'daniel.soto@gmail.com', 'vespertino', '@alp_2025_22', '2025-10-18 19:30:40'),
-(34, 'cultural', 'Danza', 'mendez', 'vargas', 'lucia', '6to', 'lucia.mendez@cbtis258.edu.mx', 'matutino', '@alp_2025_23', '2025-10-18 19:30:40'),
-(35, 'cultural', 'Fotografía', 'vargas', 'ortega', 'mateo', '4to', 'mateo.vargas@gmail.com', 'vespertino', '@alp_2025_24', '2025-10-18 19:30:40'),
-(36, 'cultural', 'Pintura', 'ortega', 'castro', 'valeria', '6to', 'valeria.ortega@cbtis258.edu.mx', 'matutino', '@alp_2025_25', '2025-10-18 19:30:40'),
-(37, 'cultural', 'Coro', 'castr', 'fernandez', 'sebastian', '5to', 'sebastian.castro@gmail.com', 'vespertino', '@alp_2025_26', '2025-10-18 19:30:40'),
-(38, 'cultural', 'Teatro', 'fernandez', 'lopez', 'camila', '3ro', 'camila.fernandez@cbtis258.edu.mx', 'matutino', '@alp_2025_27', '2025-10-18 19:30:40'),
-(39, 'cultural', 'Música', 'lopez', 'morales', 'andres', '2do', 'andres.lopez@gmail.com', 'vespertino', '@alp_2025_28', '2025-10-18 19:30:40'),
-(40, 'cultural', 'Danza', 'morales', 'ramirez', 'isabella', '1ro', 'isabella.morales@cbtis258.edu.mx', 'matutino', '@alp_2025_29', '2025-10-18 19:30:40'),
-(41, 'cultural', 'Fotografía', 'ramirez', 'rojas', 'julian', '6to', 'julian.ramirez@gmail.com', 'vespertino', '@alp_2025_30', '2025-10-18 19:30:40'),
-(42, 'deportivo', 'Fútbol', 'rojas', 'soto', 'emma', '4to', 'emma.rojas@cbtis258.edu.mx', 'matutino', '@alp_2025_21', '2025-10-18 19:30:40'),
-(43, 'deportivo', 'Voleibol', 'soto', 'mendez', 'daniel', '5to', 'daniel.soto@gmail.com', 'vespertino', '@alp_2025_22', '2025-10-18 19:30:40'),
-(44, 'deportivo', 'Atletismo', 'mendez', 'vargas', 'lucia', '6to', 'lucia.mendez@cbtis258.edu.mx', 'matutino', '@alp_2025_23', '2025-10-18 19:30:40'),
-(45, 'deportivo', 'Basquetbol', 'vargas', 'ortega', 'mateo', '4to', 'mateo.vargas@gmail.com', 'vespertino', '@alp_2025_24', '2025-10-18 19:30:40'),
-(46, 'deportivo', 'Natación', 'ortega', 'castro', 'valeria', '6to', 'valeria.ortega@cbtis258.edu.mx', 'matutino', '@alp_2025_25', '2025-10-18 19:30:40'),
-(47, 'deportivo', 'Fútbol', 'castro', 'fernandez', 'sebastian', '5to', 'sebastian.castro@gmail.com', 'vespertino', '@alp_2025_26', '2025-10-18 19:30:40'),
+(47, 'deportivo', 'Fútbol', 'castroaaa', 'fernandez', 'sebastian', '5to', 'sebastian.castro@gmail.com', 'vespertino', '@alp_2025_26', '2025-10-18 19:30:40'),
 (48, 'deportivo', 'Voleibol', 'fernandez', 'lopez', 'camila', '3ro', 'camila.fernandez@cbtis258.edu.mx', 'matutino', '@alp_2025_27', '2025-10-18 19:30:40'),
-(49, 'deportivo', 'Atletismo', 'lopez', 'morales', 'andres', '2do', 'andres.lopez@gmail.com', 'vespertino', '@alp_2025_28', '2025-10-18 19:30:40'),
+(49, 'deportivo', 'Atletismo', 'lopeza', 'morales', 'andres', '2do', 'andres.lopez@gmail.com', 'vespertino', '@alp_2025_28', '2025-10-18 19:30:40'),
 (50, 'deportivo', 'Basquetbol', 'morales', 'ramirez', 'isabella', '1ro', 'isabella.morales@cbtis258.edu.mx', 'matutino', '@alp_2025_29', '2025-10-18 19:30:40'),
-(51, 'deportivo', 'Natación', 'ramirez', 'rojas', 'julian', '6to', 'julian.ramirez@gmail.com', 'vespertino', '@alp_2025_30', '2025-10-18 19:30:40'),
-(52, 'civil', 'Escolta', 'rojas', 'soto', 'emma', '4to', 'emma.rojas@cbtis258.edu.mx', 'matutino', '@alp_2025_21', '2025-10-18 19:30:40'),
-(53, 'civil', 'Banda de guerra', 'soto', 'mendez', 'daniel', '5to', 'daniel.soto@gmail.com', 'vespertino', '@alp_2025_22', '2025-10-18 19:30:40'),
-(54, 'civil', 'Escolta', 'mendez', 'vargas', 'lucia', '6to', 'lucia.mendez@cbtis258.edu.mx', 'matutino', '@alp_2025_23', '2025-10-18 19:30:40'),
-(55, 'civil', 'Banda de guerra', 'vargas', 'ortega', 'mateo', '4to', 'mateo.vargas@gmail.com', 'vespertino', '@alp_2025_24', '2025-10-18 19:30:40'),
-(56, 'civil', 'Escolta', 'ortega', 'castro', 'valeria', '6to', 'valeria.ortega@cbtis258.edu.mx', 'matutino', '@alp_2025_25', '2025-10-18 19:30:40'),
-(57, 'civil', 'Banda de guerra', 'castro', 'fernandez', 'sebastian', '5to', 'sebastian.castro@gmail.com', 'vespertino', '@alp_2025_26', '2025-10-18 19:30:40'),
-(58, 'civil', 'Escolta', 'fernandez', 'lopez', 'camila', '3ro', 'camila.fernandez@cbtis258.edu.mx', 'matutino', '@alp_2025_27', '2025-10-18 19:30:40'),
-(59, 'civil', 'Banda de guerra', 'lopez', 'morales', 'andres', '2do', 'andres.lopez@gmail.com', 'vespertino', '@alp_2025_28', '2025-10-18 19:30:40'),
-(60, 'civil', 'Escolta', 'morales', 'ramirez', 'isabella', '1ro', 'isabella.morales@cbtis258.edu.mx', 'matutino', '@alp_2025_29', '2025-10-18 19:30:40'),
-(61, 'civil', 'Banda de guerra', 'ramirez', 'rojas', 'julian', '6to', 'julian.ramirez@gmail.com', 'vespertino', '@alp_2025_30', '2025-10-18 19:30:40');
+(51, 'deportivo', 'Natación', 'ramirez', 'rojas', 'julian', '6to', 'julian.ramirez@gmail.com', 'vespertino', '@alp_2025_30', '2025-10-18 19:30:40');
 
 -- --------------------------------------------------------
 
@@ -167,6 +118,24 @@ CREATE TABLE `password_resets` (
   `used` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `user_id`, `token`, `expires_at`, `used`, `created_at`) VALUES
+(1, '@tea_2025_11', '5d34843114e2abfb277aa53bfb576083', '2025-10-29 07:01:06', 0, '2025-10-29 05:01:06'),
+(2, '@tea_2025_11', '485934', '2025-10-29 06:38:02', 1, '2025-10-29 05:28:02'),
+(3, '@tea_2025_11', '938105', '2025-10-29 06:47:21', 1, '2025-10-29 05:37:21'),
+(4, '@tea_2025_11', '417915', '2025-10-30 02:38:02', 1, '2025-10-30 01:28:02'),
+(5, '@tea_2025_11', '574589', '2025-10-30 02:58:02', 1, '2025-10-30 01:48:02'),
+(6, '@tea_2025_11', '785223', '2025-10-30 03:03:03', 1, '2025-10-30 01:53:03'),
+(7, '@tea_2025_11', '962031', '2025-10-30 03:19:12', 1, '2025-10-30 02:09:12'),
+(8, '@tea_2025_11', '152872', '2025-10-30 03:23:15', 0, '2025-10-30 02:13:15'),
+(9, '@tea_2025_11', '388070', '2025-10-30 04:32:01', 0, '2025-10-30 03:22:01'),
+(10, '@tea_2025_11', '185073', '2025-10-30 04:32:04', 0, '2025-10-30 03:22:04'),
+(11, '@tea_2025_11', '440762', '2025-10-30 05:21:24', 0, '2025-10-30 04:11:24'),
+(12, '@tea_2025_11', '531608', '2025-10-30 05:21:37', 1, '2025-10-30 04:11:37');
 
 -- --------------------------------------------------------
 
@@ -237,7 +206,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `user_id`, `email`, `username`, `password_hash`, `role`, `created_at`) VALUES
 (1, '@alp_2025', 'elsy.hernandez.alp@cbtis258.edu.mx', 'elsy ignacio', '$2y$10$wyi.3lfBbDCv1sPkFObRTOTbKkxH20OKRKULyg.H2bLgUvQCXI4Y.', 'student', '2025-10-17 14:33:10'),
 (2, '@tea_2025', 'ilse.hernandez.alp@cbtis258.edu.mx', 'maestra maria', '$2y$10$jelPdf5hzi0PZ6zzNEhDsKe1YjtkchZxW7GUMWWAUpUTEnh5mNfG5ma', 'teacher', '2025-10-17 14:36:28'),
-(3, '@tea_2025_11', 'alberto.vazquez.alp@cbtis258.edu.mx', 'jaretvzz_', '$2y$10$yX3aOtxTw8wDxq2cNUZaBukKDui7bO/knZWjtryIdy3noYIjdgGse', 'teacher', '2025-10-18 19:14:48'),
+(3, '@tea_2025_11', 'alberto.vazquez.alp@cbtis258.edu.mx', 'jaretvzz_', '$2y$10$QjVo8fxTOBSeXwzSJVDZr.DJPm.U1A2PJXpGVI0FxNiABfsM9c4E.', 'teacher', '2025-10-18 19:14:48'),
 (4, '@alp_2025_01', 'ana.gomez@cbtis258.edu.mx', 'Ana Gómez', '$2y$10$Yz1xv9ZQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzU', 'student', '2025-10-18 19:21:51'),
 (5, '@alp_2025_02', 'luis.martinez@gmail.com', 'Luis Martínez', '$2y$10$Yz1xv9ZQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzU', 'student', '2025-10-18 19:21:51'),
 (6, '@alp_2025_03', 'karla.lopez@cbtis258.edu.mx', 'Karla López', '$2y$10$Yz1xv9ZQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzUe9zQeJzK1xG8x7YzU', 'student', '2025-10-18 19:21:51'),
@@ -293,7 +262,31 @@ INSERT INTO `users` (`id`, `user_id`, `email`, `username`, `password_hash`, `rol
 (96, '@tea_2025_0111', 'asd@gmail.com', 'asd', '$2y$10$groMeM9yM69tKJ5vRLw6H.qEOlZJ1i./es5ysqpOk7m4JgVnY6wt6', 'teacher', '2025-10-19 06:36:15'),
 (97, '@tea_2025_01111', '123@gmail.com', 'asd', '$2y$10$H2K5ICXbISCjbEW0QBAk..ik/HWiPzr2bm6zLeCh/xT50hJJoWtwS', 'teacher', '2025-10-19 06:36:50'),
 (98, '@alp_2025_777', 'vegetta777@gmail.com', 'vegetta777', '$2y$10$ZCmPDjhQ7PivyiXdIEzq8.PsaL6HE38UWC69ALaUMWtsH2hL00hdG', 'student', '2025-10-19 16:38:22'),
-(99, '@tea_2025_willy', 'willy@gmail.com', 'willyrex', '$2y$10$F1.nd3H1I4YiwK36FXWVGet2pv/FXLLrte9L8RI4ZRi.5c8hrmwh6', 'teacher', '2025-10-19 16:53:30');
+(99, '@tea_2025_willy', 'willy@gmail.com', 'willyrex', '$2y$10$F1.nd3H1I4YiwK36FXWVGet2pv/FXLLrte9L8RI4ZRi.5c8hrmwh6', 'teacher', '2025-10-19 16:53:30'),
+(100, '@al831125', 'alberto.vazqasdfasdfuez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$gbf9vsoDwjRpEZtOLcSuHe4R/DpqltAqdx6wXzWcu324qNf7F/zKW', 'student', '2025-10-28 06:30:10'),
+(101, '@ma484721', 'alb@cbtis258.edu.mx', 'jaretvz', '$2y$10$IzioXLLWT9rqNzYrzAuQHeRvJ7dt6TaPlU9NTthx4Jt3q4CZN22G.', 'teacher', '2025-10-28 06:30:46'),
+(102, '@al467195', 'alberto.vazquafasfez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$YFgGJeQxrqyIQcOXQnZEdeo0yXfcrSjZjgBZsLBC9fnSsBA600msy', 'student', '2025-10-28 06:38:07'),
+(103, '@al776512', '1@gmail.com', 'jaretvz', '$2y$10$Hs0cpayYOvi7jWis8NHN4O6NIFCs8tXKC/EtuCv4NBNBcphf52XGS', 'student', '2025-10-28 13:19:38'),
+(104, '@al501360', 'ajarettovaaar@gmail.com', 'jaretvz', '$2y$10$xfTjBer5fjv3doHK1Nben.9sFUNDmKfU.FHTy/3nIu0h9lq2VVi3m', 'student', '2025-10-29 04:54:04'),
+(105, '@al686934', 'alberto.vazaaaaaaaqauez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$Sfe.zP8egJyfX1MTbhK8AedfqKhvHOQMqY2tUz01stIcnTh4KwEne', 'student', '2025-10-29 04:55:10'),
+(106, '@ma974196', 'alberto.vazqauez.alp@cbtis258.edu.mx', 'asd', '$2y$10$Y7clEmGIX1sx143HFFiqRuSpWNM6ybgY0ChfDkPoPZfGU3PF4Zhau', 'teacher', '2025-10-29 04:55:44'),
+(107, '@al068500', 'luis.maratinez@gmail.com', 'jaretvz', '$2y$10$6T75R1P1zcnti1kbWL0U8OPs19brxG6TxB/2cDsGOrdQWwQCY0/t2', 'student', '2025-10-29 05:00:19'),
+(108, '@ma425666', 'vegetaata777@gmail.com', 'jaretvz', '$2y$10$bHBgEX6.5/n4VX.FsEO80eFBZvSQKMSM4KKOb6TCaJkmjV8cey4GO', 'teacher', '2025-10-30 01:29:36'),
+(109, '@ma218451', 'alberto.vazqaaaaaauez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$Z83k7NXzHAUdJzgtSkzy2.TTb7xd2XvnW9HWsLE4cU8JiytgPxha6', 'teacher', '2025-10-30 01:32:54'),
+(110, '@ma154348', 'luis.martassssinez@gmail.com', 'jaretvz', '$2y$10$ZVHeDJUjwVLkJ2gu5o7F7uyNaJmqlty6IeGC72JnciEGSBdpM8S/S', 'teacher', '2025-10-30 01:41:53'),
+(111, '@al748952', 'luis.maaaartinez@gmail.com', 'jaretvz', '$2y$10$gAd/YKdglrNwKbpPM/lr3.SbPV9mMcAr6van1dR2L2j5tKdMLYLt2', 'student', '2025-10-30 06:28:01'),
+(112, '@al704678', 'luis.martinezaaa@gmail.com', 'jaretvz', '$2y$10$GsZ/7G8.hVH.BCo9csQi2.syHMZlvJ3vG2V0cwt5fyziclKAvicV6', 'student', '2025-10-30 06:47:57'),
+(113, '@al005911', 'luis.madasdartinez@gmail.com', 'jaretvz', '$2y$10$BA3PIBzu2iXVphH0cYR7DeldSe.2ZUGqTEuzgzKHsfZpoGUOiFp0m', 'student', '2025-10-30 07:22:31'),
+(114, '@al762601', 'ajarettoaasdfsdafvar@gmail.com', 'jaretvz', '$2y$10$Twwl6fBbAHMBAXq1TZ3YOun4cPtHo/O63TBq.vZ.RhfBQNX.Wtbs2', 'student', '2025-10-30 07:27:05'),
+(115, '@al712243', 'luis.martinafasdsdfaez@gmail.com', 'jaretvz', '$2y$10$B8IOf9OoRVMjGWuhpjyw9uubGUQYq3eKunqC3RbM/0T8mHqX6QUm2', 'student', '2025-10-30 07:33:25'),
+(116, '@al690910', 'albadferto.vazquafasdafez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$bGSoVgGePayMDxhQMsMtKuUWux5J4yrTWsWnMTvPUKkD9y.NhANyu', 'student', '2025-10-30 07:34:27'),
+(117, '@al549019', 'AFASluis.martinez@gmail.com', 'jaretvz', '$2y$10$JZAeUIj2iyPJqpwlJJVCaOIxg2G8dnWkoYPqZsmSsGEt/CPEaKN6G', 'student', '2025-10-30 07:39:28'),
+(118, '@al673214', 'vegettDSDDa777@gmail.com', 'jaretvz', '$2y$10$ysf.yjMQf/tEO/LqrYuQ.ONgK./BqcwSZpAfIL0BQChMdDRkQ6azm', 'student', '2025-10-30 07:45:04'),
+(119, '@al240901', 'luis.mFAFAFAFAartinez@gmail.com', 'jaretvz', '$2y$10$1zI7Z7EETErE7dHcPTx6/utkeOE78CRfu7UpRep.3ACLFariAe0b2', 'student', '2025-10-30 07:46:20'),
+(120, '@al100025', 'vegettaAAAA777@gmail.com', 'jaretvz', '$2y$10$1PjuXPRz4qqFhJhmW3OA/.v52TmT0ltW/buPKoshW4x22MzwOkDbC', 'student', '2025-10-30 07:59:31'),
+(121, '@al628631', 'vegetfdslsfldflta777@gmail.com', 'jaretvz', '$2y$10$XhsLjcOccjDudtR90GcIyOBzaU.7xC4SK5oXANNUi1yL.4LaFo8Zm', 'student', '2025-10-30 17:31:08'),
+(122, '@tea_2025_11aaa', 'alberto.vazqsaasssuez.alp@cbtis258.edu.mx', 'jaretvz', '$2y$10$aro9/DTU9OIgA4TW8IZ1cOp9kKOzJA2NVSQafVhn4KSDqmLOPut12', 'teacher', '2025-10-30 17:33:36'),
+(123, '@alp_2025ilse', 'janeth.hernandez.alp@cbtis258.edu.mx', 'ilse', '$2y$10$.7rlvkIWzfdspJ8XpVA2P.JpkhwH4gxt27uvUrlMYqMS6hbGctQjy', 'student', '2025-10-30 17:34:48');
 
 --
 -- Índices para tablas volcadas
@@ -344,7 +337,7 @@ ALTER TABLE `club_registrations`
 -- AUTO_INCREMENT de la tabla `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `tutoring_registrations`
@@ -356,7 +349,7 @@ ALTER TABLE `tutoring_registrations`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -7,7 +7,7 @@ $user = $_SESSION['user'];
 if (isset($_GET['error']) || isset($_GET['success'])) {
     $flash = null;
     if (isset($_GET['success'])) {
-        $flash = ['type' => 'success', 'msg' => '¡Club registrado con éxito!'];
+        $flash = ['type' => 'success', 'msg' => 'Se ha creado correctamente'];
     } elseif (isset($_GET['error'])) {
         if ($_GET['error'] === 'duplicado') {
             $flash = ['type' => 'error', 'msg' => '⚠️ El ID del club ya está registrado. Usa uno diferente.'];
@@ -20,14 +20,13 @@ if (isset($_GET['error']) || isset($_GET['success'])) {
     
     if ($flash) {
         $_SESSION['flash'] = $flash;
+        // Clean up URL after setting flash message
+        $params = $_GET;
+        unset($params['success'], $params['error']);
+        $redirectUrl = $_SERVER['PHP_SELF'] . (count($params) > 0 ? '?' . http_build_query($params) : '');
+        header('Location: ' . $redirectUrl);
+        exit;
     }
-
-    // Clean up URL
-    $params = $_GET;
-    unset($params['success'], $params['error']);
-    $redirectUrl = $_SERVER['PHP_SELF'] . (count($params) > 0 ? '?' . http_build_query($params) : '');
-    header('Location: ' . $redirectUrl);
-    exit;
 }
 
 /**
@@ -153,6 +152,40 @@ $culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'
 $deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo);
 $civilData     = getPaginated($pdo, 'club_registrations', "club_type = 'civil'", 'page_civil', $filter_civil);
 $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $filter_asesoria);
+
+if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
+    $type = $_GET['type'];
+    
+    $tablesConfig = [
+        'cultural' => [
+            'title' => 'Cultural', 'data' => $culturalData,
+            'columns' => ['club_name' => 'Club', 'nombre' => 'Nombre', 'semestre' => 'Semestre', 'correo' => 'Correo', 'turno' => 'Turno', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
+            'pageParam' => 'page_cultural', 'filterParam' => 'filter_cultural', 'filterOptions' => $culturales
+        ],
+        'deportivo' => [
+            'title' => 'Deportivo', 'data' => $deportivoData,
+            'columns' => ['club_name' => 'Club', 'nombre' => 'Nombre', 'semestre' => 'Semestre', 'correo' => 'Correo', 'turno' => 'Turno', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
+            'pageParam' => 'page_deportivo', 'filterParam' => 'filter_deportivo', 'filterOptions' => $deportivos
+        ],
+        'civil' => [
+            'title' => 'Civil', 'data' => $civilData,
+            'columns' => ['club_name' => 'Club', 'nombre' => 'Nombre', 'semestre' => 'Semestre', 'correo' => 'Correo', 'turno' => 'Turno', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
+            'pageParam' => 'page_civil', 'filterParam' => 'filter_civil', 'filterOptions' => $civiles
+        ],
+        'asesorias' => [
+            'title' => 'Asesorías', 'data' => $asesoriasData,
+            'columns' => ['materia' => 'Materia', 'nombre' => 'Nombre', 'carrera' => 'Carrera', 'maestro' => 'Maestro', 'telefono' => 'Teléfono', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
+            'pageParam' => 'page_asesoria', 'filterParam' => 'filter_asesoria', 'filterOptions' => $materias_asesoria
+        ]
+    ];
+
+    if (isset($tablesConfig[$type])) {
+        $config = $tablesConfig[$type];
+        renderTable($config['title'], $config['data'], $config['columns'], $config['pageParam'], $config['filterParam'], $config['filterOptions']);
+    }
+    
+    exit;
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -254,7 +287,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
         font-size: 16px;
         line-height: 1;
     }
-    #editToolbar { display:none; position: sticky; top: 120px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    #editToolbar { display:none; position: fixed; top: 120px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1160px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); box-sizing: border-box; }
     .edit-active { display:flex; align-items:center; gap:12px; }
     .edit-col, .edit-action {display:none; text-align: center;}
     .edit-col{width:36px;}
@@ -403,25 +436,61 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
         };
         if (pageMap[param]) u.searchParams.set(pageMap[param], '1');
         
-        const cardMap = {
-          'filter_cultural': 'card-cultural',
-          'filter_deportivo': 'card-deportivo',
-          'filter_civil': 'card-civil',
-          'filter_asesoria': 'card-asesorias'
-        };
-        const hash = cardMap[param] ? '#' + cardMap[param] : '';
-        
-        // Update URL and reload
         history.pushState(null, '', u.pathname + u.search);
-        location.reload();
+
+        const typeMap = {
+            'filter_cultural': 'cultural',
+            'filter_deportivo': 'deportivo',
+            'filter_civil': 'civil',
+            'filter_asesoria': 'asesorias'
+        };
+        const type = typeMap[param];
+        if (!type) return;
+
+        const targetCardId = 'card-' + type;
+        const targetCard = document.getElementById(targetCardId);
+        if (!targetCard) return;
+
+        targetCard.style.opacity = '0.5';
+        targetCard.style.pointerEvents = 'none';
+
+        const fetchUrl = new URL(u.toString());
+        fetchUrl.searchParams.set('ajax', '1');
+        fetchUrl.searchParams.set('type', type);
+
+        fetch(fetchUrl.toString())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const newCard = tempDiv.firstChild;
+                if (newCard) {
+                    targetCard.parentNode.replaceChild(newCard, targetCard);
+                } else {
+                    throw new Error('Invalid HTML response');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching filtered data:', error);
+                showNotification('Error al filtrar los datos.', 'error');
+                if(targetCard) {
+                    targetCard.style.opacity = '1';
+                    targetCard.style.pointerEvents = 'auto';
+                }
+            });
       }
 
-      document.querySelectorAll('.filter-select').forEach(sel => {
-        sel.addEventListener('change', (e) => {
-          const param = sel.dataset.param;
-          const val = sel.value;
-          setFilterParam(param, val === '__all__' ? '' : val);
-        });
+      // Use event delegation for filter selects
+      document.querySelector('.container').addEventListener('change', function(e) {
+          if (e.target.matches('.filter-select')) {
+              const sel = e.target;
+              const param = sel.dataset.param;
+              const val = sel.value;
+              setFilterParam(param, val === '__all__' ? '' : val);
+          }
       });
 
       const toggleEditBtn = document.getElementById('toggleEditBtn');
@@ -613,6 +682,32 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
     });
   </script>
   <script src="../js/notification.js?v=<?= time() ?>"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const addClubForm = document.getElementById('addClubForm');
+      if (addClubForm) {
+        addClubForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(addClubForm);
+          const response = await fetch('../actions/agregar_club.php', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.success) {
+            showNotification(result.message, 'success');
+            addClubForm.reset();
+            document.getElementById('modal').classList.remove('show');
+            document.body.style.overflow = '';
+            // Optionally, you can reload the page or update the club list dynamically
+            location.reload();
+          } else {
+            showNotification(result.message, 'error');
+          }
+        });
+      }
+    });
+  </script>
   <?php
     // Recuperar datos del formulario y errores si existen
     $form_data = $_SESSION['form_data'] ?? [];
@@ -668,7 +763,7 @@ $asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1
       <div class="edit-active">
         <strong>Modo edición activo</strong>
         <button id="exitEditBtn" class="btn alt small" onclick="(function(){document.getElementById('toggleEditBtn').click();})();">Salir modo edición</button>
-        <button id="bulkDeleteBtn" class="btn btn-icon" title="Dar de baja seleccionados" style="background-color: #c62828; color: white;"><i class="fas fa-trash-alt"></i></button>
+        <button id="bulkDeleteBtn" class="btn btn-icon" title="Eliminar" style="background-color: #c62828; color: white;"><i class="fas fa-trash"></i></button>
         <small style="margin-left:8px;color:#666;">Selecciona filas para dar de baja o usa el icono de lápiz para editar una fila.</small>
       </div>
     </div>
@@ -846,7 +941,7 @@ $btnAttrs = "class='btn-edit btn btn-icon' data-id='$id' data-member-id='$member
         <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
       </div>
 
-      <form method="post" action="../actions/agregar_club.php" novalidate>
+      <form id="addClubForm" method="post" action="../actions/agregar_club.php" novalidate>
         <div class="form-row">
           <div class="field">
             <label class="form-label">Nombre del club</label>

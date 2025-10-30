@@ -56,23 +56,9 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Base de Datos de Clubs</title>
-  <style>
-:root{
-      --primary-color: #4D0011; /* Guinda más oscuro (para header) */
-      --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
-      --accent-color: #952f57; /* Guinda medio (para tablas y botones) */
-      --bg1: #f9e6e6; /* Fondo claro complementario */
-      --bg2: #e8d1d1; /* Fondo claro complementario */
-      --card-bg: rgba(255,255,255,0.9);
-      --primary: var(--secondary-color);
-      --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-      --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
-      --muted: #888;
-      --glass: rgba(255,255,255,0.6);
-      --glass2: #4d0011d7;;
-      --glass3: #5c153630;
-      --radius: 12px;
-    }
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="css/main-modern.css">
+   <style>
     .main-header .logo {
         display: flex;
         align-items: center;
@@ -88,9 +74,25 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         font-weight: 700;
         color: #fff;
     }
+:root{
+      --primary-color: #4D0011; /* Guinda más oscuro (para header) */
+      --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
+      --accent-color: #952f57; /* Guinda medio (para tablas y botones) */
+      --bg1: #f9e6e6; /* Fondo claro complementario */
+      --bg2: #e8d1d1; /* Fondo claro complementario */
+      --card-bg: rgba(255,255,255,0.9);
+      --primary: var(--secondary-color);
+      --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+      --muted: #888;
+      --glass: rgba(255,255,255,0.6); 
+      --glass2: #4D0011d7; /* Guinda con transparencia */
+      --radius: 12px;
+      --edit-highlight: rgba(255, 244, 180, 0.7);
+    }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    header h2 { margin: 0; font-size: 28px; color: #fff; }
+    header h2 { margin: 0; font-size: 28px; color:#fff; }
     .header-actions { display:flex; align-items:center; gap:12px; }
     .header-actions .btn {
         font-size: 16px;
@@ -100,12 +102,22 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .header-actions .btn:hover {
         background: transparent;
     }
+    .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
     .container { max-width: 1160px; margin: 0 auto; padding: 28px; }
-    .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; }
+    .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 28px; transition: transform 0.18s ease; position: relative; }
+    .card.editing { border: 2px dashed #ffb703; background: linear-gradient(180deg, var(--edit-highlight), rgba(255,255,255,0.9)); }
+    .card h3 { margin-top: 0; font-size: 20px; color: #2b3a42; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .filter-row { display:flex; gap:10px; align-items:center; margin-top:8px; margin-bottom:10px; }
+    .filter-row select, .filter-row input[type="search"] { height:36px; padding:6px 10px; border-radius:8px; border:1px solid #e6e9ef; background:#fff; transition: all 0.2s ease-in-out; }
+    .filter-row select:focus, .filter-row input[type="search"]:focus { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
     .table th { background: #fafafa; color: #555; }
+    small.gray { color: var(--muted); }
+    .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
+    .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
+    .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
     .btn { 
         padding: 10px 20px; 
         background: var(--button-bg); 
@@ -114,8 +126,8 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         border-radius: 10px; 
         cursor: pointer; 
         font-weight:600; 
-        text-decoration: none; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        text-decoration: none; 
         transition: all 0.3s ease;
     }
     .btn:hover {
@@ -123,35 +135,33 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         background: var(--button-hover-bg);
     }
-    .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
-    .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
-    .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
-    .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
-    .modal.show { display: flex; }
-    .modal-panel { background: #fff; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 90%; animation: modal-pop 0.25s ease; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
-    .modal-header h3 { margin: 0; color: #333; }
-    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
-    @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    form { padding: 20px; }
-    .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
-    .field { flex: 1; display: flex; flex-direction: column; }
-    .form-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #444; }
-    input[type="text"], input[type="password"], select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background: #fff; color: #333; }
-    .actions { text-align: center; margin-top: 24px; }
-    .actions .btn { width: 100%; }
-    .btn.small { padding: 6px 10px; font-size: 13px; }
-    .filter-controls { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
-    .filter-controls input[type="search"], .filter-controls select { height: 38px; padding: 0 10px; border-radius: 8px; border: 1px solid #ccc; }
-    .filter-controls input[type="search"] { flex: 1; }
-    .filter-controls .reset-btn { font-size: 24px; text-decoration: none; color: #888; }
-    #editToolbar { display:none; position: sticky; top:72px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .btn.small { padding:6px 10px; font-size:13px; }
+    .btn-icon {
+        padding: 6px 8px;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    .styled-table .btn.btn-icon {
+        padding: 0 !important;
+        font-size: 16px;
+        line-height: 1;
+    }
+    #editToolbar { display:none; position: fixed; top: 120px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1160px; z-index: 105; margin-bottom:12px; background: #fff9e6; padding:10px 14px; border:1px solid #ffecb3; border-radius:10px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); box-sizing: border-box; }
     .edit-active { display:flex; align-items:center; gap:12px; }
-    .edit-col, .edit-action {display:none;}
+    .edit-col, .edit-action {display:none; text-align: center;}
     .edit-col{width:36px;}
     tr.row-selected{background:#ffe488; font-weight: 600;}
-    .header-actions { display:flex; align-items:center; gap:12px; }
+    
+    /* Mostrar columnas de edición cuando el modo está activo */
+    body.edit-mode-active .edit-col,
+    body.edit-mode-active .edit-action {
+        display: table-cell;
+    }
+
     /* User Icon */
     .usericon { position: relative; }
     .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; }
@@ -180,56 +190,170 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .user-menu a { padding: 8px 12px; text-decoration: none; display: block; color: #333; }
     .user-menu a:hover { background: #f5f5f5; }
     .user-menu a.logout { color: #d93025; font-weight: 500; }
-/* Animación de entrada */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-.fade-in-content {
-    animation: fadeIn 0.6s ease-out forwards;
-}
+    /* Modal styles */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(4px); }
+    .modal.show { display: flex; align-items: center; justify-content: center; }
+    .modal-panel { 
+        background: #fff; 
+        border-radius: var(--radius); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        max-width: 500px; 
+        width: 90%; 
+        animation: modal-pop 0.25s ease;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
+    .modal-header h3 { margin: 0; color: #333; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+    #confirmationModalMessage { color: #333; font-size: 16px; line-height: 1.5; }
+    @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Form styles */
+    #modal form { background-color: transparent; }
+    form { padding: 20px; }
+    .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .field { flex: 1; display: flex; flex-direction: column; }
+    .form-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #444; }
+    input[type="text"], input[type="password"], select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background: #fff; color: #333; }
+    input[type="text"]::placeholder, input[type="password"]::placeholder { color: #aaa; opacity: 1; }
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23888888'%20d='M7%2010l5%205%205-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+    select option { color: #000; }
+    .helper { font-size: 12px; color: #777; margin-top: 4px; }
+    .actions { text-align: center; margin-top: 24px; }
+    .actions .btn { width: 100%; }
+    .form-error { color: #d93025; font-size: 12px; margin-top: 4px; }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      header h2 {
+        font-size: 22px;
+      }
+      .header-actions {
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .container {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
+
+    /* Animación de entrada */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .fade-in-content {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
   </style>
-  <link rel="stylesheet" href="css/table-styles.css">
-  <link rel="stylesheet" href="css/notification.css">
+  <link rel="stylesheet" href="css/table-styles.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="css/notification.css?v=<?= time() ?>">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const addClubForm = document.getElementById('addClubForm');
+      if (addClubForm) {
+        addClubForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(addClubForm);
+          const response = await fetch('actions/agregar_club.php', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.success) {
+            showNotification(result.message, 'success');
+            addClubForm.reset();
+            document.getElementById('modal').classList.remove('show');
+            document.body.style.overflow = '';
+            // Optionally, you can reload the page or update the club list dynamically
+            location.reload();
+          } else {
+            showNotification(result.message, 'error');
+          }
+        });
+      }
+    });
+  </script>
+  <?php
+    // Recuperar datos del formulario y errores si existen
+    $form_data = $_SESSION['form_data'] ?? [];
+    $form_errors = ($_SESSION['flash']['is_form_error'] ?? false) ? ($_SESSION['flash']['messages'] ?? []) : [];
+    unset($_SESSION['form_data']);
+
+    // Limpiar flash solo si no es un error de formulario, para que los errores se puedan mostrar
+    if (!($_SESSION['flash']['is_form_error'] ?? false)) {
+        unset($_SESSION['flash']);
+    }
+  ?>
 </head>
-<body>
+<body class="fade-in-content">
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Si la URL tiene `modal=show`, abre el modal automáticamente.
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('modal') === 'show') {
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.classList.add('show');
+          document.body.style.overflow = 'hidden';
+        }
+        // Limpia el parámetro de la URL para que no se vuelva a abrir al recargar
+        urlParams.delete('modal');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    });
+  </script>
  <header class="main-header">
-  <div class="logo">
-    <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 50px; margin-right: 15px;">
+    <div class="logo">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 50px; margin-right: 15px;">
 <img src="admin/assets/img/logo1.png" alt="Logo EduClubs" style="height: 80px; margin-right: 15px;">
-    <span>EduClubs - Base de Datos</span>
-  </div>
+        <span>EduClubs - Base de Datos</span>
+    </div>
   <div class="header-actions">
-    <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <a href="teacher/dashboard.php" class="btn">&laquo; Volver al Panel</a>
+    <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
+    <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <div class="usericon">
       <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
       <div class="user-menu">
         <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="auth/logout.php" class="logout">Cerrar sesión</a>
+        <a href="auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
       </div>
     </div>
   </div>
  </header>
 
   <div class="container fade-in-content">
-    <div id="editToolbar">
-      <div class="edit-active">
-        <strong>Modo edición activo</strong>
-        <button id="bulkDeleteBtn" class="btn small">Eliminar seleccionados</button>
-        <small style="margin-left:8px;color:#666;">Selecciona filas para eliminar o usa el icono de lápiz para editar.</small>
-      </div>
-    </div>
     <div class="card">
-      <h3>Clubs Registrados</h3>
-      <form id="filterForm" class="filter-controls">
+      <div id="editToolbar">
+        <div class="edit-active">
+          <strong>✎ Modo edición activo</strong>
+          <button id="bulkDeleteBtn" class="btn small" title="Eliminar seleccionados">🗑️</button>
+          <small style="margin-left:8px;color:#666;">Selecciona filas para eliminar o usa el icono de lápiz para editar.</small>
+        </div>
+      </div>
+      <form id="filterForm" class="filter-row">
         <input type="search" id="searchInput" name="search" placeholder="Buscar por nombre de club..." value="<?= htmlspecialchars($search) ?>">
         <select id="typeFilter" name="type">
           <option value="">Todas las categorías</option>
@@ -382,12 +506,6 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         applyFilters();
       });
 
-      // Filter by type immediately on change
-      typeFilter.addEventListener('change', () => {
-        // We can submit the form which will trigger our submit listener
-        filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
-      });
-
       let editMode = false;
       const toggleEditBtn = document.getElementById('toggleEditBtn');
       const editToolbar = document.getElementById('editToolbar');
@@ -408,6 +526,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       if (toggleEditBtn) {
         toggleEditBtn.addEventListener('click', () => setEditMode(!editMode));
       }
+
 
       document.addEventListener('change', (e) => {
         const cb = e.target.closest('.row-checkbox');
@@ -538,6 +657,51 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       }
     });
   </script>
-  <script src="js/notification.js"></script>
+  <script src="js/notification.js?v=<?= time() ?>"></script>
+  <!-- Modal Agregar Club -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h3 id="modal-title">Nuevo Club</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="addClubForm" method="post" action="actions/agregar_club.php" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Nombre del club</label>
+            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica" pattern=".*[a-zA-Z]+.*" title="El nombre del club debe contener al menos una letra." value="<?= htmlspecialchars($form_data['club_name'] ?? '') ?>">
+            <?php if (isset($form_errors['club_name'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['club_name']) ?></div><?php endif; ?>
+          </div>
+          <div class="field">
+            <label class="form-label">Tipo de club</label>
+            <select name="club_type" required>
+              <option value="">Selecciona una opción</option>
+              <option value="cultural" <?= ($form_data['club_type'] ?? '') === 'cultural' ? 'selected' : '' ?>>Cultural</option>
+              <option value="deportivo" <?= ($form_data['club_type'] ?? '') === 'deportivo' ? 'selected' : '' ?>>Deportivo</option>
+              <option value="asesoria" <?= ($form_data['club_type'] ?? '') === 'asesoria' ? 'selected' : '' ?>>Asesorías</option>
+              <option value="civil" <?= ($form_data['club_type'] ?? '') === 'civil' ? 'selected' : '' ?>>Civil</option>
+            </select>
+            <?php if (isset($form_errors['club_type'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['club_type']) ?></div><?php endif; ?>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label class="form-label">Nombre del creador</label>
+            <input type="text" name="creator_name" required placeholder="Nombre completo" pattern="[a-zA-Z\s]+" title="El nombre del creador solo puede contener letras y espacios." value="<?= htmlspecialchars($form_data['creator_name'] ?? '') ?>">
+            <?php if (isset($form_errors['creator_name'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['creator_name']) ?></div><?php endif; ?>
+          </div>
+          <div class="field" style="flex:0 0 120px; align-self:flex-end;">
+            <button type="button" class="btn alt close-modal" style="width:100%;">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">Guardar club</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>

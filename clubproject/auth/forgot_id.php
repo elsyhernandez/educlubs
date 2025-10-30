@@ -14,8 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // In a real application, you would email this to the user.
-            // For this demo, we'll display it directly.
             $message = "Tu ID de Usuario es: <strong>" . htmlspecialchars($user['user_id']) . "</strong>";
         } else {
             $error = "No se encontró ninguna cuenta con ese correo electrónico.";
@@ -29,86 +27,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar ID de Usuario - EduClubs</title>
-    <link rel="stylesheet" href="../css/auth-landing.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../css/notification.css?v=<?php echo time(); ?>">
-    <style>
-        .recovery-container {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .recovery-container h1 {
-            margin-bottom: 20px;
-        }
-        .recovery-container p {
-            margin-bottom: 20px;
-            color: #666;
-        }
-        .recovery-container input[type="email"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .recovery-container button {
-            width: 100%;
-        }
-        .message, .error {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-weight: 500;
-        }
-        .message {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            transition: text-decoration 0.3s ease;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/auth-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+<div class="auth-wrapper">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
-    <div class="recovery-container">
-        <h1>Recuperar ID de Usuario</h1>
-        <p>Introduce tu correo electrónico para encontrar tu ID de usuario.</p>
+    <div class="auth-container">
+        <h2><i class="fas fa-id-card"></i> Recuperar ID</h2>
+        <p style="color: #666; margin-bottom: 20px;">Introduce tu correo para encontrar tu ID de usuario.</p>
         
         <?php if ($message): ?>
-            <div class="message"><?= $message ?></div>
+            <div class="message success" style="background-color: rgba(33, 147, 176, 0.1); color: #2193b0; border: 1px solid #2193b0; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 20px;"><?= $message ?></div>
         <?php endif; ?>
         <?php if ($error): ?>
-            <div class="error"><?= $error ?></div>
+            <div class="message error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
         <form action="forgot_id.php" method="post">
-            <input type="email" name="email" placeholder="Tu correo electrónico" required>
-            <button type="submit">Buscar mi ID</button>
+            <div class="form-group">
+                <i class="fas fa-envelope icon"></i>
+                <input type="email" name="email" placeholder="Tu correo electrónico" required>
+            </div>
+            <button type="submit" class="auth-btn">Buscar mi ID</button>
         </form>
-        <a href="auth.php" class="back-link">Volver a Iniciar Sesión</a>
+        <div class="auth-links">
+            <a href="auth.php" class="auth-link">Volver a Iniciar Sesión</a>
+        </div>
     </div>
+</div>
 </body>
 </html>

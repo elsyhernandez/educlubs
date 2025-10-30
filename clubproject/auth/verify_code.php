@@ -19,11 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reset_request = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($reset_request) {
-        // El código es válido, marcamos que se ha verificado y redirigimos
         $_SESSION['reset_verified'] = true;
         $_SESSION['reset_user_id'] = $user_id;
         
-        // Marcar el token como usado para que no se pueda reutilizar para verificación
         $stmt = $pdo->prepare("UPDATE password_resets SET used = 1 WHERE id = ?");
         $stmt->execute([$reset_request['id']]);
 
@@ -34,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Verificar Código</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Código - EduClubs</title>
     <link rel="stylesheet" href="../css/auth-modern.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -59,15 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="post">
             <div class="form-group">
-                <label for="code">Código de 6 dígitos</label>
                 <i class="fas fa-hashtag icon"></i>
-                <input id="code" name="code" required maxlength="6" pattern="\d{6}" title="El código debe ser de 6 dígitos numéricos.">
+                <input id="code" name="code" placeholder="Código de 6 dígitos" required maxlength="6" pattern="\d{6}" title="El código debe ser de 6 dígitos numéricos.">
             </div>
             <button type="submit" class="auth-btn">Verificar y Continuar</button>
-            <div class="auth-links">
-                <a class="auth-link" href="password_reset_request.php">¿No recibiste el código? Reenviar</a>
-            </div>
         </form>
+        <div class="auth-links">
+            <a class="auth-link" href="password_reset_request.php">¿No recibiste el código? Reenviar</a>
+            <a href="auth.php" class="auth-link" style="margin-top: 10px; display: block;">Volver a iniciar sesión</a>
+        </div>
     </div>
 </div>
 </body>

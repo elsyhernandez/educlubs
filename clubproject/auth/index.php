@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido a EduClubs</title>
-    <link rel="stylesheet" href="../css/landing.css">
+    <link rel="stylesheet" href="../css/landing.css?v=1.2">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../admin/assets/css/swiper-bundle.min.css">
@@ -12,7 +12,8 @@
 <body>
     <header class="main-header">
         <div class="logo">
-            <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+            <img src="../admin/assets/img/logo.png" alt="Logo EduClubs" class="logo-educlubs">
+            <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" class="logo-cbtis">
             <span>EduClubs</span>
         </div>
         <nav>
@@ -60,9 +61,9 @@
         <div class="footer-content">
             <div class="contact-info">
                 <h3>Contacto</h3>
-                <p><i class="fas fa-map-marker-alt"></i> CBTis 258, Cd. Ju&aacute;rez, Chihuahua</p>
-                <p><i class="fas fa-phone"></i> (656) 123-4567</p>
-                <p><i class="fas fa-envelope"></i> contacto@cbtis258.edu.mx</p>
+                <p><i class="fas fa-map-marker-alt"></i> CBTis 258 Mariano escobedo de la peña</p>
+                <p><i class="fas fa-phone"></i> 81 8397 1666</p>
+                <p><i class="fas fa-envelope"></i> cbtis258.dir@dgeti.sems.gob.mx</p>
             </div>
             <div class="social-media">
                 <h3>S&iacute;guenos</h3>

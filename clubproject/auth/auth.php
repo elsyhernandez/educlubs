@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             $_SESSION['user'] = ['user_id' => $user['user_id'], 'email' => $user['email'], 'username' => $user['username'], 'role' => $user['role']];
-            $redirect_url = ($user['role'] === 'teacher') ? '../teacher/dashboard.php' : '../student/dashboard.php';
+            $redirect_url = ($user['role'] === 'teacher') ? '../teacher/dashboard.php' : '../clubs/student_dashboard.php';
             if ($is_ajax) {
                 echo json_encode(['success' => true, 'redirect' => $redirect_url]);
                 exit();
@@ -76,18 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (user_id, email, username, password_hash, role) VALUES (?, ?, ?, ?, ?)");
             if ($stmt->execute([$user_id, $email, $username, $hash, $role])) {
-                $roleText = $role === 'teacher' ? 'maestro' : 'alumno';
-                $success_message = "¡Registro exitoso! Tus datos se han rellenado para que inicies sesión.";
+                $_SESSION['user'] = ['user_id' => $user_id, 'email' => $email, 'username' => $username, 'role' => $role];
+                $redirect_url = ($role === 'teacher') ? '../teacher/dashboard.php' : '../clubs/student_dashboard.php';
 
                 if ($is_ajax) {
-                    echo json_encode([
-                        'success' => true,
-                        'message' => "¡Registro exitoso! Tus datos se han rellenado para que inicies sesión.",
-                        'user_id' => $user_id,
-                        'role' => $role
-                    ]);
+                    echo json_encode(['success' => true, 'redirect' => $redirect_url]);
                     exit();
                 }
+                redirect($redirect_url);
             } else {
                 $errors[] = "Error en el registro. Por favor, inténtalo de nuevo.";
             }
@@ -354,23 +350,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (xhr.status >= 200 && xhr.status < 400) {
                         try {
                             const data = JSON.parse(xhr.responseText);
-                            if (data.success) {
-                                showNotification(data.message, 'success');
-
-                                const email = registerForm.querySelector('input[name="email"]').value;
-                                const loginForm = document.querySelector('.sign-in-container form');
-                                if (loginForm) {
-                                    loginForm.querySelector('input[name="user_id"]').value = data.user_id;
-                                    loginForm.querySelector('input[name="email"]').value = email;
-                                }
-
-                                // Reset the form immediately
-                                registerForm.reset();
-                                userIdDisplay.style.display = 'none';
-
+                            if (data.success && data.redirect) {
+                                showNotification('¡Registro exitoso! Redirigiendo...', 'success');
                                 setTimeout(() => {
-                                    document.getElementById('signIn').click();
-                                }, 2000);
+                                    window.location.href = data.redirect;
+                                }, 1500);
                             } else {
                                 data.errors.forEach(error => {
                                     showNotification(error, 'error');

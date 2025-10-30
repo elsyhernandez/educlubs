@@ -30,11 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['club_type'] = "Debe seleccionar un tipo de club.";
     }
 
-    // 2. Si hay errores, redirigir con ellos
+    // 2. Si hay errores, devolverlos como JSON
     if (!empty($errors)) {
-        $_SESSION['flash'] = ['type' => 'error', 'messages' => $errors, 'is_form_error' => true];
-        $_SESSION['form_data'] = $_POST; // Guardar datos del formulario
-        header('Location: ../teacher/dashboard.php?modal=show'); // Redirigir de vuelta
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => implode('<br>', $errors)]);
         exit;
     }
 
@@ -60,17 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO clubs (club_id, club_name, creator_name, club_type, created_at) VALUES (?, ?, ?, ?, NOW())");
         $stmt->execute([$club_id, $club_name, $creator_name, $club_type]);
 
-        $_SESSION['flash'] = ['type' => 'success', 'msg' => '¡Club "' . htmlspecialchars($club_name) . '" registrado con éxito!'];
-        header('Location: ../teacher/dashboard.php');
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Se ha creado correctamente']);
         exit;
 
     } catch (PDOException $e) {
-        $_SESSION['flash'] = ['type' => 'error', 'messages' => ['Error al guardar en la base de datos.']];
-        header('Location: ../teacher/dashboard.php');
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Error al guardar en la base de datos.']);
         exit;
     }
 
 } else {
-    header('Location: ../teacher/dashboard.php');
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
     exit;
 }
