@@ -15,20 +15,63 @@ if (empty($ids)) {
     exit;
 }
 
+// Get context for pagination recalculation
+$clubType = $input['club_type'] ?? null;
+$filterValue = $input['filter_value'] ?? null;
+$currentPage = isset($input['current_page']) ? intval($input['current_page']) : 1;
+$limit = 10;
+
+// Determine table and columns based on club type
+$isAsesoria = $clubType === 'asesorias';
+$tableName = $isAsesoria ? 'tutoring_registrations' : 'club_registrations';
+$nameColumn = $isAsesoria ? 'nombre' : "CONCAT(nombres, ' ', paterno)";
+
 try {
-    // Primero obtener los nombres antes de eliminar
+    // First, get the names before deleting
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $sqlSelect = "SELECT CONCAT(nombres, ' ', paterno) as nombre_completo FROM club_registrations WHERE id IN ($placeholders)";
+    $sqlSelect = "SELECT $nameColumn as nombre_completo FROM $tableName WHERE id IN ($placeholders)";
     $stmtSelect = $pdo->prepare($sqlSelect);
     $stmtSelect->execute($ids);
     $nombres = $stmtSelect->fetchAll(PDO::FETCH_COLUMN);
     
-    // Ahora eliminar los registros
-    $sql = "DELETE FROM club_registrations WHERE id IN ($placeholders)";
+    // Now, delete the records
+    $sql = "DELETE FROM $tableName WHERE id IN ($placeholders)";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($ids);
-    
-    echo json_encode(['success' => true, 'deleted' => $stmt->rowCount(), 'nombres' => $nombres]);
+    $deletedCount = $stmt->execute($ids) ? $stmt->rowCount() : 0;
+
+    // Recalculate pagination
+    $params = [];
+    if ($isAsesoria) {
+        $where = '1=1';
+        if ($filterValue) {
+            $where = "materia = ?";
+            $params[] = $filterValue;
+        }
+    } else {
+        $where = "club_type = ?";
+        $params[] = $clubType;
+        if ($filterValue) {
+            $where .= " AND club_name = ?";
+            $params[] = $filterValue;
+        }
+    }
+
+    $countSql = "SELECT COUNT(*) FROM $tableName WHERE $where";
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $total = (int) $stmt->fetchColumn();
+
+    $totalPages = max(1, ceil($total / $limit));
+    $newPage = min($currentPage, $totalPages);
+
+    echo json_encode([
+        'success' => true, 
+        'deleted' => $deletedCount, 
+        'nombres' => $nombres,
+        'newPage' => $newPage,
+        'needsReload' => $currentPage != $newPage || ($total > 0 && $deletedCount > 0 && $total % $limit === 0)
+    ]);
+
 } catch (Throwable $e) {
     error_log($e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error al eliminar registros.']);

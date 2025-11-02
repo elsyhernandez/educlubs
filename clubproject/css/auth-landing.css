@@ -49,6 +49,16 @@ body {
     transition: all 0.6s ease-in-out;
 }
 
+.scrollable-form {
+    overflow-y: auto;
+    padding-right: 15px; /* space for scrollbar */
+}
+
+.scrollable-form::-webkit-scrollbar {
+    width: 0;
+    background: transparent; /* make scrollbar transparent */
+}
+
 .sign-in-container {
     left: 0;
     width: 50%;
@@ -517,4 +527,88 @@ a {
 
 .fade-in-content {
     animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-button {
+    color: var(--secondary-color);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#findIdForm input {
+    background-color: var(--gray-color);
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    border-radius: 5px;
+}
+
+#findIdForm button {
+    border-radius: 20px;
+    border: 1px solid var(--primary-color);
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+}
+
+
+
+#id-result {
+    margin-top: 15px;
+    font-size: 1.1em;
+    color: var(--dark-text-color);
+}
+
+#place-data-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: none; /* Hidden by default */
 }

@@ -26,13 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $turno = trim($_POST['turno'] ?? '');
             $maestro = trim($_POST['maestro'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
+            $correo = trim($_POST['correo'] ?? '');
 
             if (!preg_match('/^\d{10}$/', $telefono)) $errors[] = "El teléfono debe tener exactamente 10 dígitos.";
             if (!$paterno || !$materno || !$nombres) $errors[] = "Nombre completo es requerido.";
+            
+            // validar correo (permitir gmail y edu.mx y tener @)
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido.";
+            else {
+                $host = substr(strrchr($correo, "@"), 1);
+                if (strtolower($host) !== 'gmail.com' && substr(strtolower($host), -6) !== 'edu.mx') {
+                    $errors[] = "Solo se permiten correos Gmail o institucionales .edu.mx.";
+                }
+            }
 
             if (empty($errors)) {
-                $stmt = $pdo->prepare("INSERT INTO tutoring_registrations (materia,paterno,materno,nombres,carrera,turno,maestro,telefono,user_id) VALUES (?,?,?,?,?,?,?,?,?)");
-                $stmt->execute([$_POST['club'],$paterno,$materno,$nombres,$carrera,$turno,$maestro,$telefono,$user['user_id']]);
+                $stmt = $pdo->prepare("INSERT INTO tutoring_registrations (materia,paterno,materno,nombres,carrera,turno,maestro,telefono,correo,user_id) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                $stmt->execute([$_POST['club'],$paterno,$materno,$nombres,$carrera,$turno,$maestro,$telefono,$correo,$user['user_id']]);
                 $success = true;
             }
         } else {
@@ -74,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h2>Registro - <?=htmlspecialchars($club)?> (<?=htmlspecialchars($type)?>)</h2>
 
   <?php if($success): ?>
-    <div class="message success">Tu registro ha sido exitoso. <a href="../student/dashboard.php">Volver a inicio</a></div>
+    <div class="message success">Tu registro ha sido exitoso. <a href="../student_dashboard.php">Volver a inicio</a></div>
   <?php else: ?>
     <?php if($errors): ?><div class="message error"><?php foreach($errors as $e) echo "<div>- ".htmlspecialchars($e)."</div>"; ?></div><?php endif; ?>
 
@@ -89,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="form-group"><label>Turno</label><input name="turno" value="<?=htmlspecialchars($_POST['turno'] ?? '')?>"></div>
         <div class="form-group"><label>Maestro</label><input name="maestro" value="<?=htmlspecialchars($_POST['maestro'] ?? '')?>"></div>
         <div class="form-group"><label>Teléfono (10 dígitos)</label><input name="telefono" value="<?=htmlspecialchars($_POST['telefono'] ?? '')?>"></div>
+        <div class="form-group"><label>Correo (Gmail o .edu.mx)</label><input name="correo" required value="<?=htmlspecialchars($_POST['correo'] ?? '')?>"></div>
         <button type="submit" class="btn">Enviar registro</button>
       </form>
     <?php else: ?>

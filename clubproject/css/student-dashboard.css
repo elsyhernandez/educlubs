@@ -31,8 +31,7 @@ body {
 
 .main-header {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px);
+    background-color: #4D0011;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 1rem 2rem;
@@ -86,7 +85,9 @@ body {
 }
 
 .club-card {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
     padding: 1.5rem;
     text-decoration: none;

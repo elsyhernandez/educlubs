@@ -326,12 +326,12 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </script>
  <header class="main-header">
     <div class="logo">
-        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 50px; margin-right: 15px;">
-<img src="admin/assets/img/logo1.png" alt="Logo EduClubs" style="height: 80px; margin-right: 15px;">
-        <span>EduClubs - Base de Datos</span>
+        <img src="admin/assets/img/logo.png" alt="Logo EduClubs" style="height: 80px; margin-right: 10px;">
+        <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258" style="height: 60px; margin-right: 15px;">
+        <span>EduClubs - Base de Clubs</span>
     </div>
   <div class="header-actions">
-    <a href="teacher/dashboard.php" class="btn">&laquo; Volver al Panel</a>
+    <a href="teacher/dashboard.php" class="btn">Volver al Panel</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <div class="usericon">
@@ -506,6 +506,9 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         applyFilters();
       });
 
+      // Filter on category change
+      typeFilter.addEventListener('change', applyFilters);
+
       let editMode = false;
       const toggleEditBtn = document.getElementById('toggleEditBtn');
       const editToolbar = document.getElementById('editToolbar');
@@ -590,7 +593,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
           ev.preventDefault();
           const form = new FormData(editForm);
           try {
-            const res = await fetch('admin/editar_club.php', { method: 'POST', body: new URLSearchParams([...form]) });
+            const res = await fetch('actions/editar_club.php', { method: 'POST', body: new URLSearchParams([...form]) });
             const data = await res.json();
             if (data.success) {
               showNotification('Club actualizado correctamente.');

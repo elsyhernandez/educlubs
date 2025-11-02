@@ -25,9 +25,11 @@
     background-color: var(--secondary-color);
     color: #ffffff;
     font-weight: 600;
-    padding: 15px 20px;
+    padding: 8px 6px;
     text-align: left;
     border-bottom: 2px solid var(--primary-color);
+    white-space: nowrap;
+    font-size: 13px;
 }
 
 .styled-table thead th:first-child {
@@ -39,10 +41,13 @@
 }
 
 .styled-table tbody td {
-    padding: 15px 20px;
+    padding: 8px 6px;
     border-bottom: 1px solid var(--table-border-color);
     color: #333;
     vertical-align: middle;
+    font-size: 12px;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .styled-table tbody tr {
@@ -83,6 +88,13 @@
 }
 
 .styled-table tbody tr:hover .edit-action {
+    visibility: visible;
+    opacity: 1;
+}
+
+body.edit-mode-active .edit-action {
+    position: static;
+    transform: none;
     visibility: visible;
     opacity: 1;
 }
