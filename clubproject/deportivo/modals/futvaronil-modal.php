@@ -2,7 +2,7 @@
 <div class="modal" id="modal-futvaronil">
   <div class="modal-content danza">
     <div class="modal-header">
-      <h2>Club de Fútbol</h2>
+      <h2>Club de Fútbol Varonil</h2>
       <span class="close-btn" onclick="cerrarModal('futvaronil')">&times;</span>
     </div>
     <div class="modal-body">

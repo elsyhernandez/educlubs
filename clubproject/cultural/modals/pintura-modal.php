@@ -9,10 +9,10 @@
       <div class="modal-left slide-in-left">
         <p><strong>Profesor responsable:</strong> Mtra. Silvia Gómez</p>
         <p><strong>Descripción:</strong> Aprende técnicas de dibujo, pintura y participa en exposiciones escolares.</p>
-        <a class="btn-inscribirme" href="clubs/cultural/pintura.php">Ver más</a>
+        <a class="btn-inscribirme" href="cultural/pintura.php">Ver más</a>
       </div>
       <div class="modal-right slide-in-right">
-        <img src="clubs/assets/images/pin.jpg" alt="Pintura y Dibujo">
+        <img src="assets/images/pin.jpg" alt="Pintura y Dibujo">
       </div>
     </div>
   </div>

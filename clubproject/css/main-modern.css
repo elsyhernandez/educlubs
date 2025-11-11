@@ -1,19 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 :root {
-    --primary-color: #952f57; /* Guinda medio (para tablas y botones) */
-    --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
-    --accent-color: #4D0011; /* Guinda más oscuro (para header) */
-    --text-color-light: #ffffff;
-    --text-color-dark: #333;
-    --bg-color: #f4f7fa;
-    --container-bg: rgba(255, 255, 255, 0.6);
-    --header-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    --button-primary-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-    --button-primary-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+    --primary-color: #2c3e50; /* Dark Blue */
+    --secondary-color: #34495e; /* Lighter Dark Blue */
+    --accent-color: #4D0011; /* Dark Red */
+    --text-color-light: #ecf0f1; /* Light Gray */
+    --text-color-dark: #2c3e50; /* Dark Blue */
+    --bg-color: #ecf0f1; /* Light Gray */
+    --container-bg: #ffffff;
+    --header-bg: #ffffff;
+    --button-primary-bg: var(--primary-color);
+    --button-primary-hover-bg: var(--secondary-color);
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --bg1: #f9e6e6; /* Fondo claro complementario */
-    --bg2: #e8d1d1; /* Fondo claro complementario */
+    --card-bg: #ffffff;
+    --card-border: #bdc3c7; /* Gray */
+    --card-shadow: rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -24,51 +25,10 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    background-color: var(--bg-color);
     color: var(--text-color-dark);
     line-height: 1.6;
     min-height: 100vh;
-    background-size: cover;
-    background-attachment: fixed;
-}
-
-.main-header {
-    background: var(--primary-color);
-    color: var(--text-color-light);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.main-header .logo {
-    display: flex;
-    align-items: center;
-}
-
-.main-header .logo img {
-    height: 50px;
-    margin-right: 15px;
-}
-
-.main-header .logo span {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-}
-
-.main-header nav a {
-    color: var(--text-color-light);
-    text-decoration: none;
-    margin-left: 20px;
-    font-weight: 500;
-    transition: opacity 0.3s ease;
-}
-
-.main-header nav a:hover {
-    opacity: 0.8;
 }
 
 .main-container {
@@ -76,171 +36,303 @@ body {
     margin: 40px auto;
     padding: 40px;
     background: var(--container-bg);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px 0 var(--shadow-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
 }
 
 .main-container h2 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 10px;
-    color: var(--secondary-color);
-}
-
-.btn {
-    text-decoration: none;
-    color: var(--text-color-light);
-    background: var(--button-primary-bg);
-    padding: 12px 25px;
-    border-radius: 25px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    display: inline-block;
-    font-size: 1rem;
     text-align: center;
-}
-
-.btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    background: var(--button-primary-hover-bg);
-}
-
-.btn-secondary {
-    background: #6c757d;
-}
-
-.btn-danger {
-    background: #dc3545;
-}
-
-.message {
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-}
-
-.message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-}
-
-.message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th, table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-}
-
-table th {
-    background-color: var(--accent-color);
-    color: var(--text-color-light);
+    margin-bottom: 40px;
+    font-size: 2.2rem;
     font-weight: 600;
-}
-
-table tbody tr:hover {
-    background-color: #f8f9fa;
+    color: var(--text-color-dark);
 }
 
 .club-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 35px;
+    padding: 20px 0;
+    perspective: 1000px;
 }
 
 .club-card {
-    text-decoration: none;
-    color: inherit;
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 2px 8px var(--card-shadow);
+    padding: 25px;
     text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: var(--text-color-dark);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    width: 280px;
 }
 
 .club-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border-color: var(--accent-color);
+}
+
+.club-card i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: block;
+    color: var(--accent-color);
+    transition: transform 0.3s ease;
+}
+
+.club-card:hover i {
+    transform: scale(1.1);
 }
 
 .club-card h3 {
-    color: var(--primary-color);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
 }
 
-.club-list-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+.club-card:hover h3 {
+    color: var(--accent-color);
 }
 
-.club-list-item {
-    background: white;
-    padding: 20px;
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background: rgba(255,255,255,0.9);
     border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: fadeUp 0.5s ease;
+}
+
+.modal-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
 }
 
-.form-group {
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-btn:hover {
+    transform: rotate(90deg);
+}
+
+.modal-body {
     display: flex;
-    flex-direction: column;
+    padding: 30px;
+    gap: 30px;
 }
 
-.form-group label {
-    margin-bottom: 5px;
-    font-weight: 600;
+.modal-left, .modal-right {
+    flex: 1;
+}
+
+.modal-left p {
+    font-size: 1.1rem;
+    line-height: 1.8;
     color: var(--text-color-dark);
 }
 
-.form-group input {
-    padding: 10px;
+.modal-right img {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.btn-inscribirme {
+    display: inline-block;
+    margin-top: 20px;
+    background: var(--button-primary-bg);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-inscribirme:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background: var(--button-primary-hover-bg);
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .modal-body {
+        flex-direction: column;
+    }
+}
+
+/* Table Styles */
+.table-container {
+    background: var(--container-bg);
     border-radius: 8px;
-    border: 1px solid #ccc;
-    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    padding: 30px;
+    overflow-x: auto;
 }
 
-/* Animación de entrada */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-color-dark);
 }
 
-.fade-in-content {
-    animation: fadeIn 0.6s ease-out forwards;
+.styled-table thead tr {
+    background-color: var(--secondary-color);
+    color: var(--text-color-light);
+    text-align: left;
+    font-weight: 600;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 15px 18px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+    transition: background-color 0.2s ease;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+/* Registered Club Card Styles */
+.registered-club-card {
+    text-align: left;
+    cursor: default;
+    padding: 20px;
+}
+
+.registered-club-card h3 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.registered-club-card p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+.registered-club-card p strong {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.registered-club-card p small {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.registered-club-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px var(--card-shadow);
+    border-color: var(--card-border);
+}
+
+/* Club Page Specific Styles */
+.club-page-container {
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.subtitle {
+    text-align: center;
+    margin-top: -30px;
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+}
+
+.btn-back {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    display: inline-block;
+    background: var(--accent-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.club-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+}
+
+.club-card:hover::before {
+    opacity: 0.1;
+}
+
+.club-card > * {
+    position: relative;
+    z-index: 2;
 }

@@ -1,7 +1,9 @@
 <?php
 // config.php
-session_set_cookie_params(['path' => '/']);
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_set_cookie_params(['path' => '/']);
+    session_start();
+}
 
 $DB_HOST = '127.0.0.1';
 $DB_NAME = 'clubs_db';
@@ -15,6 +17,8 @@ try {
 } catch (Exception $e) {
     die('DB error: ' . $e->getMessage());
 }
+
+define('BASE_URL', '/proyecto/educlubs/clubproject');
 
 // helper para redirección simple
 function redirect($url){

@@ -12,7 +12,7 @@
         <a class="btn-inscribirme" href="asesoria/mate3.php">Ver más</a>
       </div>
       <div class="modal-right slide-in-right">
-        <img src="assets/images/cbtis.jpg" alt="Mate 3">
+        <img src="assets/images/pin4.jpg" alt="Mate 3">
       </div>
     </div>
   </div>

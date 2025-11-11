@@ -74,7 +74,7 @@ INSERT INTO `clubs` (`club_id`, `club_name`, `password`, `creator_name`, `club_t
 
 CREATE TABLE `club_registrations` (
   `id` int(11) NOT NULL,
-  `club_type` enum('cultural','deportivo','civil') NOT NULL,
+  `club_type` enum('cultural','deportivo','civil','asesoria') NOT NULL,
   `club_name` varchar(150) NOT NULL,
   `paterno` varchar(100) NOT NULL,
   `materno` varchar(100) NOT NULL,
@@ -203,7 +203,9 @@ CREATE TABLE `users` (
   `materno` varchar(255) NOT NULL,
   `telefono` varchar(10) NOT NULL,
   `semestre` varchar(255) NOT NULL,
-  `turno` varchar(255) NOT NULL
+  `turno` varchar(255) NOT NULL,
+  `tipo_sangre` varchar(10) DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

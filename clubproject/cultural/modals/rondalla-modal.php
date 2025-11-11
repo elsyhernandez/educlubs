@@ -9,10 +9,10 @@
       <div class="modal-left slide-in-left">
         <p><strong>Profesor responsable:</strong> Mtra. Laura Martínez</p>
         <p><strong>Descripción:</strong> Aprende guitarra, canto y participa en presentaciones musicales escolares.</p>
-        <a class="btn-inscribirme" href="clubs/cultural/rondalla.php">Ver más</a>
+        <a class="btn-inscribirme" href="cultural/rondalla.php">Ver más</a>
       </div>
       <div class="modal-right slide-in-right">
-        <img src="clubs/assets/images/ron1.jpg" alt="Rondalla">
+        <img src="assets/images/ron.jpg" alt="Rondalla">
       </div>
     </div>
   </div>

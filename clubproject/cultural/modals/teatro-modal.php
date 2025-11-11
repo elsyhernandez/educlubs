@@ -9,10 +9,10 @@
       <div class="modal-left slide-in-left">
         <p><strong>Profesor responsable:</strong> Mtro. Jorge Ramírez</p>
         <p><strong>Descripción:</strong> Participa en obras teatrales, mejora tu expresión corporal y trabajo en equipo.</p>
-        <a class="btn-inscribirme" href="clubs/cultural/teatro.php">Ver más</a>
+        <a class="btn-inscribirme" href="cultural/teatro.php">Ver más</a>
       </div>
       <div class="modal-right slide-in-right">
-        <img src="clubs/assets/images/danza5.jpg" alt="Teatro">
+        <img src="assets/images/danza5.jpg" alt="Teatro">
       </div>
     </div>
   </div>
