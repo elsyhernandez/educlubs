@@ -3,17 +3,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative; /* Necesario para el posicionamiento del panel */
-    padding: 0 20px; /* Ajusta el padding según sea necesario */
-    background-color: #333; /* O el color de tu header */
+    position: relative;
+    padding: 10px 20px; /* Añadido para dar espacio */
+    background-color: #4D0011; /* Usando el color primario del menú */
     color: #fff;
 }
 
-/* Ajustes para el contenedor del menú */
-.menu-container {
-    display: flex;
-    align-items: center;
-}
+/* El .menu-container original no necesita cambios, ya está en menu.css */
 
 /* Estilos para el ícono de notificación */
 .notification-icon {
