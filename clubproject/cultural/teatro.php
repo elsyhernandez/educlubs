@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -763,45 +764,15 @@
     </div>
 </div>
 
+<script>
+    // Definir variables globales para el modal, accesibles por el script del modal.
+    const clubName = 'Teatro';
+    const clubType = 'cultural';
+</script>
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Definir variables específicas para este club
-    const clubType = 'cultural';
-    const clubName = 'Teatro';
-
-    // Variables y lógica para el modal
-    const registerButton = document.getElementById('btn-registrar');
-    const modal = document.getElementById('registrationModal');
-    const closeButton = document.querySelector('.close-button');
-    const clubIdInput = document.getElementById('clubId');
-    const clubTypeInput = document.getElementById('clubType');
-
-    if (registerButton) {
-        registerButton.addEventListener('click', function() {
-            if (typeof clubName !== 'undefined' && typeof clubType !== 'undefined') {
-                clubIdInput.value = clubName;
-                clubTypeInput.value = clubType;
-                modal.style.display = 'block';
-            } else {
-                console.error('clubName o clubType no están definidos en la página.');
-            }
-        });
-    }
-
-    if (closeButton) {
-        closeButton.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    });
-
     // Variables globales para el Carrusel 3D
     const carousel = document.getElementById('carrusel');
     const cards = Array.from(carousel.children);

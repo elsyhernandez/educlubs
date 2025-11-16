@@ -83,8 +83,27 @@ body {
     color: var(--primary-color);
 }
 
-.usericon { position: relative; display: flex; align-items: center; gap: 8px; }
-.avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; overflow: hidden; }
+.usericon { position: relative; display: flex; align-items: center; gap: 10px; }
+.avatar { 
+  width: 60px; 
+  height: 60px; 
+  border-radius: 50%; 
+  background: var(--primary); 
+  color: #fff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 600; 
+  cursor: pointer; 
+  overflow: hidden;
+  border: 2px solid var(--white-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
 .avatar img {
   width: 100%;
   height: 100%;
@@ -119,8 +138,44 @@ body {
 .usericon:hover .dropdown-arrow {
   transform: rotate(180deg);
 }
-.user-menu div { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
-.user-menu a { padding: 8px 12px; text-decoration: none; display: block; color: #333; }
+.user-menu .user-info {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.user-menu .avatar.large {
+  width: 50px;
+  height: 50px;
+  margin-right: 15px;
+  border: none;
+  box-shadow: none;
+}
+.user-menu .user-details {
+  display: flex;
+  flex-direction: column;
+}
+.user-menu .username {
+  font-weight: 600;
+  color: #333;
+}
+.user-menu .user-id {
+  font-size: 0.9em;
+  color: #777;
+}
+.user-menu a { 
+  padding: 10px 15px; 
+  text-decoration: none; 
+  display: flex; 
+  align-items: center;
+  gap: 10px;
+  color: #333; 
+  transition: background-color 0.2s ease;
+}
+.user-menu a i {
+  width: 15px;
+  text-align: center;
+}
 .user-menu a:hover { background: #f5f5f5; }
 .user-menu a.logout { color: #d93025; font-weight: 500; }
 .logo {

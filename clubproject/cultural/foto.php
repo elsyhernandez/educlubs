@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -623,11 +624,11 @@
 <div class="espera">...</div>
 
 <div class="respuesta">
-    Es un **juego de estrategia** y concentración, considerado un deporte mental, que simula una batalla entre dos ejércitos. Desarrolla la **lógica**, la **planificación** y la **toma de decisiones** bajo presión.
-    <div class="cuadro estetico">Táctica</div>
-    <div class="cuadro artistico">Estrategia</div>
-    <div class="cuadro cultural">Lógica</div>
-    <div class="cuadro expresivo">Concentración</div>
+    Es el arte y la técnica de capturar imágenes duraderas mediante la acción de la luz. A través del club, aprenderás a **componer escenas**, manejar la cámara, y **contar historias** con tus fotografías y videos.
+    <div class="cuadro estetico">Composición</div>
+    <div class="cuadro artistico">Creatividad</div>
+    <div class="cuadro cultural">Técnica</div>
+    <div class="cuadro expresivo">Narrativa</div>
 </div>
 
 <div class="carrusel-container">
@@ -638,36 +639,36 @@
 
     <div class="carrusel-wrapper" id="carrusel">
         <div class="card" data-index="0">
-            <img src="../assets/images/danza1.jpg" alt="Ajedrez: Aperturas">
-            <div class="info">Aperturas Clave</div>
+            <img src="../assets/images/pin.jpg" alt="Fotografía de Retrato">
+            <div class="info">Técnicas de Retrato</div>
         </div>
         <div class="card" data-index="1">
-            <img src="../assets/images/danza2.jpg" alt="Torneo Local de Ajedrez">
-            <div class="info">Torneo Local 2024</div>
+            <img src="../assets/images/pin2.jpg" alt="Fotografía de Paisajes">
+            <div class="info">Composición de Paisajes</div>
         </div>
         <div class="card" data-index="2">
-            <img src="../assets/images/danza4.jpg" alt="Estudio de Finales">
-            <div class="info">Análisis de Finales</div>
+            <img src="../assets/images/pin3.jpg" alt="Edición de Fotografía">
+            <div class="info">Edición y Postproducción</div>
         </div>
         <div class="card" data-index="3">
-            <img src="../assets/images/danza5.jpg" alt="Sesión de Táctica">
-            <div class="info">Resolución de Táctica</div>
+            <img src="../assets/images/pin4.jpg" alt="Taller de Iluminación">
+            <div class="info">Uso de Luz Natural y Artificial</div>
         </div>
         <div class="card" data-index="4">
-            <img src="../assets/images/danza6.jpg" alt="Ajedrez Rápido">
-            <div class="info">Práctica de Blitz</div>
+            <img src="../assets/images/pin5.jpg" alt="Grabación de Video">
+            <div class="info">Principios de Grabación</div>
         </div>
         <div class="card" data-index="5">
-            <img src="../assets/images/danza7.jpg" alt="Partida Simultánea">
-            <div class="info">Partida Simultánea</div>
+            <img src="../assets/images/pin6.jpg" alt="Video con Drones">
+            <div class="info">Taller de Video Aéreo</div>
         </div>
         <div class="card" data-index="6">
-            <img src="../assets/images/danza8.jpg" alt="Clase de Estrategia">
-            <div class="info">Lecciones de Estrategia</div>
+            <img src="../assets/images/pin7.jpg" alt="Exposición Fotográfica">
+            <div class="info">Exposición Anual del Club</div>
         </div>
         <div class="card" data-index="7">
-            <img src="../assets/images/danza9.jpg" alt="Torneo de Clausura">
-            <div class="info">Torneo de Clausura</div>
+            <img src="../assets/images/pin9.jpg" alt="Salida Fotográfica">
+            <div class="info">Práctica en Campo</div>
         </div>
     </div>
 
@@ -766,42 +767,11 @@
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Definir variables específicas para este club
+    // Definir variables globales para que el modal pueda acceder a ellas
     const clubType = 'cultural';
     const clubName = 'Fotografía/Video';
 
-    // Variables y lógica para el modal
-    const registerButton = document.getElementById('btn-registrar');
-    const modal = document.getElementById('registrationModal');
-    const closeButton = document.querySelector('.close-button');
-    const clubIdInput = document.getElementById('clubId');
-    const clubTypeInput = document.getElementById('clubType');
-
-    if (registerButton) {
-        registerButton.addEventListener('click', function() {
-            if (typeof clubName !== 'undefined' && typeof clubType !== 'undefined') {
-                clubIdInput.value = clubName;
-                clubTypeInput.value = clubType;
-                modal.style.display = 'block';
-            } else {
-                console.error('clubName o clubType no están definidos en la página.');
-            }
-        });
-    }
-
-    if (closeButton) {
-        closeButton.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    });
-
+document.addEventListener('DOMContentLoaded', function() {
     // Variables globales para el Carrusel 3D
     const carousel = document.getElementById('carrusel');
     const cards = Array.from(carousel.children);

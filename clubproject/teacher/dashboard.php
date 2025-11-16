@@ -50,20 +50,19 @@ function getUniqueValues(PDO $pdo, string $table, string $column, string $where 
  *
  * IMPORTANTE: bindValue se usa para LIMIT/OFFSET como enteros para evitar que PDO los ponga entre comillas.
  */
-function getPaginated(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterValue = null) {
+function getPaginated(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterValue = null, string $orderBy = 'ORDER BY reg.created_at DESC') {
     $page = max(1, intval($_GET[$pageParam] ?? 1));
     $limit = 10;
     $offset = ($page - 1) * $limit;
 
     $params = [];
-    $where = $whereBase;
+    $where = str_replace(['club_type', 'club_name'], ['reg.club_type', 'reg.club_name'], $whereBase);
     if ($filterValue !== null && $filterValue !== '') {
-        $where .= " AND club_name = ?";
+        $where .= " AND reg.club_name = ?";
         $params[] = $filterValue;
     }
 
-    // contar
-    $countSql = "SELECT COUNT(*) FROM `$table` WHERE $where";
+    $countSql = "SELECT COUNT(reg.id) FROM `$table` reg WHERE $where";
     $stmt = $pdo->prepare($countSql);
     $stmt->execute($params);
     $total = (int) $stmt->fetchColumn();
@@ -72,17 +71,19 @@ function getPaginated(PDO $pdo, string $table, string $whereBase, string $pagePa
         return ['rows' => [], 'total' => 0, 'page' => $page, 'limit' => $limit];
     }
 
-    // seleccionar con límite, enlazando parámetros y luego bindValue para LIMIT/OFFSET
-    // Nota: NO pasar $params a execute() aquí; usamos bindValue para parámetros dinámicos + LIMIT/OFFSET como enteros
-    $selectSql = "SELECT * FROM `$table` WHERE $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $selectSql = "SELECT 
+                    reg.id, reg.club_name, reg.created_at,
+                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.turno, u.profile_picture AS profile_pic_path
+                  FROM `$table` reg
+                  LEFT JOIN `users` u ON reg.user_id = u.user_id
+                  WHERE $where $orderBy LIMIT ? OFFSET ?";
+    
     $stmt = $pdo->prepare($selectSql);
 
-    // bind dynamic params (filters)
     $idx = 1;
     foreach ($params as $p) {
         $stmt->bindValue($idx++, $p);
     }
-    // bind limit/offset como enteros
     $stmt->bindValue($idx++, (int)$limit, PDO::PARAM_INT);
     $stmt->bindValue($idx++, (int)$offset, PDO::PARAM_INT);
 
@@ -96,7 +97,7 @@ function getPaginated(PDO $pdo, string $table, string $whereBase, string $pagePa
  * Paginación para tablas que no tienen club_name (ej. tutoring_registrations).
  * Permite filtrar por una columna arbitraria (por ejemplo materia).
  */
-function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterColumn = null, ?string $filterValue = null) {
+function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterColumn = null, ?string $filterValue = null, string $orderBy = 'ORDER BY reg.created_at DESC') {
     $page = max(1, intval($_GET[$pageParam] ?? 1));
     $limit = 10;
     $offset = ($page - 1) * $limit;
@@ -104,11 +105,11 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
     $params = [];
     $where = $whereBase;
     if ($filterColumn && $filterValue !== null && $filterValue !== '') {
-        $where .= " AND `$filterColumn` = ?";
+        $where .= " AND reg.`$filterColumn` = ?";
         $params[] = $filterValue;
     }
 
-    $countSql = "SELECT COUNT(*) FROM `$table` WHERE $where";
+    $countSql = "SELECT COUNT(reg.id) FROM `$table` reg WHERE $where";
     $stmt = $pdo->prepare($countSql);
     $stmt->execute($params);
     $total = (int) $stmt->fetchColumn();
@@ -117,7 +118,13 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
         return ['rows' => [], 'total' => 0, 'page' => $page, 'limit' => $limit];
     }
 
-    $selectSql = "SELECT * FROM `$table` WHERE $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $selectSql = "SELECT 
+                    reg.id, reg.materia, reg.maestro, reg.created_at,
+                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, reg.carrera, u.turno, u.profile_picture AS profile_pic_path
+                  FROM `$table` reg
+                  LEFT JOIN `users` u ON reg.user_id = u.user_id
+                  WHERE $where $orderBy LIMIT ? OFFSET ?";
+
     $stmt = $pdo->prepare($selectSql);
 
     $idx = 1;
@@ -131,6 +138,42 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     return ['rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit];
+}
+
+/**
+ * Devuelve un icono de Font Awesome basado en el nombre de un club (o un ícono por defecto).
+ */
+function getIconForClub(string $clubName): string {
+    $clubName = strtolower($clubName);
+    $iconMap = [
+        'danza' => 'fa-female', 'artes manuales' => 'fa-cut', 'literatura' => 'fa-book-open',
+        'rondalla' => 'fa-music', 'norteño' => 'fa-hat-cowboy', 'teatro' => 'fa-theater-masks',
+        'fotografía' => 'fa-camera', 'ajedrez' => 'fa-chess', 'basquetbol' => 'fa-basketball-ball',
+        'defensa personal' => 'fa-fist-raised', 'futbol' => 'fa-futbol', 'voleibol' => 'fa-volleyball-ball',
+        'banda de guerra' => 'fa-drum', 'escolta' => 'fa-flag', 'inglés' => 'fa-language',
+        'matemáticas' => 'fa-calculator', 'default' => 'fa-users'
+    ];
+    foreach ($iconMap as $key => $icon) {
+        if (strpos($clubName, $key) !== false) return $icon;
+    }
+    return $iconMap['default'];
+}
+
+/**
+ * Genera los botones de filtro para una categoría de clubes.
+ */
+function renderClubFilterButtons(array $clubOptions, string $filterParam) {
+    $selectedValue = $_GET[$filterParam] ?? '';
+    echo '<div class="club-filters">';
+    echo '<button class="club-filter-btn' . ($selectedValue === '' ? ' active' : '') . '" data-filter-param="' . htmlspecialchars($filterParam) . '" data-filter-value="">Todos</button>';
+    foreach ($clubOptions as $club) {
+        $icon = getIconForClub($club);
+        $activeClass = ($club === $selectedValue) ? ' active' : '';
+        echo '<button class="club-filter-btn' . $activeClass . '" data-filter-param="' . htmlspecialchars($filterParam) . '" data-filter-value="' . htmlspecialchars($club) . '">';
+        echo '<i class="fas ' . $icon . ' icon"></i> ' . htmlspecialchars($club);
+        echo '</button>';
+    }
+    echo '</div>';
 }
 
 /* Obtener listas dinámicas para selects - arrays de TODOS los clubes disponibles por tipo,
@@ -150,10 +193,12 @@ $filter_civil     = trim($_GET['filter_civil'] ?? '');
 $filter_asesoria  = trim($_GET['filter_asesoria'] ?? '');
 
 /* Obtener datos paginados aplicando filtros (si existen) */
-$culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'", 'page_cultural', $filter_cultural);
-$deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo);
-$civilData     = getPaginated($pdo, 'club_registrations', "club_type = 'civil'", 'page_civil', $filter_civil);
-$asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $filter_asesoria);
+$orderBy = " ORDER BY u.nombres ASC, u.paterno ASC, u.materno ASC"; // Ordenamiento alfabético
+
+$culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'", 'page_cultural', $filter_cultural, $orderBy);
+$deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo, $orderBy);
+$civilData     = getPaginated($pdo, 'club_registrations', "club_type = 'civil'", 'page_civil', $filter_civil, $orderBy);
+$asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $filter_asesoria, $orderBy);
 
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     $type = $_GET['type'];
@@ -195,9 +240,119 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Panel Maestro</title>
+  <script>
+    const BASE_PATH = '<?php echo str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'], 2)); ?>';
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="../css/menu.css">
   <link rel="stylesheet" href="../css/main-modern.css">
    <style>
+    .card-section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid var(--accent-color);
+    }
+    .club-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    .club-filter-btn {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .club-filter-btn.active,
+    .club-filter-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .club-filter-btn .icon {
+        font-size: 1.1em;
+    }
+    .print-report-btn-container {
+        text-align: center;
+        margin-top: 15px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    }
+    .print-report-btn-container.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-top: 1px solid #eee;
+    }
+    .print-report-btn {
+        padding: 12px 25px;
+        background: var(--button-bg);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .print-report-btn:hover {
+        background: var(--button-hover-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .header-actions, .edit-col, .edit-action, .pagination, .club-filters, .print-report-btn-container, .main-header, #editToolbar, .table-header h4 {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+        .table-container {
+            margin-top: 0;
+        }
+        h2.printable-title {
+            visibility: visible;
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    }
     .main-header .logo {
         display: flex;
         align-items: center;
@@ -226,20 +381,32 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       --muted: #888;
       --glass: rgba(255,255,255,0.6); 
       --glass2: #4D0011d7; /* Guinda con transparencia */
-      --radius: 12px;
-      --edit-highlight: rgba(255, 244, 180, 0.7);
+          --radius: 12px;
+          --edit-highlight: rgba(255, 244, 180, 0.7);
+          --white-color: #FFFFFF;
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header { background: var(--primary-color); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     header h2 { margin: 0; font-size: 28px; color:#fff; }
     .header-actions { display:flex; align-items:center; gap:12px; }
     .header-actions .btn {
-        font-size: 16px;
+        margin-right: 1.5rem;
         background: transparent;
+        border: 1px solid var(--white-color);
+        color: var(--white-color);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
         box-shadow: none;
+        transition: all 0.3s ease; /* Revert to original transition to include transform */
+        font-size: 16px;
     }
+
     .header-actions .btn:hover {
-        background: transparent;
+        background: var(--white-color);
+        color: var(--primary-color);
+        /* transform: none; is removed to allow animation from .btn:hover */
+        box-shadow: none; /* Keep box-shadow override */
     }
     .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
@@ -250,16 +417,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .filter-row { display:flex; gap:10px; align-items:center; margin-top:8px; margin-bottom:10px; }
     .filter-row select, .filter-row input[type="search"] { height:36px; padding:6px 10px; border-radius:8px; border:1px solid #e6e9ef; background:#fff; transition: all 0.2s ease-in-out; }
     .filter-row select:focus, .filter-row input[type="search"]:focus { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-    .styled-table {
-        table-layout: fixed;
-        width: 100%;
-    }
-    .styled-table td {
-        overflow-wrap: break-word;
-    }
-    .table th { background: #fafafa; color: #555; }
     small.gray { color: var(--muted); }
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
@@ -306,6 +463,66 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     body.edit-mode-active .edit-col,
     body.edit-mode-active .edit-action {
         display: table-cell;
+    }
+
+    /* Student Profile Modal */
+    .profile-modal-content {
+        display: flex;
+        gap: 20px;
+        padding: 25px;
+    }
+    .profile-pic-container {
+        flex-shrink: 0;
+        text-align: center;
+    }
+    .profile-pic {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .profile-pic-container .student-name {
+        font-weight: 700;
+        font-size: 18px;
+        margin-top: 10px;
+        color: var(--primary-color);
+    }
+    .profile-details {
+        flex-grow: 1;
+    }
+    .profile-details h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 22px;
+        color: var(--secondary-color);
+        border-bottom: 2px solid var(--accent-color);
+        padding-bottom: 8px;
+    }
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+    .detail-item .icon {
+        font-size: 16px;
+        color: var(--accent-color);
+        width: 25px;
+        text-align: center;
+        margin-right: 10px;
+    }
+    .detail-item .label {
+        font-weight: 600;
+        color: #555;
+    }
+    .detail-item .value {
+        color: #333;
+        margin-left: 8px;
+    }
+    .styled-table tbody tr {
+        cursor: pointer;
     }
 
     /* User Icon */
@@ -460,6 +677,14 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         const targetCard = document.getElementById(targetCardId);
         if (!targetCard) return;
 
+        // Toggle print button visibility based on filter selection for immediate feedback
+        const printBtnContainer = targetCard.querySelector('.print-report-btn-container');
+        if (printBtnContainer) {
+            // Show button if a specific filter is selected, hide if "All" is chosen.
+            // The server will make the final decision based on whether there are rows to print.
+            printBtnContainer.classList.toggle('visible', value !== '');
+        }
+
         targetCard.style.opacity = '0.5';
         targetCard.style.pointerEvents = 'none';
 
@@ -492,8 +717,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
             });
       }
 
-      // Use event delegation for filter selects and pagination links
+      // Use event delegation for pagination, filters, and print buttons
       document.querySelector('.container').addEventListener('click', function(e) {
+          // Pagination links
           if (e.target.matches('.ajax-page-link')) {
               e.preventDefault();
               const link = e.target;
@@ -528,15 +754,62 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
                       card.style.opacity = '1';
                       card.style.pointerEvents = 'auto';
                   });
+              return;
           }
-      });
 
-      document.querySelector('.container').addEventListener('change', function(e) {
-          if (e.target.matches('.filter-select')) {
-              const sel = e.target;
-              const param = sel.dataset.param;
-              const val = sel.value;
-              setFilterParam(param, val === '__all__' ? '' : val);
+          // Club filter buttons
+          const filterBtn = e.target.closest('.club-filter-btn');
+          if (filterBtn) {
+              e.preventDefault();
+              const param = filterBtn.dataset.filterParam;
+              const value = filterBtn.dataset.filterValue;
+
+              const parent = filterBtn.closest('.club-filters');
+              if (parent) {
+                  parent.querySelectorAll('.club-filter-btn').forEach(b => b.classList.remove('active'));
+              }
+              filterBtn.classList.add('active');
+
+              setFilterParam(param, value);
+              return;
+          }
+
+          // Print report button
+          const printBtn = e.target.closest('.print-report-btn');
+          if (printBtn) {
+              const card = printBtn.closest('.card');
+              if (card) {
+                  const type = card.id.replace('card-', '');
+                  const filterButton = card.querySelector('.club-filter-btn.active');
+                  const filterValue = filterButton ? filterButton.dataset.filterValue : '';
+
+                  if (type && filterValue) {
+                      const reportUrl = `print_report.php?type=${encodeURIComponent(type)}&filter_value=${encodeURIComponent(filterValue)}`;
+                      
+                      // Create a hidden iframe
+                      const iframe = document.createElement('iframe');
+                      iframe.style.position = 'absolute';
+                      iframe.style.width = '0';
+                      iframe.style.height = '0';
+                      iframe.style.border = '0';
+                      document.body.appendChild(iframe);
+
+                      // Set the iframe's source
+                      iframe.src = reportUrl;
+
+                      // When the iframe is loaded, print its content and then remove it
+                      iframe.onload = function() {
+                          setTimeout(function() { // Timeout to ensure content is rendered
+                              iframe.contentWindow.focus();
+                              iframe.contentWindow.print();
+                              document.body.removeChild(iframe);
+                          }, 500);
+                      };
+
+                  } else {
+                      showNotification('Por favor, selecciona un club para generar el reporte.', 'error');
+                  }
+              }
           }
       });
 
@@ -676,11 +949,48 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         const tr = e.target.closest('tr[data-id]');
         if (!tr) return;
         if (e.target.closest('button, input, a, select, textarea')) return;
-        if (!editMode) return;
-        const cb = tr.querySelector('.row-checkbox');
-        if (!cb) return;
-        cb.checked = !cb.checked;
-        tr.classList.toggle('row-selected', cb.checked);
+        
+        if (editMode) {
+            const cb = tr.querySelector('.row-checkbox');
+            if (!cb) return;
+            cb.checked = !cb.checked;
+            tr.classList.toggle('row-selected', cb.checked);
+        } else {
+            // --- Open Student Profile Modal ---
+            const modal = document.getElementById('studentProfileModal');
+            if (!modal) return;
+
+            const studentData = tr.dataset;
+
+            // Populate modal
+            modal.querySelector('.student-name').textContent = studentData.nombres || 'N/A';
+            modal.querySelector('#profile-student-name').textContent = `${studentData.nombres || ''} ${studentData.paterno || ''} ${studentData.materno || ''}`;
+            
+            const profilePic = modal.querySelector('.profile-pic');
+            const defaultPicPath = `${BASE_PATH}/assets/profile_pics/default.png`;
+            profilePic.src = defaultPicPath; // Reset to default
+
+            if (studentData.memberId) {
+                const profilePicPath = `${BASE_PATH}/assets/profile_pics/${studentData.memberId}.jpg`;
+                const img = new Image();
+                img.src = profilePicPath;
+                img.onload = () => { profilePic.src = profilePicPath; };
+                img.onerror = () => { profilePic.src = defaultPicPath; }; // Explicitly set default on error
+            }
+
+            modal.querySelector('#profile-club-name').textContent = studentData.clubName || 'N/A';
+            modal.querySelector('#profile-email').textContent = studentData.correo || 'N/A';
+            modal.querySelector('#profile-phone').textContent = studentData.telefono || 'N/A';
+            modal.querySelector('#profile-semester').textContent = studentData.semestre || 'N/A';
+            modal.querySelector('#profile-user-id').textContent = studentData.memberId || 'N/A';
+            modal.querySelector('#profile-carrera').textContent = studentData.carrera || 'N/A';
+            modal.querySelector('#profile-turno').textContent = studentData.turno || 'N/A';
+
+            // Show modal
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
       });
 
       document.addEventListener('click', (e) => {
@@ -714,13 +1024,19 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
             document.getElementById('edit_semestre').value = btn.dataset.semestre || '';
         }
 
-        document.getElementById('editMemberModal').classList.add('show');
+        const modal = document.getElementById('editMemberModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
       });
 
       document.querySelectorAll('.close-modal, .close-btn').forEach(b => b.addEventListener('click', (e) => {
         const panel = e.target.closest('.modal');
-        if(panel) panel.classList.remove('show');
+        if(panel) {
+          panel.classList.remove('show');
+          panel.setAttribute('aria-hidden', 'true');
+          if (document.activeElement) document.activeElement.blur();
+        }
         document.body.style.overflow = '';
       }));
 
@@ -774,7 +1090,11 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
               } else {
                 location.reload();
               }
-              document.getElementById('editMemberModal').classList.remove('show');
+              const editModal = document.getElementById('editMemberModal');
+              if (editModal) {
+                editModal.classList.remove('show');
+                editModal.setAttribute('aria-hidden', 'true');
+              }
               document.body.style.overflow = '';
             } else {
               showNotification(data.message || 'No se pudo guardar.', 'error');
@@ -852,12 +1172,16 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     <a href="../view_clubs.php" class="btn">Ver base de clubs</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
-    <div class="usericon">
-      <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
-      <div class="user-menu">
-        <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="../auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
-      </div>
+    
+    <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+        <?php include '../includes/teacher_menu.php'; ?>
+        <div class="usericon">
+          <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
+          <div class="user-menu">
+            <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
+            <a href="../auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
+          </div>
+        </div>
     </div>
   </div>
  </header>
@@ -909,28 +1233,20 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       $cardId = strtolower(str_replace(['í', ' '], ['i', '-'], $title));
       echo "<div class='card fade-in-content' id='card-" . htmlspecialchars($cardId) . "' data-card='" . htmlspecialchars($title) . "'>";
       
+      echo "<h3 class='card-section-title'>" . htmlspecialchars($title) . "</h3>";
+
       if ($filterParam !== null) {
-        $selected = $_GET[$filterParam] ?? '';
-        echo "<div class='filter-row'>";
-        echo "<label style='font-size:13px;color:#444;margin-right:6px;'>Filtrar por:</label>";
-        echo "<select class='filter-select' data-param='".htmlspecialchars($filterParam)."'>";
-        echo "<option value='__all__'>Todos</option>";
-        foreach ($filterOptions as $opt) {
-          $sel = ($opt === $selected) ? 'selected' : '';
-          echo "<option value='".htmlspecialchars($opt)."' $sel>".htmlspecialchars($opt)."</option>";
-        }
-        echo "</select>";
-        echo "<div style='margin-left:auto;color:#666;font-size:13px;'>Registros: " . intval($data['total'] ?? 0) . "</div>";
-        echo "</div>";
-      } else {
-        echo "<div style='margin-top:6px;color:#666;font-size:13px;'>Registros: " . intval($data['total'] ?? 0) . "</div>";
+        renderClubFilterButtons($filterOptions, $filterParam);
       }
+
+      echo "<div class='printable-area'>";
+      echo "<h2 class='printable-title' style='display:none;'>" . htmlspecialchars($title) . " - Reporte de Miembros</h2>";
 
       if (empty($data['rows'])) {
         echo "<p>No hay registros disponibles.</p>";
       } else {
         echo "<div class='table-container'>";
-        echo "<div class='table-header'><h4>" . htmlspecialchars($title) . "</h4></div>";
+        
         echo "<table class='styled-table'><thead><tr>";
         echo "<th class='edit-col'></th>";
         foreach ($columns as $key => $label) echo "<th>" . htmlspecialchars($label) . "</th>";
@@ -938,8 +1254,20 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         echo "</tr></thead><tbody>";
         foreach ($data['rows'] as $r) {
           $id = htmlspecialchars($r['id'] ?? '');
+          $member_id = htmlspecialchars($r['user_id'] ?? '');
+          $paterno = htmlspecialchars($r['paterno'] ?? '');
+          $materno = htmlspecialchars($r['materno'] ?? '');
+          $nombres = htmlspecialchars($r['nombres'] ?? '');
+          $correo = htmlspecialchars($r['correo'] ?? '');
+          $semestre = htmlspecialchars($r['semestre'] ?? '');
+          $telefono = htmlspecialchars($r['telefono'] ?? '');
+          $club_name = htmlspecialchars($r['club_name'] ?? $r['materia'] ?? ''); // Handle both club and asesoria
+          $carrera = htmlspecialchars($r['carrera'] ?? '');
+          $turno = htmlspecialchars($r['turno'] ?? '');
           
-          echo "<tr data-id='$id'>";
+          $tr_data_attrs = "data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-telefono='$telefono' data-club-name='$club_name' data-carrera='$carrera' data-turno='$turno'";
+
+          echo "<tr $tr_data_attrs>";
           echo "<td class='edit-col'><input type='checkbox' class='row-checkbox' data-id='$id'></td>";
           foreach ($columns as $key => $label) {
             if ($key === 'fecha') {
@@ -950,14 +1278,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
           }
           $btnAttrs = "";
           if ($id !== '') {
-            $member_id = htmlspecialchars($r['user_id'] ?? '');
-            $paterno = htmlspecialchars($r['paterno'] ?? '');
-            $materno = htmlspecialchars($r['materno'] ?? '');
-            $nombres = htmlspecialchars($r['nombres'] ?? '');
-            $correo = htmlspecialchars($r['correo'] ?? '');
-            $semestre = htmlspecialchars($r['semestre'] ?? '');
-            $turno = htmlspecialchars($r['turno'] ?? '');
-            $telefono = htmlspecialchars($r['telefono'] ?? '');
             $type_slug = strtolower($title);
             if ($type_slug === 'asesorías') $type_slug = 'asesoria';
             $carrera = htmlspecialchars($r['carrera'] ?? '');
@@ -993,6 +1313,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
           echo "</div>";
         }
       }
+      echo "</div>"; // Cierre de .printable-area
+      $selectedValue = $_GET[$filterParam] ?? '';
+      $visibleClass = (!empty($selectedValue) && !empty($data['rows'])) ? 'visible' : '';
+      echo '<div class="print-report-btn-container ' . $visibleClass . '"><button class="print-report-btn" data-card-id="' . htmlspecialchars($cardId) . '"><i class="fas fa-print"></i> Imprimir Reporte</button></div>';
       echo "</div>";
     }
 
@@ -1190,5 +1514,60 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     </div>
   </div>
 
+  <!-- Student Profile Modal -->
+  <div id="studentProfileModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="studentProfileModalTitle">Perfil del Alumno</h3>
+        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="profile-modal-content">
+        <div class="profile-pic-container">
+          <img src="../assets/profile_pics/default.png" alt="Foto de perfil" class="profile-pic">
+          <div class="student-name"></div>
+        </div>
+        <div class="profile-details">
+          <h4 id="profile-student-name"></h4>
+          <div class="detail-item">
+            <i class="fas fa-university icon"></i>
+            <span class="label">Club/Materia:</span>
+            <span class="value" id="profile-club-name"></span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-id-card icon"></i>
+            <span class="label">Matrícula:</span>
+            <span class="value" id="profile-user-id"></span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-envelope icon"></i>
+            <span class="label">Correo:</span>
+            <span class="value" id="profile-email"></span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-phone icon"></i>
+            <span class="label">Teléfono:</span>
+            <span class="value" id="profile-phone"></span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-graduation-cap icon"></i>
+            <span class="label">Semestre:</span>
+            <span class="value" id="profile-semester"></span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-briefcase icon"></i>
+            <span class="label">Carrera:</span>
+            <span class="value" id="profile-carrera"></span>
+          </div>
+          <div class="detail-item">
+            <i class="far fa-clock icon"></i>
+            <span class="label">Turno:</span>
+            <span class="value" id="profile-turno"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="../js/menu.js"></script>
 </body>
 </html>

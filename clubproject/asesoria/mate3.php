@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../css/modal-styles.css">
    <style>
         /* -------------------- */
         /* Estilos Base */
@@ -603,7 +605,7 @@
     <a href="../club.php?type=asesoria" class="btn-volver">Volver a Asesorias</a>
 </header>
 
-<h1 class="titulo">Bienvenidos Asesorias de Matemáticas 3</h1>
+<h1 class="titulo">Bienvenidos a las Asesorías de Matemáticas 3</h1>
 
 <div class="pregunta">¿En que te ayudan las Matemáticas?</div>
 <div class="espera">...</div>
@@ -618,7 +620,7 @@
 
 <div class="carrusel-container">
     
-    <button class="btn-carrusel btn-prev" onclick="moverCarrusel(-1)">
+    <button class="btn-carrusel btn-prev">
         <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -657,7 +659,7 @@
         </div>
     </div>
 
-    <button class="btn-carrusel btn-next" onclick="moverCarrusel(1)">
+    <button class="btn-carrusel btn-next">
         <i class="fas fa-chevron-right"></i>
     </button>
 </div>
@@ -749,17 +751,15 @@
     </div>
 </div>
 
-<script>
-    // Definir variables específicas para este club
-    var clubType = 'asesoria';
-    var clubName = 'Matemáticas 3';
-</script>
-
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
+    // Definir variables globales para que el modal pueda acceder a ellas
+    const clubType = 'asesoria';
+    const clubName = 'Matemáticas 3';
 
-    // --- Lógica del Carrusel 3D (sin cambios) ---
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales para el Carrusel 3D
     const carousel = document.getElementById('carrusel');
     const cards = Array.from(carousel.children);
     const numCards = cards.length;
@@ -782,6 +782,9 @@
         updateCarousel();
     }
     
+    document.querySelector('.btn-prev').addEventListener('click', () => moverCarrusel(-1));
+    document.querySelector('.btn-next').addEventListener('click', () => moverCarrusel(1));
+
     cards.forEach((card, index) => {
         card.addEventListener('click', () => {
             resetAutoRotate();
@@ -791,7 +794,8 @@
     });
 
     function autoRotate() {
-        moverCarrusel(1);
+        currentCardIndex = (currentCardIndex + 1) % numCards;
+        updateCarousel();
     }
 
     function resetAutoRotate() {
@@ -799,88 +803,39 @@
         autoRotateInterval = setInterval(autoRotate, 5000); 
     }
     
-    window.addEventListener('load', () => {
-        updateCarousel();
-        resetAutoRotate();
-    });
-
-
-
-    // ==========================================================
-    // --- Lógica del Carrusel de Features (Ajuste para animación) ---
-    // ==========================================================
-    
+    // Lógica del Carrusel de Features
     const featuresWrapper = document.getElementById('featuresWrapper');
     const prevBtnFeatures = document.getElementById('featuresPrevBtn');
     const nextBtnFeatures = document.getElementById('featuresNextBtn');
     const paginationDotsFeatures = document.getElementById('featuresPaginationDots');
     const featureCards = document.querySelectorAll('.feature-card');
-
-    const cardsPerView = 2; 
+    const cardsPerView = window.innerWidth <= 768 ? 1 : 2;
     let currentFeatureSlide = 0;
-    const totalSlides = Math.ceil(featureCards.length / cardsPerView); 
+    const totalSlides = Math.ceil(featureCards.length / cardsPerView);
 
     function updateFeaturesCarousel() {
-        const featuresContainer = document.querySelector('.features-container');
-        const containerWidth = featuresContainer.offsetWidth; 
-        
-        const gap = 20; 
-        const cardWidth = (containerWidth - gap) / cardsPerView;
-
-        const slideDistance = cardWidth * cardsPerView + gap;
-        let offset;
-
-        // Ajuste para el modo responsivo (1 tarjeta por vista)
-        if (window.innerWidth <= 768) { 
-            offset = -currentFeatureSlide * (containerWidth + gap); 
-        } else {
-             offset = -currentFeatureSlide * slideDistance; 
-        }
-
+        const containerWidth = featuresWrapper.parentElement.offsetWidth;
+        const gap = 20;
+        const offset = -currentFeatureSlide * (containerWidth + gap) / cardsPerView;
         featuresWrapper.style.transform = `translateX(${offset}px)`;
 
         document.querySelectorAll('.feature-dot').forEach((dot, index) => {
-            if (index === currentFeatureSlide) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
+            dot.classList.toggle('active', index === currentFeatureSlide);
         });
-        
-        // **NUEVO: Lógica para reactivar la animación de las letras**
+
         featureCards.forEach(card => card.classList.remove('animate-slide'));
-        
-        // Añadir la clase 'animate-slide' solo a las tarjetas visibles.
-        // Asumimos 2 tarjetas visibles en escritorio, 1 en móvil (ajustado en CSS)
         const startCardIndex = currentFeatureSlide * cardsPerView;
-        const visibleCardsCount = window.innerWidth <= 768 ? 1 : cardsPerView;
-        
-        for (let i = 0; i < visibleCardsCount; i++) {
-            const cardIndex = startCardIndex + i;
-            if (featureCards[cardIndex]) {
-                 featureCards[cardIndex].classList.add('animate-slide');
+        for (let i = 0; i < cardsPerView; i++) {
+            if (featureCards[startCardIndex + i]) {
+                featureCards[startCardIndex + i].classList.add('animate-slide');
             }
         }
     }
 
-    // Flechas y Puntos (Lógica ajustada)
     const moveFeaturesCarousel = (dir) => {
-        if (dir === -1) {
-            if (currentFeatureSlide === 0) {
-                currentFeatureSlide = totalSlides - 1;
-            } else {
-                currentFeatureSlide--;
-            }
-        } else if (dir === 1) {
-            if (currentFeatureSlide === totalSlides - 1) {
-                currentFeatureSlide = 0;
-            } else {
-                currentFeatureSlide++;
-            }
-        }
+        currentFeatureSlide = (currentFeatureSlide + dir + totalSlides) % totalSlides;
         updateFeaturesCarousel();
     };
-
 
     prevBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(-1));
     nextBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(1));
@@ -892,40 +847,25 @@
         }
     });
 
-    // Se mantiene la lógica de carga y redimensionamiento
-    window.addEventListener('load', updateFeaturesCarousel);
+    // Lógica de Intersección para animación al scroll
+    const bottomSection = document.getElementById('bottomSection');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+                updateFeaturesCarousel(); 
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    observer.observe(bottomSection);
+
+    // Inicialización
+    updateCarousel();
+    resetAutoRotate();
     window.addEventListener('resize', updateFeaturesCarousel);
-
-
-    // ==========================================================
-    // --- Lógica de Intersección (Animación al Scroll - Se mantiene) ---
-    // ==========================================================
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const bottomSection = document.getElementById('bottomSection');
-
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate');
-                        // Llama a updateFeaturesCarousel para que la primera vista se anime
-                        updateFeaturesCarousel(); 
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                rootMargin: '0px',
-                threshold: 0.1 
-            });
-
-            observer.observe(bottomSection);
-        } else {
-            bottomSection.classList.add('animate');
-            updateFeaturesCarousel();
-        }
-    });
-
+});
 </script>
 
 </body>

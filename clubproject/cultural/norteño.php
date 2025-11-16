@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -763,13 +764,14 @@
     </div>
 </div>
 
-<?php include '../includes/modals/registration_modal.php'; ?>
-
 <script>
     // Definir variables específicas para este club
     const clubType = 'cultural';
     const clubName = 'Música grupo norteño';
+</script>
+<?php include '../includes/modals/registration_modal.php'; ?>
 
+<script>
     // Variables globales para el Carrusel 3D
     const carousel = document.getElementById('carrusel');
     const cards = Array.from(carousel.children);

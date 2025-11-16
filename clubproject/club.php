@@ -45,7 +45,7 @@ function clubToFile($club) {
     'Fotografía/Video' => 'foto',
     'Danza y baile' => 'danza',
     'Música/Rondalla' => 'rondalla',
-    'Música grupo norteño' => 'norteño',
+    'Música grupo norteño' => 'norteno',
     'Arte manual' => 'artemanual',
     'Oratoria y declamación' => 'oratoria',
     'Pintura/Dibujo' => 'pintura',
@@ -81,11 +81,11 @@ if (!isset($lists[$type])) {
 <div class="main-container club-page-container">
     <h2>Clubes de <?=htmlspecialchars(ucfirst($type))?></h2>
     <p class="subtitle">Haz clic en un club para ver más detalles o inscribirte.</p>
-    <div class="club-grid">
+    <div class="club-grid<?php if ($type === 'civil') echo ' civil-grid'; ?>">
         <?php foreach($lists[$type] as $club): 
             $id = clubToFile($club); 
             $icon = getClubIcon($club);
-            if ($type === 'asesoria'): ?>
+            if ($type === 'asesoria' || $type === 'civil'): ?>
                 <a href="<?=$type?>/<?=$id?>.php" class="club-card">
                     <i class="<?=$icon?>"></i>
                     <h3><?=htmlspecialchars($club)?></h3>
@@ -100,10 +100,12 @@ if (!isset($lists[$type])) {
     </div>
 </div>
 
+  <?php if ($type !== 'asesoria' && $type !== 'civil'): ?>
   <?php foreach($lists[$type] as $club): 
     $id = clubToFile($club); 
     @include "{$type}/modals/{$id}-modal.php";
   endforeach; ?>
+  <?php endif; ?>
 
   <script>
     function abrirModal(id) {

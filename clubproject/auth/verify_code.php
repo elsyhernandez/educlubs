@@ -42,31 +42,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="auth-wrapper">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
-    <div class="auth-container">
-        <h2><i class="fas fa-shield-alt"></i> Verificar Código</h2>
-        <p style="color: #666; margin-bottom: 20px;">Hemos enviado un código a tu correo. Por favor, ingrésalo a continuación.</p>
-        
-        <?php if($error): ?>
-            <div class="message error">
-                <?= htmlspecialchars($error) ?>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <div class="logo-container">
+                <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+                <span>EduClubs</span>
             </div>
-        <?php endif; ?>
+            <h2><i class="fas fa-shield-alt"></i> Verificar Código</h2>
+            <p>Hemos enviado un código a tu correo. Por favor, ingrésalo a continuación.</p>
+            
+            <?php if($error): ?>
+                <div class="message error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
 
-        <form method="post">
-            <div class="form-group">
-                <i class="fas fa-hashtag icon"></i>
-                <input id="code" name="code" placeholder="Código de 6 dígitos" required maxlength="6" pattern="\d{6}" title="El código debe ser de 6 dígitos numéricos.">
+            <form method="post">
+                <div class="form-group">
+                    <i class="fas fa-hashtag icon"></i>
+                    <input id="code" name="code" placeholder="Código de 6 dígitos" required maxlength="6" pattern="\d{6}" title="El código debe ser de 6 dígitos numéricos.">
+                </div>
+                <button type="submit" class="auth-btn">Verificar y Continuar</button>
+            </form>
+            <div class="auth-links">
+                <a href="password_reset_request.php">¿No recibiste el código? Reenviar</a>
+                <a href="auth.php" style="display: block; margin-top: 10px;">Volver a iniciar sesión</a>
             </div>
-            <button type="submit" class="auth-btn">Verificar y Continuar</button>
-        </form>
-        <div class="auth-links">
-            <a class="auth-link" href="password_reset_request.php">¿No recibiste el código? Reenviar</a>
-            <a href="auth.php" class="auth-link" style="margin-top: 10px; display: block;">Volver a iniciar sesión</a>
         </div>
     </div>
-</div>
 </body>
 </html>

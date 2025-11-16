@@ -58,6 +58,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Base de Datos de Clubs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="css/main-modern.css">
+  <link rel="stylesheet" href="css/menu.css">
    <style>
     .main-header .logo {
         display: flex;
@@ -89,18 +90,30 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       --glass2: #4D0011d7; /* Guinda con transparencia */
       --radius: 12px;
       --edit-highlight: rgba(255, 244, 180, 0.7);
+      --white-color: #FFFFFF;
     }
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     header h2 { margin: 0; font-size: 28px; color:#fff; }
     .header-actions { display:flex; align-items:center; gap:12px; }
     .header-actions .btn {
-        font-size: 16px;
+        margin-right: 1.5rem;
         background: transparent;
+        border: 1px solid var(--white-color);
+        color: var(--white-color);
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
         box-shadow: none;
+        transition: all 0.3s ease; /* Revert to original transition to include transform */
+        font-size: 16px;
     }
+
     .header-actions .btn:hover {
-        background: transparent;
+        background: var(--white-color);
+        color: var(--primary-color);
+        /* transform: none; is removed to allow animation from .btn:hover */
+        box-shadow: none; /* Keep box-shadow override */
     }
     .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
@@ -111,9 +124,6 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .filter-row { display:flex; gap:10px; align-items:center; margin-top:8px; margin-bottom:10px; }
     .filter-row select, .filter-row input[type="search"] { height:36px; padding:6px 10px; border-radius:8px; border:1px solid #e6e9ef; background:#fff; transition: all 0.2s ease-in-out; }
     .filter-row select:focus, .filter-row input[type="search"]:focus { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-    .table th { background: #fafafa; color: #555; }
     small.gray { color: var(--muted); }
     .pagination { margin-top: 16px; display:flex; flex-wrap:wrap; gap:8px; }
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
@@ -331,15 +341,18 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <span>EduClubs - Base de Clubs</span>
     </div>
   <div class="header-actions">
-    <a href="teacher/dashboard.php" class="btn">Volver al Panel</a>
+    <a href="teacher/dashboard.php" class="btn">Volver</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
-    <div class="usericon">
-      <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
-      <div class="user-menu">
-        <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-        <a href="auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
-      </div>
+    <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+        <?php include 'includes/teacher_menu.php'; ?>
+        <div class="usericon">
+          <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
+          <div class="user-menu">
+            <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
+            <a href="auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
+          </div>
+        </div>
     </div>
   </div>
  </header>
@@ -661,6 +674,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     });
   </script>
   <script src="js/notification.js?v=<?= time() ?>"></script>
+  <script src="js/menu.js"></script>
   <!-- Modal Agregar Club -->
   <div id="modal" class="modal" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">

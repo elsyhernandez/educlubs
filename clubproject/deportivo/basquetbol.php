@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -632,7 +633,7 @@
 
 <div class="carrusel-container">
     
-    <button class="btn-carrusel btn-prev" onclick="moverCarrusel(-1)">
+    <button class="btn-carrusel btn-prev">
         <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -671,7 +672,7 @@
         </div>
     </div>
 
-    <button class="btn-carrusel btn-next" onclick="moverCarrusel(1)">
+    <button class="btn-carrusel btn-next">
         <i class="fas fa-chevron-right"></i>
     </button>
 </div>
@@ -766,10 +767,11 @@
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
-    // Definir variables específicas para este club
+    // Definir variables globales para que el modal pueda acceder a ellas
     const clubType = 'deportivo';
     const clubName = 'Basquetbol';
 
+document.addEventListener('DOMContentLoaded', function() {
     // Variables globales para el Carrusel 3D
     const carousel = document.getElementById('carrusel');
     const cards = Array.from(carousel.children);
@@ -777,148 +779,76 @@
     const angleIncrement = 360 / numCards; 
     let currentCardIndex = 0; 
     let currentRotation = 0; 
-    let autoRotateInterval; // Variable para el intervalo de rotación
+    let autoRotateInterval;
 
-    // ---------------------------------------------
-    // Lógica del Carrusel 3D
-    // ---------------------------------------------
-    
     function updateCarousel() {
         currentRotation = -(currentCardIndex * angleIncrement); 
-        
         carousel.style.transform = `translateZ(calc(var(--translate-z) * -1)) rotateY(${currentRotation}deg)`;
-
         cards.forEach((card, index) => {
-            card.classList.remove('active');
-        });
-
-        cards.forEach((card, index) => {
-            const relativeIndex = (index - currentCardIndex + numCards) % numCards;
-            if (relativeIndex === 0) {
-                card.classList.add('active');
-            } else {
-                card.classList.remove('active');
-            }
+            card.classList.toggle('active', index === currentCardIndex);
         });
     }
 
     function moverCarrusel(dir) {
-        // Detener y reiniciar el temporizador en cada movimiento manual
         resetAutoRotate(); 
-        
-        currentCardIndex += dir;
-
-        if (currentCardIndex < 0) {
-            currentCardIndex = numCards - 1;
-        } else if (currentCardIndex >= numCards) {
-            currentCardIndex = 0;
-        }
-
+        currentCardIndex = (currentCardIndex + dir + numCards) % numCards;
         updateCarousel();
     }
     
+    document.querySelector('.btn-prev').addEventListener('click', () => moverCarrusel(-1));
+    document.querySelector('.btn-next').addEventListener('click', () => moverCarrusel(1));
+
     cards.forEach((card, index) => {
         card.addEventListener('click', () => {
-            resetAutoRotate(); // Detener y reiniciar al hacer clic en una tarjeta
+            resetAutoRotate();
             currentCardIndex = index;
             updateCarousel();
         });
     });
 
-    // Función para el auto-cambio
     function autoRotate() {
-        moverCarrusel(1); // Mover al siguiente
+        currentCardIndex = (currentCardIndex + 1) % numCards;
+        updateCarousel();
     }
 
-    // Función para detener y reiniciar el intervalo
     function resetAutoRotate() {
         clearInterval(autoRotateInterval);
-        // El carrusel automático de 5 segundos se retoma
         autoRotateInterval = setInterval(autoRotate, 5000); 
     }
     
-    // Inicializar el carrusel y el auto-cambio al cargar la página
-    window.addEventListener('load', () => {
-        updateCarousel();
-        resetAutoRotate(); // Iniciar la rotación automática
-    });
-
-
-    // ==========================================================
-    // --- Lógica del Carrusel de Features (Ajuste para animación) ---
-    // ==========================================================
-    
+    // Lógica del Carrusel de Features
     const featuresWrapper = document.getElementById('featuresWrapper');
     const prevBtnFeatures = document.getElementById('featuresPrevBtn');
     const nextBtnFeatures = document.getElementById('featuresNextBtn');
     const paginationDotsFeatures = document.getElementById('featuresPaginationDots');
     const featureCards = document.querySelectorAll('.feature-card');
-
-    const cardsPerView = 2; 
+    const cardsPerView = window.innerWidth <= 768 ? 1 : 2;
     let currentFeatureSlide = 0;
-    const totalSlides = Math.ceil(featureCards.length / cardsPerView); 
+    const totalSlides = Math.ceil(featureCards.length / cardsPerView);
 
     function updateFeaturesCarousel() {
-        const featuresContainer = document.querySelector('.features-container');
-        const containerWidth = featuresContainer.offsetWidth; 
-        
-        const gap = 20; 
-        const cardWidth = (containerWidth - gap) / cardsPerView;
-
-        const slideDistance = cardWidth * cardsPerView + gap;
-        let offset;
-
-        // Ajuste para el modo responsivo (1 tarjeta por vista)
-        if (window.innerWidth <= 768) { 
-            offset = -currentFeatureSlide * (containerWidth + gap); 
-        } else {
-             offset = -currentFeatureSlide * slideDistance; 
-        }
-
+        const containerWidth = featuresWrapper.parentElement.offsetWidth;
+        const gap = 20;
+        const offset = -currentFeatureSlide * (containerWidth + gap) / cardsPerView;
         featuresWrapper.style.transform = `translateX(${offset}px)`;
 
         document.querySelectorAll('.feature-dot').forEach((dot, index) => {
-            if (index === currentFeatureSlide) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
+            dot.classList.toggle('active', index === currentFeatureSlide);
         });
-        
-        // **NUEVO: Lógica para reactivar la animación de las letras**
+
         featureCards.forEach(card => card.classList.remove('animate-slide'));
-        
-        // Añadir la clase 'animate-slide' solo a las tarjetas visibles.
-        // Asumimos 2 tarjetas visibles en escritorio, 1 en móvil (ajustado en CSS)
         const startCardIndex = currentFeatureSlide * cardsPerView;
-        const visibleCardsCount = window.innerWidth <= 768 ? 1 : cardsPerView;
-        
-        for (let i = 0; i < visibleCardsCount; i++) {
-            const cardIndex = startCardIndex + i;
-            if (featureCards[cardIndex]) {
-                 featureCards[cardIndex].classList.add('animate-slide');
+        for (let i = 0; i < cardsPerView; i++) {
+            if (featureCards[startCardIndex + i]) {
+                featureCards[startCardIndex + i].classList.add('animate-slide');
             }
         }
     }
 
-    // Flechas y Puntos (Lógica ajustada)
     const moveFeaturesCarousel = (dir) => {
-        if (dir === -1) {
-            if (currentFeatureSlide === 0) {
-                currentFeatureSlide = totalSlides - 1;
-            } else {
-                currentFeatureSlide--;
-            }
-        } else if (dir === 1) {
-            if (currentFeatureSlide === totalSlides - 1) {
-                currentFeatureSlide = 0;
-            } else {
-                currentFeatureSlide++;
-            }
-        }
+        currentFeatureSlide = (currentFeatureSlide + dir + totalSlides) % totalSlides;
         updateFeaturesCarousel();
     };
-
 
     prevBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(-1));
     nextBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(1));
@@ -930,40 +860,25 @@
         }
     });
 
-    // Se mantiene la lógica de carga y redimensionamiento
-    window.addEventListener('load', updateFeaturesCarousel);
+    // Lógica de Intersección para animación al scroll
+    const bottomSection = document.getElementById('bottomSection');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+                updateFeaturesCarousel(); 
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    observer.observe(bottomSection);
+
+    // Inicialización
+    updateCarousel();
+    resetAutoRotate();
     window.addEventListener('resize', updateFeaturesCarousel);
-
-
-    // ==========================================================
-    // --- Lógica de Intersección (Animación al Scroll - Se mantiene) ---
-    // ==========================================================
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const bottomSection = document.getElementById('bottomSection');
-
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate');
-                        // Llama a updateFeaturesCarousel para que la primera vista se anime
-                        updateFeaturesCarousel(); 
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                rootMargin: '0px',
-                threshold: 0.1 
-            });
-
-            observer.observe(bottomSection);
-        } else {
-            bottomSection.classList.add('animate');
-            updateFeaturesCarousel();
-        }
-    });
-
+});
 </script>
 
 </body>

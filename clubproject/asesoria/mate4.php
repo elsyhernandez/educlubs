@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+<?php require_once '../includes/config.php'; ?>
  <title>Matemáticas 4</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../css/modal-styles.css">
    <style>
         /* -------------------- */
         /* Estilos Base */
@@ -624,36 +626,36 @@
 
     <div class="carrusel-wrapper" id="carrusel">
         <div class="card" data-index="0">
-            <img src="../assets/images/danza1.jpg" alt="Ajedrez: Aperturas">
-            <div class="info">Aperturas Clave</div>
+            <img src="../assets/images/asesoria1.jpg" alt="Imagen 1 de Asesorías">
+            <div class="info">Aprendizaje Colaborativo</div>
         </div>
         <div class="card" data-index="1">
-            <img src="../assets/images/danza2.jpg" alt="Torneo Local de Ajedrez">
-            <div class="info">Torneo Local 2024</div>
+            <img src="../assets/images/asesoria2.jpg" alt="Imagen 2 de Asesorías">
+            <div class="info">Resolución de Problemas</div>
         </div>
         <div class="card" data-index="2">
-            <img src="../assets/images/danza4.jpg" alt="Estudio de Finales">
-            <div class="info">Análisis de Finales</div>
+            <img src="../assets/images/asesoria3.jpg" alt="Imagen 3 de Asesorías">
+            <div class="info">Tutorías Personalizadas</div>
         </div>
         <div class="card" data-index="3">
-            <img src="../assets/images/danza5.jpg" alt="Sesión de Táctica">
-            <div class="info">Resolución de Táctica</div>
+            <img src="../assets/images/asesoria5.jpg" alt="Imagen 4 de Asesorías">
+            <div class="info">Material de Apoyo</div>
         </div>
         <div class="card" data-index="4">
-            <img src="../assets/images/danza6.jpg" alt="Ajedrez Rápido">
-            <div class="info">Práctica de Blitz</div>
+            <img src="../assets/images/asesoria6.jpg" alt="Imagen 5 de Asesorías">
+            <div class="info">Sesiones de Estudio</div>
         </div>
         <div class="card" data-index="5">
-            <img src="../assets/images/danza7.jpg" alt="Partida Simultánea">
-            <div class="info">Partida Simultánea</div>
+            <img src="../assets/images/asesoria7.jpg" alt="Imagen 6 de Asesorías">
+            <div class="info">Preparación para Exámenes</div>
         </div>
         <div class="card" data-index="6">
-            <img src="../assets/images/danza8.jpg" alt="Clase de Estrategia">
-            <div class="info">Lecciones de Estrategia</div>
+            <img src="../assets/images/asesoria8.jpg" alt="Imagen 7 de Asesorías">
+            <div class="info">Ambiente de Confianza</div>
         </div>
         <div class="card" data-index="7">
-            <img src="../assets/images/danza9.jpg" alt="Torneo de Clausura">
-            <div class="info">Torneo de Clausura</div>
+            <img src="../assets/images/asesoria1.jpg" alt="Imagen 8 de Asesorías">
+            <div class="info">Éxito Académico</div>
         </div>
     </div>
 
@@ -749,15 +751,11 @@
     </div>
 </div>
 
-<script>
-    // Definir variables específicas para este club
-    var clubType = 'asesoria';
-    var clubName = 'Matemáticas 4';
-</script>
-
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
+    const clubType = 'asesoria';
+    const clubName = 'Matemáticas 4';
 
     // --- Lógica del Carrusel 3D (sin cambios) ---
     const carousel = document.getElementById('carrusel');
@@ -804,69 +802,6 @@
         resetAutoRotate();
     });
 
-    // ---------------------------------------------
-    // Lógica del Carrusel 3D
-    // ---------------------------------------------
-    
-    function updateCarousel() {
-        currentRotation = -(currentCardIndex * angleIncrement); 
-        
-        carousel.style.transform = `translateZ(calc(var(--translate-z) * -1)) rotateY(${currentRotation}deg)`;
-
-        cards.forEach((card, index) => {
-            card.classList.remove('active');
-        });
-
-        cards.forEach((card, index) => {
-            const relativeIndex = (index - currentCardIndex + numCards) % numCards;
-            if (relativeIndex === 0) {
-                card.classList.add('active');
-            } else {
-                card.classList.remove('active');
-            }
-        });
-    }
-
-    function moverCarrusel(dir) {
-        // Detener y reiniciar el temporizador en cada movimiento manual
-        resetAutoRotate(); 
-        
-        currentCardIndex += dir;
-
-        if (currentCardIndex < 0) {
-            currentCardIndex = numCards - 1;
-        } else if (currentCardIndex >= numCards) {
-            currentCardIndex = 0;
-        }
-
-        updateCarousel();
-    }
-    
-    cards.forEach((card, index) => {
-        card.addEventListener('click', () => {
-            resetAutoRotate(); // Detener y reiniciar al hacer clic en una tarjeta
-            currentCardIndex = index;
-            updateCarousel();
-        });
-    });
-
-    // Función para el auto-cambio
-    function autoRotate() {
-        moverCarrusel(1); // Mover al siguiente
-    }
-
-    // Función para detener y reiniciar el intervalo
-    function resetAutoRotate() {
-        clearInterval(autoRotateInterval);
-        // El carrusel automático de 5 segundos se retoma
-        autoRotateInterval = setInterval(autoRotate, 5000); 
-    }
-    
-    // Inicializar el carrusel y el auto-cambio al cargar la página
-    window.addEventListener('load', () => {
-        updateCarousel();
-        resetAutoRotate(); // Iniciar la rotación automática
-    });
 
 
     // ==========================================================

@@ -1,0 +1,111 @@
+:root {
+    --primary-color: #4D0011;
+    --secondary-color: #62152d;
+    --accent-color: #952f57;
+    --white-color: #FFFFFF;
+    --light-gray-color: #f9f5f7;
+}
+
+.menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+
+.menu-toggle {
+    background: transparent;
+    border: 1px solid var(--white-color);
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu-toggle:hover {
+    background-color: var(--white-color);
+}
+
+.menu-toggle:hover i {
+    color: var(--primary-color);
+}
+
+.menu-toggle i {
+    font-size: 20px;
+    color: var(--white-color);
+    transition: color 0.3s;
+}
+
+.menu-nav {
+    display: block;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background-color: var(--white-color);
+    box-shadow: 0 8px 25px rgba(236, 92, 92, 0.15);
+    z-index: 1000;
+    min-width: 220px;
+    border-radius: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    overflow: hidden;
+}
+
+.menu-nav.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.menu-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+}
+
+.menu-nav ul li a, 
+.menu-nav ul li a:link, 
+.menu-nav ul li a:visited {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.menu-nav ul li a:hover {
+    background-color: var(--light-gray-color);
+    color: var(--primary-color);
+}
+
+.menu-nav ul li a i {
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    color: inherit;
+    transition: color 0.2s ease;
+}
+
+.menu-nav ul li a.active, 
+.menu-nav ul li a.active:link, 
+.menu-nav ul li a.active:visited {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.menu-nav ul li a.active:hover {
+    background-color: var(--light-gray-color);
+}
+
+.menu-nav ul li a.active::before {
+    content: '>';
+    color: var(--primary-color);
+    margin-right: 10px;
+    font-weight: bold;
+}

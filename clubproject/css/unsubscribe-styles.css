@@ -1,0 +1,183 @@
+/* --- Rediseño del Botón/Icono para Darse de Baja --- */
+.btn-unsubscribe {
+    background-color: #fdedec;
+    color: #e74c3c;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.registered-club-card:hover .btn-unsubscribe {
+    opacity: 1;
+    visibility: visible;
+}
+
+.btn-unsubscribe:hover {
+    background-color: #e74c3c;
+    color: white;
+    transform: translateY(-50%) scale(1.1) rotate(10deg);
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+}
+
+/* --- Rediseño del Modal de Confirmación --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background-color: var(--container-bg);
+    color: var(--text-color-dark);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+    opacity: 0;
+}
+
+.modal-overlay.active .modal-container {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.modal-header::before {
+    content: '\f071'; /* Font Awesome warning icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 2rem;
+    color: #e74c3c;
+    background-color: #fdedec;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.modal-title {
+    font-size: 1.6rem;
+    margin: 0;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.modal-close {
+    display: none; /* Ocultamos el botón de cerrar tradicional */
+}
+
+.modal-body {
+    margin-bottom: 30px;
+    line-height: 1.7;
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+.modal-body p strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.modal-sub-message {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 8px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-footer .btn-cancel,
+.modal-footer .btn-confirm-danger {
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.modal-footer .btn-cancel {
+    background-color: #ecf0f1;
+    color: var(--secondary-color);
+    border: 1px solid #bdc3c7;
+}
+
+.modal-footer .btn-cancel:hover {
+    background-color: #dce4e6;
+    border-color: #95a5a6;
+}
+
+.modal-footer .btn-confirm-danger {
+    background-color: #e74c3c;
+    color: white;
+    border: 1px solid #e74c3c;
+}
+
+.modal-footer .btn-confirm-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Animation for removing club card */
+.registered-club-card.removing {
+    transition: all 0.5s ease;
+    opacity: 0;
+    transform: scale(0.9);
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border-width: 0 !important;
+    overflow: hidden;
+}

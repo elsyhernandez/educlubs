@@ -41,6 +41,34 @@
                             ?>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="carrera">Carrera</label>
+                        <select id="carrera" name="carrera" required>
+                            <option value="">Selecciona tu carrera</option>
+                            <?php
+                            $carreras = ["Ing. en Sistemas Computacionales", "Ing. Industrial", "Ing. en Mecatrónica", "Ing. en Gestión Empresarial", "Lic. en Administración"];
+                            foreach ($carreras as $carrera) {
+                                $user_carrera = isset($user['carrera']) ? $user['carrera'] : '';
+                                $selected = ($user_carrera == $carrera) ? 'selected' : '';
+                                echo "<option value=\"$carrera\" $selected>" . htmlspecialchars($carrera) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="turno">Turno</label>
+                        <select id="turno" name="turno" required>
+                            <option value="">Selecciona tu turno</option>
+                            <?php
+                            $turnos = ["Matutino", "Vespertino"];
+                            foreach ($turnos as $turno) {
+                                $user_turno = isset($user['turno']) ? $user['turno'] : '';
+                                $selected = ($user_turno == $turno) ? 'selected' : '';
+                                echo "<option value=\"$turno\" $selected>" . htmlspecialchars($turno) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
                 <div class="form-group">
                     <label for="paterno">Apellido Paterno</label>
                     <input type="text" id="paterno" name="paterno" value="<?= htmlspecialchars($user['paterno'] ?? '') ?>" required>

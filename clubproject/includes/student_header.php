@@ -23,6 +23,7 @@ $_SESSION['user'] = $user; // Refresh the session data
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="<?= BASE_URL ?>/css/student-header.css?v=<?php echo time(); ?>">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/css/menu.css?v=<?php echo time(); ?>">
   <?php if (basename($_SERVER['PHP_SELF']) == 'student_dashboard.php'): ?>
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/student-dashboard.css?v=<?php echo time(); ?>">
   <?php endif; ?>
@@ -35,12 +36,13 @@ $_SESSION['user'] = $user; // Refresh the session data
         <span>EduClubs - Panel de Alumno</span>
     </div>
     <div class="header-actions">
+        <?php include 'menu.php'; ?>
         <?php
         $currentPage = basename($_SERVER['PHP_SELF']);
         if ($currentPage === 'student_clubs.php') : ?>
-            <a href="<?= BASE_URL ?>/student_dashboard.php" class="btn transparent">Volver al Dashboard</a>
+            <a href="<?= BASE_URL ?>/student_dashboard.php" class="btn transparent">Volver</a>
         <?php elseif ($currentPage === 'profile_settings.php' || $currentPage === 'club.php') : ?>
-            <a href="<?= BASE_URL ?>/student_dashboard.php" class="btn transparent">Volver al Panel</a>
+            <a href="<?= BASE_URL ?>/student_dashboard.php" class="btn transparent">Volver</a>
         <?php else : ?>
             <a href="<?= BASE_URL ?>/student_clubs.php" class="btn transparent">Mis Clubs</a>
         <?php endif; ?>
@@ -50,16 +52,29 @@ $_SESSION['user'] = $user; // Refresh the session data
                 <?php if (!empty($user['profile_picture'])): ?>
                     <img src="<?= BASE_URL ?>/<?= htmlspecialchars($user['profile_picture']) ?>" alt="Foto de perfil">
                 <?php else: ?>
-                    <?= strtoupper($user['username'][0] ?? 'U') ?>
+                    <?= strtoupper(substr($user['nombres'], 0, 1)) ?>
                 <?php endif; ?>
             </div>
             <i class="fas fa-chevron-down dropdown-arrow"></i>
             <div class="user-menu">
-                <div><?= htmlspecialchars($user['user_id'] ?? '') ?></div>
-                <a href="<?= BASE_URL ?>/profile_settings.php" class="settings">Configuración</a>
-                <a href="<?= BASE_URL ?>/auth/logout.php" class="logout">Cerrar sesión</a>
+                <div class="user-info">
+                    <div class="avatar large">
+                        <?php if (!empty($user['profile_picture'])): ?>
+                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($user['profile_picture']) ?>" alt="Foto de perfil">
+                        <?php else: ?>
+                            <?= strtoupper(substr($user['nombres'], 0, 1)) ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="user-details">
+                        <div class="username"><?= htmlspecialchars($user['nombres'] . ' ' . $user['paterno']) ?></div>
+                        <div class="user-id"><?= htmlspecialchars($user['user_id'] ?? '') ?></div>
+                    </div>
+                </div>
+                <a href="<?= BASE_URL ?>/profile_settings.php" class="settings"><i class="fas fa-cog"></i>Configuración</a>
+                <a href="<?= BASE_URL ?>/auth/logout.php" class="logout"><i class="fas fa-sign-out-alt"></i>Cerrar sesión</a>
             </div>
         </div>
         <?php endif; ?>
     </div>
   </header>
+  <script src="<?= BASE_URL ?>/js/menu.js?v=<?php echo time(); ?>"></script>

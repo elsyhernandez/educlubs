@@ -7,7 +7,8 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-$user_id = $_SESSION['user']['id'];
+$user_id = $_SESSION['user']['id']; // ID numérico para la tabla 'users'
+$old_email = $_SESSION['user']['email']; // Correo antiguo para buscar en 'club_registrations'
 
 // Recoger y limpiar datos
 $nombres = trim($_POST['nombres'] ?? '');
@@ -16,6 +17,8 @@ $materno = trim($_POST['materno'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $telefono = trim($_POST['telefono'] ?? '');
 $semestre = trim($_POST['semestre'] ?? '');
+$carrera = trim($_POST['carrera'] ?? '');
+$turno = trim($_POST['turno'] ?? '');
 
 // Validación básica
 if (empty($nombres) || empty($paterno) || empty($email)) {
@@ -71,6 +74,9 @@ if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 
 }
 
 try {
+    $pdo->beginTransaction();
+
+    // Actualizar la tabla de usuarios
     $sql_parts = [];
     $params = [];
 
@@ -80,17 +86,27 @@ try {
     $sql_parts[] = "email = ?"; $params[] = $email;
     $sql_parts[] = "telefono = ?"; $params[] = $telefono;
     $sql_parts[] = "semestre = ?"; $params[] = $semestre;
+    $sql_parts[] = "carrera = ?"; $params[] = $carrera;
+    $sql_parts[] = "turno = ?"; $params[] = $turno;
 
     if ($profile_picture_path !== null) {
         $sql_parts[] = "profile_picture = ?";
         $params[] = $profile_picture_path;
     }
 
-    $sql = "UPDATE users SET " . implode(', ', $sql_parts) . " WHERE id = ?";
+    $sql_user = "UPDATE users SET " . implode(', ', $sql_parts) . " WHERE id = ?";
     $params[] = $user_id;
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    $stmt_user = $pdo->prepare($sql_user);
+    $stmt_user->execute($params);
+
+    // Sincronizar los datos del usuario en la tabla club_registrations usando el correo como clave
+    $stmt_clubs = $pdo->prepare(
+        "UPDATE club_registrations SET nombres = ?, paterno = ?, materno = ?, semestre = ?, carrera = ?, turno = ?, correo = ?, telefono = ? WHERE correo = ?"
+    );
+    $stmt_clubs->execute([$nombres, $paterno, $materno, $semestre, $carrera, $turno, $email, $telefono, $old_email]);
+
+    $pdo->commit();
 
     // Si se subió una nueva foto y había una anterior, borrar la anterior
     if ($profile_picture_path !== null && $old_pic) {

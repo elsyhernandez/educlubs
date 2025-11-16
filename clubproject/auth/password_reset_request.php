@@ -2,7 +2,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 require '../includes/config.php';
 require '../includes/mail_config.php';
 
@@ -65,39 +65,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="auth-wrapper">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
-    <div class="auth-container">
-        <h2><i class="fas fa-key"></i> Recuperar Contraseña</h2>
-        <p style="color: #666; margin-bottom: 20px;">Ingresa tus datos para enviarte un código de recuperación.</p>
-        
-        <?php if($info): ?>
-            <div class="message success" style="background-color: rgba(33, 147, 176, 0.1); color: #2193b0; border: 1px solid #2193b0; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-                <?= htmlspecialchars($info) ?>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <div class="logo-container">
+                <img src="https://imgs.search.brave.com/iH58Yz2SiQN00OY9h2I7Efo09BFFa5heeAaEj_uNTsM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYnRp/czI1OC5lZHUubXgv/d3AtY29udGVudC91/cGxvYWRzLzIwMjQv/MDgvY2J0aXMyNTgt/bG9nby5wbmc" alt="Logo CBTis 258">
+                <span>EduClubs</span>
             </div>
-        <?php endif; ?>
-        <?php if($error): ?>
-            <div class="message error">
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+            <h1>Recuperar Contraseña</h1>
+            <p>Ingresa tus datos para enviarte un código de recuperación.</p>
+            
+            <?php if($info): ?>
+                <div class="message success">
+                    <?= htmlspecialchars($info) ?>
+                </div>
+            <?php endif; ?>
+            <?php if($error): ?>
+                <div class="message error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
 
-        <form method="post">
-            <div class="form-group">
-                <i class="fas fa-user icon"></i>
-                <input id="user_id" name="user_id" placeholder="ID de Usuario" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
+            <form method="post">
+                <div class="input-wrapper">
+                    <input id="user_id" name="user_id" placeholder="ID de Usuario" required value="<?=htmlspecialchars($_POST['user_id'] ?? '')?>">
+                </div>
+                <div class="input-wrapper">
+                    <input id="email" name="email" type="email" placeholder="Correo Electrónico" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
+                </div>
+                <button type="submit">Solicitar recuperación</button>
+            </form>
+            <div class="auth-links">
+                <a href="auth.php">Volver a iniciar sesión</a>
             </div>
-            <div class="form-group">
-                <i class="fas fa-envelope icon"></i>
-                <input id="email" name="email" type="email" placeholder="Correo Electrónico" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>">
-            </div>
-            <button type="submit" class="auth-btn">Solicitar recuperación</button>
-        </form>
-        <div class="auth-links" style="text-align: center; margin-top: 20px;">
-            <a href="auth.php" class="auth-link">Volver a iniciar sesión</a>
         </div>
     </div>
-</div>
 </body>
 </html>

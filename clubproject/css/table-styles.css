@@ -1,58 +1,59 @@
 :root {
-    --table-header-bg: #f9e6e6; /* Light maroon background */
+    --table-header-bg: linear-gradient(to bottom, #62152d, #4D0011);
     --table-border-color: #e0e0e0;
-    --table-row-hover-bg: #f1f1f1;
-    --primary-color: #62152d; /* Guinda oscuro profundo */
-    --secondary-color: #952f57; /* Guinda medio */
+    --table-row-hover-bg: #f5f5f5;
+    --table-row-even-bg: #f9f9f9;
+    --primary-color: #62152d;
+    --secondary-color: #952f57;
 }
 
 .table-container {
     overflow-x: auto;
     margin-top: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     background-color: #fff;
+    border: 1px solid var(--table-border-color);
 }
 
 .styled-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    /* min-width: 600px; */ /* Eliminado para permitir que la tabla se encoja */
+    border-collapse: collapse;
 }
 
 .styled-table thead th {
-    background-color: var(--secondary-color);
+    background: var(--table-header-bg);
     color: #ffffff;
     font-weight: 600;
-    padding: 8px 6px;
+    padding: 14px 12px;
     text-align: left;
     border-bottom: 2px solid var(--primary-color);
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .styled-table thead th:first-child {
-    border-top-left-radius: 8px;
+    border-top-left-radius: 12px;
 }
 
 .styled-table thead th:last-child {
-    border-top-right-radius: 8px;
+    border-top-right-radius: 12px;
 }
 
 .styled-table tbody td {
-    padding: 8px 6px;
+    padding: 12px;
     border-bottom: 1px solid var(--table-border-color);
     color: #333;
     vertical-align: middle;
-    font-size: 12px;
-    white-space: normal;
-    word-break: break-word;
+    font-size: 14px;
 }
 
 .styled-table tbody tr {
-    position: relative; /* Para posicionar el botón de edición */
     transition: background-color 0.3s ease;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: var(--table-row-even-bg);
 }
 
 .styled-table tbody tr:hover {
@@ -63,14 +64,6 @@
     border-bottom: none;
 }
 
-.styled-table tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 8px;
-}
-
-.styled-table tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 8px;
-}
-
 .styled-table .btn {
     padding: 8px 15px;
     font-size: 0.9rem;
@@ -78,41 +71,14 @@
 }
 
 .edit-action {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s, opacity 0.2s linear;
-}
-
-.styled-table tbody tr:hover .edit-action {
-    visibility: visible;
-    opacity: 1;
-}
-
-body.edit-mode-active .edit-action {
-    position: static;
-    transform: none;
-    visibility: visible;
-    opacity: 1;
-}
-
-.edit-action .btn {
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: right;
 }
 
 @media screen and (max-width: 768px) {
     .table-container {
         box-shadow: none;
         border-radius: 0;
-    }
-
-    .styled-table {
-        min-width: 100%;
+        border: none;
     }
 
     .styled-table thead {
@@ -128,30 +94,25 @@ body.edit-mode-active .edit-action {
     .styled-table tr {
         margin-bottom: 15px;
         border: 1px solid var(--table-border-color);
-        border-radius: 8px;
-        padding: 10px;
+        border-radius: 12px;
+        padding: 15px;
         background-color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     
-    .styled-table tr:last-child {
-        margin-bottom: 0;
-    }
-
     .styled-table td {
         padding: 10px 5px;
         border: none;
         border-bottom: 1px solid #f0f0f0;
         text-align: right;
         position: relative;
-        padding-left: 50%; /* Espacio para la etiqueta */
-        white-space: normal;
-        line-height: 1.4;
+        padding-left: 50%;
     }
 
     .styled-table td:before {
         content: attr(data-label);
         position: absolute;
-        left: 10px;
+        left: 15px;
         width: 45%;
         padding-right: 10px;
         white-space: nowrap;
@@ -163,47 +124,4 @@ body.edit-mode-active .edit-action {
     .styled-table td:last-child {
         border-bottom: none;
     }
-
-    .styled-table td.edit-action:before {
-        content: none;
-    }
-
-    /* Hide edit controls by default with higher specificity */
-    .styled-table .edit-col,
-    .styled-table .edit-action {
-        display: none;
-    }
-
-    /* Show them when edit mode is active */
-    .card.editing .styled-table .edit-col,
-    .card.editing .styled-table .edit-action {
-        display: block;
-    }
-
-    /* Specific styling for the checkbox column in edit mode */
-    .card.editing .styled-table .edit-col {
-        padding: 5px 5px 10px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    /* Specific styling for the action column in edit mode */
-    .card.editing .styled-table .edit-action {
-        text-align: right;
-        padding: 10px 5px;
-    }
-}
-
-.table-header {
-    background: var(--secondary-color);
-    color: #fff;
-    padding: 12px 20px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    text-align: left;
-}
-
-.table-header h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
 }

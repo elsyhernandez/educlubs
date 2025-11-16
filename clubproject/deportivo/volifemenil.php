@@ -5,6 +5,9 @@
   <title>Club de Voleibol femenil</title>
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<?php
+require_once '../includes/config.php';
+?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../css/modal-styles.css">
    <style>
@@ -532,14 +535,6 @@
             transform: scale(1.05); /* Pequeño efecto al hacer hover/click */
         }
         
-        /* Estilos del Modal (sin cambios) */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 10px; position: relative; color: #333; }
-        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-        .close-button:hover,
-        .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
-        .modal-iframe { width: 100%; height: 400px; border: none; }
-
         /* -------------------- */
         /* Media Queries (Diseño Responsivo) */
         /* -------------------- */
@@ -766,204 +761,131 @@
 <?php include '../includes/modals/registration_modal.php'; ?>
 
 <script>
-    // Definir variables específicas para este club
+    // Definir variables globales para que el modal pueda acceder a ellas
     const clubType = 'deportivo';
-    const clubName = 'Voleibol femenil';
+    const clubName = 'Voleibol Femenil';
 
-    // Variables globales para el Carrusel 3D
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables y funciones para el carrusel 3D
     const carousel = document.getElementById('carrusel');
-    const cards = Array.from(carousel.children);
-    const numCards = cards.length;
-    const angleIncrement = 360 / numCards; 
-    let currentCardIndex = 0; 
-    let currentRotation = 0; 
-    let autoRotateInterval; // Variable para el intervalo de rotación
+    if (carousel) {
+        const cards = Array.from(carousel.children);
+        const numCards = cards.length;
+        const angleIncrement = 360 / numCards;
+        let currentCardIndex = 0;
+        let currentRotation = 0;
+        let autoRotateInterval;
 
-    // ---------------------------------------------
-    // Lógica del Carrusel 3D
-    // ---------------------------------------------
-    
-    function updateCarousel() {
-        currentRotation = -(currentCardIndex * angleIncrement); 
-        
-        carousel.style.transform = `translateZ(calc(var(--translate-z) * -1)) rotateY(${currentRotation}deg)`;
-
-        cards.forEach((card, index) => {
-            card.classList.remove('active');
-        });
-
-        cards.forEach((card, index) => {
-            const relativeIndex = (index - currentCardIndex + numCards) % numCards;
-            if (relativeIndex === 0) {
-                card.classList.add('active');
-            } else {
-                card.classList.remove('active');
-            }
-        });
-    }
-
-    function moverCarrusel(dir) {
-        // Detener y reiniciar el temporizador en cada movimiento manual
-        resetAutoRotate(); 
-        
-        currentCardIndex += dir;
-
-        if (currentCardIndex < 0) {
-            currentCardIndex = numCards - 1;
-        } else if (currentCardIndex >= numCards) {
-            currentCardIndex = 0;
+        function updateCarousel() {
+            currentRotation = -(currentCardIndex * angleIncrement);
+            carousel.style.transform = `translateZ(calc(var(--translate-z) * -1)) rotateY(${currentRotation}deg)`;
+            cards.forEach((card, index) => {
+                card.classList.toggle('active', index === currentCardIndex);
+            });
         }
 
-        updateCarousel();
-    }
-    
-    cards.forEach((card, index) => {
-        card.addEventListener('click', () => {
-            resetAutoRotate(); // Detener y reiniciar al hacer clic en una tarjeta
-            currentCardIndex = index;
+        function moverCarrusel(dir) {
+            resetAutoRotate();
+            currentCardIndex = (currentCardIndex + dir + numCards) % numCards;
             updateCarousel();
+        }
+
+        cards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                resetAutoRotate();
+                currentCardIndex = index;
+                updateCarousel();
+            });
         });
-    });
 
-    // Función para el auto-cambio
-    function autoRotate() {
-        moverCarrusel(1); // Mover al siguiente
-    }
+        function autoRotate() {
+            moverCarrusel(1);
+        }
 
-    // Función para detener y reiniciar el intervalo
-    function resetAutoRotate() {
-        clearInterval(autoRotateInterval);
-        // El carrusel automático de 5 segundos se retoma
-        autoRotateInterval = setInterval(autoRotate, 5000); 
-    }
-    
-    // Inicializar el carrusel y el auto-cambio al cargar la página
-    window.addEventListener('load', () => {
+        function resetAutoRotate() {
+            clearInterval(autoRotateInterval);
+            autoRotateInterval = setInterval(autoRotate, 5000);
+        }
+
+        const btnPrev = document.querySelector('.btn-prev');
+        const btnNext = document.querySelector('.btn-next');
+        if (btnPrev && btnNext) {
+            btnPrev.addEventListener('click', () => moverCarrusel(-1));
+            btnNext.addEventListener('click', () => moverCarrusel(1));
+        }
+
         updateCarousel();
-        resetAutoRotate(); // Iniciar la rotación automática
-    });
-
-
-    // ==========================================================
-    // --- Lógica del Carrusel de Features (Ajuste para animación) ---
-    // ==========================================================
-    
-    const featuresWrapper = document.getElementById('featuresWrapper');
-    const prevBtnFeatures = document.getElementById('featuresPrevBtn');
-    const nextBtnFeatures = document.getElementById('featuresNextBtn');
-    const paginationDotsFeatures = document.getElementById('featuresPaginationDots');
-    const featureCards = document.querySelectorAll('.feature-card');
-
-    const cardsPerView = 2; 
-    let currentFeatureSlide = 0;
-    const totalSlides = Math.ceil(featureCards.length / cardsPerView); 
-
-    function updateFeaturesCarousel() {
-        const featuresContainer = document.querySelector('.features-container');
-        const containerWidth = featuresContainer.offsetWidth; 
-        
-        const gap = 20; 
-        const cardWidth = (containerWidth - gap) / cardsPerView;
-
-        const slideDistance = cardWidth * cardsPerView + gap;
-        let offset;
-
-        // Ajuste para el modo responsivo (1 tarjeta por vista)
-        if (window.innerWidth <= 768) { 
-            offset = -currentFeatureSlide * (containerWidth + gap); 
-        } else {
-             offset = -currentFeatureSlide * slideDistance; 
-        }
-
-        featuresWrapper.style.transform = `translateX(${offset}px)`;
-
-        document.querySelectorAll('.feature-dot').forEach((dot, index) => {
-            if (index === currentFeatureSlide) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
-        
-        // **NUEVO: Lógica para reactivar la animación de las letras**
-        featureCards.forEach(card => card.classList.remove('animate-slide'));
-        
-        // Añadir la clase 'animate-slide' solo a las tarjetas visibles.
-        // Asumimos 2 tarjetas visibles en escritorio, 1 en móvil (ajustado en CSS)
-        const startCardIndex = currentFeatureSlide * cardsPerView;
-        const visibleCardsCount = window.innerWidth <= 768 ? 1 : cardsPerView;
-        
-        for (let i = 0; i < visibleCardsCount; i++) {
-            const cardIndex = startCardIndex + i;
-            if (featureCards[cardIndex]) {
-                 featureCards[cardIndex].classList.add('animate-slide');
-            }
-        }
+        resetAutoRotate();
     }
 
-    // Flechas y Puntos (Lógica ajustada)
-    const moveFeaturesCarousel = (dir) => {
-        if (dir === -1) {
-            if (currentFeatureSlide === 0) {
-                currentFeatureSlide = totalSlides - 1;
-            } else {
-                currentFeatureSlide--;
-            }
-        } else if (dir === 1) {
-            if (currentFeatureSlide === totalSlides - 1) {
-                currentFeatureSlide = 0;
-            } else {
-                currentFeatureSlide++;
-            }
-        }
-        updateFeaturesCarousel();
-    };
+    // Lógica del carrusel de "Features"
+    const featuresWrapper = document.getElementById('featuresWrapper');
+    if (featuresWrapper) {
+        const prevBtnFeatures = document.getElementById('featuresPrevBtn');
+        const nextBtnFeatures = document.getElementById('featuresNextBtn');
+        const paginationDotsFeatures = document.getElementById('featuresPaginationDots');
+        const featureCards = document.querySelectorAll('.feature-card');
+        const cardsPerView = window.innerWidth <= 768 ? 1 : 2;
+        let currentFeatureSlide = 0;
+        const totalSlides = Math.ceil(featureCards.length / cardsPerView);
 
+        function updateFeaturesCarousel() {
+            const containerWidth = featuresWrapper.parentElement.offsetWidth;
+            const gap = 20;
+            const offset = -currentFeatureSlide * (containerWidth + gap) / (window.innerWidth <= 768 ? 1 : 2);
+            featuresWrapper.style.transform = `translateX(${offset}px)`;
 
-    prevBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(-1));
-    nextBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(1));
-
-    paginationDotsFeatures.addEventListener('click', (event) => {
-        if (event.target.classList.contains('feature-dot')) {
-            currentFeatureSlide = parseInt(event.target.dataset.slide);
-            updateFeaturesCarousel();
-        }
-    });
-
-    // Se mantiene la lógica de carga y redimensionamiento
-    window.addEventListener('load', updateFeaturesCarousel);
-    window.addEventListener('resize', updateFeaturesCarousel);
-
-
-    // ==========================================================
-    // --- Lógica de Intersección (Animación al Scroll - Se mantiene) ---
-    // ==========================================================
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const bottomSection = document.getElementById('bottomSection');
-
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate');
-                        // Llama a updateFeaturesCarousel para que la primera vista se anime
-                        updateFeaturesCarousel(); 
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                rootMargin: '0px',
-                threshold: 0.1 
+            document.querySelectorAll('.feature-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentFeatureSlide);
             });
 
-            observer.observe(bottomSection);
-        } else {
-            bottomSection.classList.add('animate');
+            featureCards.forEach(card => card.classList.remove('animate-slide'));
+            const startCardIndex = currentFeatureSlide * cardsPerView;
+            for (let i = 0; i < cardsPerView; i++) {
+                if (featureCards[startCardIndex + i]) {
+                    featureCards[startCardIndex + i].classList.add('animate-slide');
+                }
+            }
+        }
+
+        function moveFeaturesCarousel(dir) {
+            currentFeatureSlide = (currentFeatureSlide + dir + totalSlides) % totalSlides;
             updateFeaturesCarousel();
         }
-    });
 
+        if (prevBtnFeatures && nextBtnFeatures) {
+            prevBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(-1));
+            nextBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(1));
+        }
+
+        if (paginationDotsFeatures) {
+            paginationDotsFeatures.addEventListener('click', (event) => {
+                if (event.target.classList.contains('feature-dot')) {
+                    currentFeatureSlide = parseInt(event.target.dataset.slide);
+                    updateFeaturesCarousel();
+                }
+            });
+        }
+
+        window.addEventListener('resize', updateFeaturesCarousel);
+        updateFeaturesCarousel(); // Initial call
+    }
+
+    // Animación al hacer scroll
+    const bottomSection = document.getElementById('bottomSection');
+    if (bottomSection) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                    if (featuresWrapper) updateFeaturesCarousel();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        observer.observe(bottomSection);
+    }
+});
 </script>
 
 </body>

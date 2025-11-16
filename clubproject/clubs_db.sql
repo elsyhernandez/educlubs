@@ -80,6 +80,7 @@ CREATE TABLE `club_registrations` (
   `materno` varchar(100) NOT NULL,
   `nombres` varchar(150) NOT NULL,
   `semestre` varchar(50) DEFAULT NULL,
+  `carrera` varchar(100) DEFAULT NULL,
   `correo` varchar(255) NOT NULL,
   `turno` varchar(50) DEFAULT NULL,
   `user_id` varchar(100) NOT NULL,
@@ -198,12 +199,13 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `role` enum('student','teacher') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `nombres` varchar(255) NOT NULL,
-  `paterno` varchar(255) NOT NULL,
-  `materno` varchar(255) NOT NULL,
-  `telefono` varchar(10) NOT NULL,
-  `semestre` varchar(255) NOT NULL,
-  `turno` varchar(255) NOT NULL,
+  `nombres` varchar(255) DEFAULT NULL,
+  `paterno` varchar(255) DEFAULT NULL,
+  `materno` varchar(255) DEFAULT NULL,
+  `telefono` varchar(10) DEFAULT NULL,
+  `semestre` varchar(255) DEFAULT NULL,
+  `carrera` varchar(255) DEFAULT NULL,
+  `turno` varchar(255) DEFAULT NULL,
   `tipo_sangre` varchar(10) DEFAULT NULL,
   `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -369,6 +371,34 @@ ALTER TABLE `tutoring_registrations`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL,
+  `teacher_id` varchar(100) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `club_name` varchar(100) NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indices de la tabla `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `teacher_id` (`teacher_id`);
+
+--
+-- AUTO_INCREMENT de la tabla `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

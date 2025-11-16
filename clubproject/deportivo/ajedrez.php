@@ -1,3 +1,4 @@
+<?php require_once '../includes/config.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -632,7 +633,7 @@
 
 <div class="carrusel-container">
     
-    <button class="btn-carrusel btn-prev" onclick="moverCarrusel(-1)">
+    <button class="btn-carrusel btn-prev">
         <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -671,7 +672,7 @@
         </div>
     </div>
 
-    <button class="btn-carrusel btn-next" onclick="moverCarrusel(1)">
+    <button class="btn-carrusel btn-next">
         <i class="fas fa-chevron-right"></i>
     </button>
 </div>
@@ -763,15 +764,122 @@
     </div>
 </div>
 
-<script>
-    // Definir variables específicas para este club
-    var clubType = 'deportivo';
-    var clubName = 'Ajedrez';
-</script>
-
 <?php include '../includes/modals/registration_modal.php'; ?>
 
-<script src="../js/main.js"></script>
+<script>
+    // Definir variables globales para que el modal pueda acceder a ellas
+    const clubType = 'deportivo';
+    const clubName = 'Ajedrez';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales para el Carrusel 3D
+    const carousel = document.getElementById('carrusel');
+    const cards = Array.from(carousel.children);
+    const numCards = cards.length;
+    const angleIncrement = 360 / numCards; 
+    let currentCardIndex = 0; 
+    let currentRotation = 0; 
+    let autoRotateInterval;
+
+    function updateCarousel() {
+        currentRotation = -(currentCardIndex * angleIncrement); 
+        carousel.style.transform = `translateZ(calc(var(--translate-z) * -1)) rotateY(${currentRotation}deg)`;
+        cards.forEach((card, index) => {
+            card.classList.toggle('active', index === currentCardIndex);
+        });
+    }
+
+    function moverCarrusel(dir) {
+        resetAutoRotate(); 
+        currentCardIndex = (currentCardIndex + dir + numCards) % numCards;
+        updateCarousel();
+    }
+    
+    document.querySelector('.btn-prev').addEventListener('click', () => moverCarrusel(-1));
+    document.querySelector('.btn-next').addEventListener('click', () => moverCarrusel(1));
+
+    cards.forEach((card, index) => {
+        card.addEventListener('click', () => {
+            resetAutoRotate();
+            currentCardIndex = index;
+            updateCarousel();
+        });
+    });
+
+    function autoRotate() {
+        currentCardIndex = (currentCardIndex + 1) % numCards;
+        updateCarousel();
+    }
+
+    function resetAutoRotate() {
+        clearInterval(autoRotateInterval);
+        autoRotateInterval = setInterval(autoRotate, 5000); 
+    }
+    
+    // Lógica del Carrusel de Features
+    const featuresWrapper = document.getElementById('featuresWrapper');
+    const prevBtnFeatures = document.getElementById('featuresPrevBtn');
+    const nextBtnFeatures = document.getElementById('featuresNextBtn');
+    const paginationDotsFeatures = document.getElementById('featuresPaginationDots');
+    const featureCards = document.querySelectorAll('.feature-card');
+    const cardsPerView = window.innerWidth <= 768 ? 1 : 2;
+    let currentFeatureSlide = 0;
+    const totalSlides = Math.ceil(featureCards.length / cardsPerView);
+
+    function updateFeaturesCarousel() {
+        const containerWidth = featuresWrapper.parentElement.offsetWidth;
+        const gap = 20;
+        const offset = -currentFeatureSlide * (containerWidth + gap) / cardsPerView;
+        featuresWrapper.style.transform = `translateX(${offset}px)`;
+
+        document.querySelectorAll('.feature-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentFeatureSlide);
+        });
+
+        featureCards.forEach(card => card.classList.remove('animate-slide'));
+        const startCardIndex = currentFeatureSlide * cardsPerView;
+        for (let i = 0; i < cardsPerView; i++) {
+            if (featureCards[startCardIndex + i]) {
+                featureCards[startCardIndex + i].classList.add('animate-slide');
+            }
+        }
+    }
+
+    const moveFeaturesCarousel = (dir) => {
+        currentFeatureSlide = (currentFeatureSlide + dir + totalSlides) % totalSlides;
+        updateFeaturesCarousel();
+    };
+
+    prevBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(-1));
+    nextBtnFeatures.addEventListener('click', () => moveFeaturesCarousel(1));
+
+    paginationDotsFeatures.addEventListener('click', (event) => {
+        if (event.target.classList.contains('feature-dot')) {
+            currentFeatureSlide = parseInt(event.target.dataset.slide);
+            updateFeaturesCarousel();
+        }
+    });
+
+    // Lógica de Intersección para animación al scroll
+    const bottomSection = document.getElementById('bottomSection');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+                updateFeaturesCarousel(); 
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    observer.observe(bottomSection);
+
+    // Inicialización
+    updateCarousel();
+    resetAutoRotate();
+    window.addEventListener('resize', updateFeaturesCarousel);
+});
+</script>
 
 </body>
 </html>
