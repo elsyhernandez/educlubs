@@ -85,9 +85,16 @@ try {
     $sql_parts[] = "materno = ?"; $params[] = $materno;
     $sql_parts[] = "email = ?"; $params[] = $email;
     $sql_parts[] = "telefono = ?"; $params[] = $telefono;
-    $sql_parts[] = "semestre = ?"; $params[] = $semestre;
-    $sql_parts[] = "carrera = ?"; $params[] = $carrera;
-    $sql_parts[] = "turno = ?"; $params[] = $turno;
+
+    if (!empty($semestre)) {
+        $sql_parts[] = "semestre = ?"; $params[] = $semestre;
+    }
+    if (!empty($carrera)) {
+        $sql_parts[] = "carrera = ?"; $params[] = $carrera;
+    }
+    if (!empty($turno)) {
+        $sql_parts[] = "turno = ?"; $params[] = $turno;
+    }
 
     if ($profile_picture_path !== null) {
         $sql_parts[] = "profile_picture = ?";
@@ -101,10 +108,30 @@ try {
     $stmt_user->execute($params);
 
     // Sincronizar los datos del usuario en la tabla club_registrations usando el correo como clave
-    $stmt_clubs = $pdo->prepare(
-        "UPDATE club_registrations SET nombres = ?, paterno = ?, materno = ?, semestre = ?, carrera = ?, turno = ?, correo = ?, telefono = ? WHERE correo = ?"
-    );
-    $stmt_clubs->execute([$nombres, $paterno, $materno, $semestre, $carrera, $turno, $email, $telefono, $old_email]);
+    $club_sql_parts = [];
+    $club_params = [];
+
+    $club_sql_parts[] = "nombres = ?"; $club_params[] = $nombres;
+    $club_sql_parts[] = "paterno = ?"; $club_params[] = $paterno;
+    $club_sql_parts[] = "materno = ?"; $club_params[] = $materno;
+    $club_sql_parts[] = "correo = ?"; $club_params[] = $email;
+    $club_sql_parts[] = "telefono = ?"; $club_params[] = $telefono;
+
+    if (!empty($semestre)) {
+        $club_sql_parts[] = "semestre = ?"; $club_params[] = $semestre;
+    }
+    if (!empty($carrera)) {
+        $club_sql_parts[] = "carrera = ?"; $club_params[] = $carrera;
+    }
+    if (!empty($turno)) {
+        $club_sql_parts[] = "turno = ?"; $club_params[] = $turno;
+    }
+
+    $sql_clubs = "UPDATE club_registrations SET " . implode(', ', $club_sql_parts) . " WHERE correo = ?";
+    $club_params[] = $old_email;
+
+    $stmt_clubs = $pdo->prepare($sql_clubs);
+    $stmt_clubs->execute($club_params);
 
     $pdo->commit();
 

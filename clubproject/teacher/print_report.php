@@ -225,12 +225,12 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php else: ?>
                     <?php foreach ($rows as $row): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars(($is_asesoria ? $row['materia'] : $row['club_name']) ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars(($row['nombres'] ?? '') . ' ' . ($row['paterno'] ?? '') . ' ' . ($row['materno'] ?? '')); ?></td>
-                            <td><?php echo htmlspecialchars($row['semestre'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row['carrera'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row['grupo'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row['turno'] ?? ''); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars(($is_asesoria ? $row['materia'] : $row['club_name']) ?? '')); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars(($row['nombres'] ?? '') . ' ' . ($row['paterno'] ?? '') . ' ' . ($row['materno'] ?? ''))); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars($row['semestre'] ?? '')); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars($row['carrera'] ?? '')); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars($row['grupo'] ?? '')); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars($row['turno'] ?? '')); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

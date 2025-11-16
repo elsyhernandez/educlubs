@@ -58,16 +58,18 @@ $_SESSION['user'] = $user; // Refresh the session data
             <i class="fas fa-chevron-down dropdown-arrow"></i>
             <div class="user-menu">
                 <div class="user-info">
-                    <div class="avatar large">
+                    <div class="profile-picture-container">
                         <?php if (!empty($user['profile_picture'])): ?>
-                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($user['profile_picture']) ?>" alt="Foto de perfil">
+                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($user['profile_picture']) ?>" alt="Foto de perfil" class="profile-picture">
                         <?php else: ?>
-                            <?= strtoupper(substr($user['nombres'], 0, 1)) ?>
+                            <div class="no-profile-picture">
+                                <span>No tiene foto</span>
+                            </div>
                         <?php endif; ?>
                     </div>
                     <div class="user-details">
-                        <div class="username"><?= htmlspecialchars($user['nombres'] . ' ' . $user['paterno']) ?></div>
-                        <div class="user-id"><?= htmlspecialchars($user['user_id'] ?? '') ?></div>
+                        <div class="username"><?= strtoupper(htmlspecialchars($user['nombres'] . ' ' . $user['paterno'])) ?></div>
+                        <div class="user-id"><?= strtoupper(htmlspecialchars($user['user_id'] ?? '')) ?></div>
                     </div>
                 </div>
                 <a href="<?= BASE_URL ?>/profile_settings.php" class="settings"><i class="fas fa-cog"></i>Configuración</a>

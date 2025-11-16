@@ -28,7 +28,7 @@
                 </div>
 <div class="form-group">
                         <label for="semestre">Semestre</label>
-                        <select id="semestre" name="semestre" required>
+                        <select id="semestre" name="semestre">
                             <option value="">Selecciona tu semestre</option>
                             <?php
                             $semestres = ["1er Semestre", "2do Semestre", "3er Semestre", "4to Semestre", "5to Semestre", "6to Semestre"];
@@ -43,10 +43,10 @@
                     </div>
                     <div class="form-group">
                         <label for="carrera">Carrera</label>
-                        <select id="carrera" name="carrera" required>
+                        <select id="carrera" name="carrera">
                             <option value="">Selecciona tu carrera</option>
                             <?php
-                            $carreras = ["Ing. en Sistemas Computacionales", "Ing. Industrial", "Ing. en Mecatrónica", "Ing. en Gestión Empresarial", "Lic. en Administración"];
+                            $carreras = ["CONTABILIDAD", "LOGÍSTICA", "MECÁNICA INDUSTRIAL", "ALIMENTOS Y BEBIDAS", "PROGRAMACIÓN", "HOSPEDAJE"];
                             foreach ($carreras as $carrera) {
                                 $user_carrera = isset($user['carrera']) ? $user['carrera'] : '';
                                 $selected = ($user_carrera == $carrera) ? 'selected' : '';
@@ -57,7 +57,7 @@
                     </div>
                     <div class="form-group">
                         <label for="turno">Turno</label>
-                        <select id="turno" name="turno" required>
+                        <select id="turno" name="turno">
                             <option value="">Selecciona tu turno</option>
                             <?php
                             $turnos = ["Matutino", "Vespertino"];

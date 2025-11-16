@@ -1,79 +1,128 @@
-/* Contenedor principal del header */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    padding: 10px 20px; /* Añadido para dar espacio */
-    background-color: #4D0011; /* Usando el color primario del menú */
-    color: #fff;
+:root {
+    --notification-success-bg: #e8f5e9;
+    --notification-success-icon: #2e7d32;
+    --notification-error-bg: #ffebee;
+    --notification-error-icon: #c62828;
+    --notification-info-bg: #e3f2fd;
+    --notification-info-icon: #1565c0;
+    --notification-warning-bg: #fff3e0;
+    --notification-warning-icon: #ef6c00;
 }
 
-/* El .menu-container original no necesita cambios, ya está en menu.css */
-
-/* Estilos para el ícono de notificación */
-.notification-icon {
-    position: relative; /* Cambiado de absolute a relative */
-    cursor: pointer;
-}
-
-.notification-icon .fa-bell {
-    font-size: 24px;
-}
-
-.notification-count {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    background-color: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-    font-weight: bold;
-    display: none; /* Oculto por defecto */
-}
-
-/* Estilos para el panel de notificaciones */
-.notification-panel {
-    display: none;
-    position: absolute;
-    right: 20px;
-    top: 50px;
-    width: 300px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
+.notification {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    padding: 8px 22px;
+    border-radius: 12px; /* Match --radius */
+    background: #fff;
     color: #333;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 1050;
+    transform: translateX(calc(100% + 30px));
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s;
+    max-width: 700px;
+    border: 1px solid rgba(0,0,0,0.08);
+    overflow: hidden; /* For progress bar */
 }
 
-.notification-header {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    background-color: #f7f7f7;
+.notification.show {
+    transform: translateX(0);
 }
 
-.notification-header h4 {
-    margin: 0;
-    font-size: 16px;
+.notification .icon {
+    font-size: 22px;
+    margin-right: 14px;
+    flex-shrink: 0;
 }
 
-.notification-body {
-    max-height: 300px;
-    overflow-y: auto;
+.notification .message {
+    flex: 1;
+    line-height: 1.4;
+    text-align: center;
 }
 
-.notification-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+.notification .close-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    margin-left: 12px;
+    padding: 0 4px;
 }
 
-.notification-item:last-child {
-    border-bottom: none;
+.notification .close-btn:hover {
+    opacity: 1;
 }
 
-.notification-item p {
-    margin: 0;
-    font-size: 14px;
+/* Type Styles */
+.notification.success {
+    background-color: var(--notification-success-bg);
+    color: var(--notification-success-icon);
+}
+.notification.success .icon {
+    color: var(--notification-success-icon);
+}
+
+.notification.error {
+    background-color: var(--notification-error-bg);
+    color: var(--notification-error-icon);
+}
+.notification.error .icon {
+    color: var(--notification-error-icon);
+}
+
+.notification.info {
+    background-color: var(--notification-info-bg);
+    color: var(--notification-info-icon);
+}
+.notification.info .icon {
+    color: var(--notification-info-icon);
+}
+
+.notification.warning {
+    background-color: var(--notification-warning-bg);
+    color: var(--notification-warning-icon);
+}
+.notification.warning .icon {
+    color: var(--notification-warning-icon);
+}
+
+/* Progress Bar */
+.notification::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background-color: currentColor; /* Use the icon color */
+    opacity: 0.4;
+    transform-origin: left;
+    animation: progressBar 4.5s linear forwards;
+}
+
+@keyframes progressBar {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+@media (max-width: 480px) {
+    .notification {
+        width: calc(100% - 20px);
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        border-radius: 10px;
+    }
 }

@@ -45,10 +45,6 @@ function getUniqueValues(PDO $pdo, string $table, string $column, string $where 
 
 /**
  * Paginación y filtro (usa parámetros preparados)
- * $whereBase: texto de condición inicial (por ejemplo "club_type = 'cultural'")
- * $filterValue: valor de filtro extra (se añade AND club_name = ? si está presente)
- *
- * IMPORTANTE: bindValue se usa para LIMIT/OFFSET como enteros para evitar que PDO los ponga entre comillas.
  */
 function getPaginated(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterValue = null, string $orderBy = 'ORDER BY reg.created_at DESC') {
     $page = max(1, intval($_GET[$pageParam] ?? 1));
@@ -73,7 +69,7 @@ function getPaginated(PDO $pdo, string $table, string $whereBase, string $pagePa
 
     $selectSql = "SELECT 
                     reg.id, reg.club_name, reg.created_at,
-                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.turno, u.profile_picture AS profile_pic_path
+                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.turno, u.carrera, u.profile_picture AS profile_pic_path
                   FROM `$table` reg
                   LEFT JOIN `users` u ON reg.user_id = u.user_id
                   WHERE $where $orderBy LIMIT ? OFFSET ?";
@@ -93,10 +89,6 @@ function getPaginated(PDO $pdo, string $table, string $whereBase, string $pagePa
     return ['rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit];
 }
 
-/**
- * Paginación para tablas que no tienen club_name (ej. tutoring_registrations).
- * Permite filtrar por una columna arbitraria (por ejemplo materia).
- */
 function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase, string $pageParam, ?string $filterColumn = null, ?string $filterValue = null, string $orderBy = 'ORDER BY reg.created_at DESC') {
     $page = max(1, intval($_GET[$pageParam] ?? 1));
     $limit = 10;
@@ -120,7 +112,7 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
 
     $selectSql = "SELECT 
                     reg.id, reg.materia, reg.maestro, reg.created_at,
-                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, reg.carrera, u.turno, u.profile_picture AS profile_pic_path
+                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.carrera, u.turno, u.profile_picture AS profile_pic_path
                   FROM `$table` reg
                   LEFT JOIN `users` u ON reg.user_id = u.user_id
                   WHERE $where $orderBy LIMIT ? OFFSET ?";
@@ -140,9 +132,6 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
     return ['rows' => $rows, 'total' => $total, 'page' => $page, 'limit' => $limit];
 }
 
-/**
- * Devuelve un icono de Font Awesome basado en el nombre de un club (o un ícono por defecto).
- */
 function getIconForClub(string $clubName): string {
     $clubName = strtolower($clubName);
     $iconMap = [
@@ -159,9 +148,6 @@ function getIconForClub(string $clubName): string {
     return $iconMap['default'];
 }
 
-/**
- * Genera los botones de filtro para una categoría de clubes.
- */
 function renderClubFilterButtons(array $clubOptions, string $filterParam) {
     $selectedValue = $_GET[$filterParam] ?? '';
     echo '<div class="club-filters">';
@@ -176,24 +162,18 @@ function renderClubFilterButtons(array $clubOptions, string $filterParam) {
     echo '</div>';
 }
 
-/* Obtener listas dinámicas para selects - arrays de TODOS los clubes disponibles por tipo,
-   usando la tabla `clubs` para asegurar que todos los clubes aparezcan en los filtros. */
 $culturales = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'cultural'");
 $deportivos = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'deportivo'");
 $civiles    = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'civil'");
 $asesorias_clubs = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'asesoria'");
-
-/* Lista de materias para filtro de asesorías (tutoring_registrations) */
 $materias_asesoria = getUniqueValues($pdo, 'tutoring_registrations', 'materia');
 
-/* Leer filtros desde GET */
 $filter_cultural = trim($_GET['filter_cultural'] ?? '');
 $filter_deportivo = trim($_GET['filter_deportivo'] ?? '');
 $filter_civil     = trim($_GET['filter_civil'] ?? '');
 $filter_asesoria  = trim($_GET['filter_asesoria'] ?? '');
 
-/* Obtener datos paginados aplicando filtros (si existen) */
-$orderBy = " ORDER BY u.nombres ASC, u.paterno ASC, u.materno ASC"; // Ordenamiento alfabético
+$orderBy = " ORDER BY u.nombres ASC, u.paterno ASC, u.materno ASC";
 
 $culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'", 'page_cultural', $filter_cultural, $orderBy);
 $deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo, $orderBy);
@@ -204,26 +184,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     $type = $_GET['type'];
     
     $tablesConfig = [
-        'cultural' => [
-            'title' => 'Cultural', 'data' => $culturalData,
-            'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
-            'pageParam' => 'page_cultural', 'filterParam' => 'filter_cultural', 'filterOptions' => $culturales
-        ],
-        'deportivo' => [
-            'title' => 'Deportivo', 'data' => $deportivoData,
-            'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
-            'pageParam' => 'page_deportivo', 'filterParam' => 'filter_deportivo', 'filterOptions' => $deportivos
-        ],
-        'civil' => [
-            'title' => 'Civil', 'data' => $civilData,
-            'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
-            'pageParam' => 'page_civil', 'filterParam' => 'filter_civil', 'filterOptions' => $civiles
-        ],
-        'asesorias' => [
-            'title' => 'Asesorías', 'data' => $asesoriasData,
-            'columns' => ['materia' => 'Materia', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'carrera' => 'Carrera', 'maestro' => 'Maestro', 'telefono' => 'Teléfono', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'],
-            'pageParam' => 'page_asesoria', 'filterParam' => 'filter_asesoria', 'filterOptions' => $materias_asesoria
-        ]
+        'cultural' => ['title' => 'Cultural', 'data' => $culturalData, 'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'pageParam' => 'page_cultural', 'filterParam' => 'filter_cultural', 'filterOptions' => $culturales],
+        'deportivo' => ['title' => 'Deportivo', 'data' => $deportivoData, 'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'pageParam' => 'page_deportivo', 'filterParam' => 'filter_deportivo', 'filterOptions' => $deportivos],
+        'civil' => ['title' => 'Civil', 'data' => $civilData, 'columns' => ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'pageParam' => 'page_civil', 'filterParam' => 'filter_civil', 'filterOptions' => $civiles],
+        'asesorias' => ['title' => 'Asesorías', 'data' => $asesoriasData, 'columns' => ['materia' => 'Materia', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'carrera' => 'Carrera', 'maestro' => 'Maestro', 'telefono' => 'Teléfono', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'pageParam' => 'page_asesoria', 'filterParam' => 'filter_asesoria', 'filterOptions' => $materias_asesoria]
     ];
 
     if (isset($tablesConfig[$type])) {
@@ -369,18 +333,18 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         color: #fff;
     }
 :root{
-      --primary-color: #4D0011; /* Guinda más oscuro (para header) */
-      --secondary-color: #62152d; /* Guinda oscuro (para sub-encabezados) */
-      --accent-color: #952f57; /* Guinda medio (para tablas y botones) */
-      --bg1: #f9e6e6; /* Fondo claro complementario */
-      --bg2: #e8d1d1; /* Fondo claro complementario */
+      --primary-color: #4D0011;
+      --secondary-color: #62152d;
+      --accent-color: #952f57;
+      --bg1: #f9e6e6;
+      --bg2: #e8d1d1;
       --card-bg: rgba(255,255,255,0.9);
       --primary: var(--secondary-color);
       --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
       --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6); 
-      --glass2: #4D0011d7; /* Guinda con transparencia */
+      --glass2: #4D0011d7;
           --radius: 12px;
           --edit-highlight: rgba(255, 244, 180, 0.7);
           --white-color: #FFFFFF;
@@ -398,15 +362,14 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         border-radius: 5px;
         text-decoration: none;
         box-shadow: none;
-        transition: all 0.3s ease; /* Revert to original transition to include transform */
+        transition: all 0.3s ease;
         font-size: 16px;
     }
 
     .header-actions .btn:hover {
         background: var(--white-color);
         color: var(--primary-color);
-        /* transform: none; is removed to allow animation from .btn:hover */
-        box-shadow: none; /* Keep box-shadow override */
+        box-shadow: none;
     }
     .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
@@ -459,13 +422,11 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .edit-col{width:36px;}
     tr.row-selected{background:#ffe488; font-weight: 600;}
     
-    /* Mostrar columnas de edición cuando el modo está activo */
     body.edit-mode-active .edit-col,
     body.edit-mode-active .edit-action {
         display: table-cell;
     }
 
-    /* Student Profile Modal */
     .profile-modal-content {
         display: flex;
         gap: 20px;
@@ -476,12 +437,25 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         text-align: center;
     }
     .profile-pic {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
+        width: 150px;
+        height: 200px;
+        border-radius: 8px;
         object-fit: cover;
         border: 4px solid var(--primary-color);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .profile-pic img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
     }
     .profile-pic-container .student-name {
         font-weight: 700;
@@ -525,7 +499,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         cursor: pointer;
     }
 
-    /* User Icon */
     .usericon { position: relative; }
     .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; }
     .user-menu {
@@ -554,7 +527,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .user-menu a:hover { background: #f5f5f5; }
     .user-menu a.logout { color: #d93025; font-weight: 500; }
 
-    /* Modal styles */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(4px); }
     .modal.show { display: flex; align-items: center; justify-content: center; }
     .modal-panel { 
@@ -571,7 +543,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     #confirmationModalMessage { color: #333; font-size: 16px; line-height: 1.5; }
     @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    /* Form styles */
     #modal form { background-color: transparent; }
     form { padding: 20px; }
     .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
@@ -594,574 +565,21 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .form-error { color: #d93025; font-size: 12px; margin-top: 4px; }
 
     @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-      }
-      header h2 {
-        font-size: 22px;
-      }
-      .header-actions {
-        flex-wrap: wrap;
-        width: 100%;
-        justify-content: flex-start;
-      }
-      .container {
-        padding: 16px;
-      }
+      header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      header h2 { font-size: 22px; }
+      .header-actions { flex-wrap: wrap; width: 100%; justify-content: flex-start; }
+      .container { padding: 16px; }
     }
 
     @media (max-width:560px){ .modal-panel { padding:16px; border-radius:12px; } .form-row { flex-direction:column; } .filter-row { flex-direction:column; align-items:stretch; } }
 
-    /* Animación de entrada */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
-    .fade-in-content {
-        animation: fadeIn 0.6s ease-out forwards;
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in-content { animation: fadeIn 0.6s ease-out forwards; }
   </style>
   <link rel="stylesheet" href="../css/table-styles.css?v=<?= time() ?>">
   <link rel="stylesheet" href="../css/notification.css?v=<?= time() ?>">
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      (function removeFlashParams(){
-        try {
-          const u = new URL(window.location.href);
-          if (u.searchParams.has('success') || u.searchParams.has('error')) {
-            u.searchParams.delete('success');
-            u.searchParams.delete('error');
-            const newUrl = u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '');
-            window.history.replaceState({}, document.title, newUrl);
-            const flash = document.getElementById('flashMessage');
-            if (flash) flash.remove();
-          }
-        } catch(e) { /* ignore */ }
-      })();
-
-      function setFilterParam(param, value) {
-        const u = new URL(window.location.href);
-        if (value === '' || value === null) {
-          u.searchParams.delete(param);
-        } else {
-          u.searchParams.set(param, value);
-        }
-        const pageMap = {
-          'filter_cultural': 'page_cultural',
-          'filter_deportivo': 'page_deportivo',
-          'filter_civil': 'page_civil',
-          'filter_asesoria': 'page_asesoria'
-        };
-        if (pageMap[param]) u.searchParams.set(pageMap[param], '1');
-        
-        history.pushState(null, '', u.pathname + u.search);
-
-        const typeMap = {
-            'filter_cultural': 'cultural',
-            'filter_deportivo': 'deportivo',
-            'filter_civil': 'civil',
-            'filter_asesoria': 'asesorias'
-        };
-        const type = typeMap[param];
-        if (!type) return;
-
-        const targetCardId = 'card-' + type;
-        const targetCard = document.getElementById(targetCardId);
-        if (!targetCard) return;
-
-        // Toggle print button visibility based on filter selection for immediate feedback
-        const printBtnContainer = targetCard.querySelector('.print-report-btn-container');
-        if (printBtnContainer) {
-            // Show button if a specific filter is selected, hide if "All" is chosen.
-            // The server will make the final decision based on whether there are rows to print.
-            printBtnContainer.classList.toggle('visible', value !== '');
-        }
-
-        targetCard.style.opacity = '0.5';
-        targetCard.style.pointerEvents = 'none';
-
-        const fetchUrl = new URL(u.toString());
-        fetchUrl.searchParams.set('ajax', '1');
-        fetchUrl.searchParams.set('type', type);
-
-        fetch(fetchUrl.toString())
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.text();
-            })
-            .then(html => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                const newCard = tempDiv.firstChild;
-                if (newCard) {
-                    targetCard.parentNode.replaceChild(newCard, targetCard);
-                } else {
-                    throw new Error('Invalid HTML response');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching filtered data:', error);
-                showNotification('Error al filtrar los datos.', 'error');
-                if(targetCard) {
-                    targetCard.style.opacity = '1';
-                    targetCard.style.pointerEvents = 'auto';
-                }
-            });
-      }
-
-      // Use event delegation for pagination, filters, and print buttons
-      document.querySelector('.container').addEventListener('click', function(e) {
-          // Pagination links
-          if (e.target.matches('.ajax-page-link')) {
-              e.preventDefault();
-              const link = e.target;
-              const url = new URL(link.href);
-              const card = link.closest('.card');
-              if (!card) return;
-
-              const type = card.id.replace('card-', '');
-              
-              history.pushState(null, '', url.toString());
-
-              card.style.opacity = '0.5';
-              card.style.pointerEvents = 'none';
-
-              const fetchUrl = new URL(url.toString());
-              fetchUrl.searchParams.set('ajax', '1');
-              fetchUrl.searchParams.set('type', type);
-
-              fetch(fetchUrl.toString())
-                  .then(response => response.text())
-                  .then(html => {
-                      const tempDiv = document.createElement('div');
-                      tempDiv.innerHTML = html;
-                      const newCard = tempDiv.firstChild;
-                      if (newCard) {
-                          card.parentNode.replaceChild(newCard, card);
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Error fetching page data:', error);
-                      showNotification('Error al cargar la página.', 'error');
-                      card.style.opacity = '1';
-                      card.style.pointerEvents = 'auto';
-                  });
-              return;
-          }
-
-          // Club filter buttons
-          const filterBtn = e.target.closest('.club-filter-btn');
-          if (filterBtn) {
-              e.preventDefault();
-              const param = filterBtn.dataset.filterParam;
-              const value = filterBtn.dataset.filterValue;
-
-              const parent = filterBtn.closest('.club-filters');
-              if (parent) {
-                  parent.querySelectorAll('.club-filter-btn').forEach(b => b.classList.remove('active'));
-              }
-              filterBtn.classList.add('active');
-
-              setFilterParam(param, value);
-              return;
-          }
-
-          // Print report button
-          const printBtn = e.target.closest('.print-report-btn');
-          if (printBtn) {
-              const card = printBtn.closest('.card');
-              if (card) {
-                  const type = card.id.replace('card-', '');
-                  const filterButton = card.querySelector('.club-filter-btn.active');
-                  const filterValue = filterButton ? filterButton.dataset.filterValue : '';
-
-                  if (type && filterValue) {
-                      const reportUrl = `print_report.php?type=${encodeURIComponent(type)}&filter_value=${encodeURIComponent(filterValue)}`;
-                      
-                      // Create a hidden iframe
-                      const iframe = document.createElement('iframe');
-                      iframe.style.position = 'absolute';
-                      iframe.style.width = '0';
-                      iframe.style.height = '0';
-                      iframe.style.border = '0';
-                      document.body.appendChild(iframe);
-
-                      // Set the iframe's source
-                      iframe.src = reportUrl;
-
-                      // When the iframe is loaded, print its content and then remove it
-                      iframe.onload = function() {
-                          setTimeout(function() { // Timeout to ensure content is rendered
-                              iframe.contentWindow.focus();
-                              iframe.contentWindow.print();
-                              document.body.removeChild(iframe);
-                          }, 500);
-                      };
-
-                  } else {
-                      showNotification('Por favor, selecciona un club para generar el reporte.', 'error');
-                  }
-              }
-          }
-      });
-
-      const toggleEditBtn = document.getElementById('toggleEditBtn');
-      const editToolbar = document.getElementById('editToolbar');
-      let editMode = false;
-      function setEditMode(on) {
-        editMode = !!on;
-        document.body.classList.toggle('edit-mode-active', on);
-        document.querySelectorAll('.card').forEach(card => {
-          card.classList.toggle('editing', on);
-        });
-        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
-        if (!on) {
-          document.querySelectorAll('tr.row-selected').forEach(tr => tr.classList.remove('row-selected'));
-        }
-        editToolbar.style.display = on ? 'block' : 'none';
-        toggleEditBtn.textContent = on ? 'Salir edición' : 'Editar';
-      }
-      if (toggleEditBtn) toggleEditBtn.addEventListener('click', () => setEditMode(!editMode));
-
-      function getSelectedIds() {
-        const ids = [];
-        document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
-          const id = cb.getAttribute('data-id');
-          if (id) ids.push(id);
-        });
-        return ids;
-      }
-
-      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-      if (bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', () => {
-        const ids = getSelectedIds();
-        if (!ids.length) {
-          showNotification('Selecciona al menos un alumno.', 'error');
-          return;
-        }
-        
-        // Determine active card to get context
-        const activeCard = document.querySelector('.card:not([style*="display: none"])');
-        let clubType = '', filterValue = '', currentPage = 1;
-        if (activeCard) {
-            const filterSelect = activeCard.querySelector('.filter-select');
-            if (filterSelect) {
-                const param = filterSelect.dataset.param;
-                clubType = param.split('_')[1];
-                filterValue = filterSelect.value === '__all__' ? '' : filterSelect.value;
-            }
-            const activePageLink = activeCard.querySelector('.pagination a.active');
-            if (activePageLink) {
-                const url = new URL(activePageLink.href);
-                currentPage = url.searchParams.get('page_' + clubType) || 1;
-            }
-        }
-
-        showConfirmationModal(
-          'Confirmar eliminación',
-          `¿Estás seguro de que quieres dar de baja a ${ids.length} alumno(s)? Esta acción no se puede deshacer.`,
-          async () => {
-            try {
-              const res = await fetch('../actions/bulk_delete_members.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ 
-                    ids,
-                    club_type: clubType,
-                    filter_value: filterValue,
-                    current_page: currentPage
-                })
-              });
-              const data = await res.json();
-              if (data.success) {
-                let mensaje = data.nombres && data.nombres.length > 0 ? 
-                              (data.nombres.length === 1 ? data.nombres[0] + ' eliminado' : 
-                                (data.nombres.length <= 3 ? data.nombres.join(', ') : data.nombres.slice(0, 3).join(', ') + '...') + ' eliminados')
-                              : 'Eliminado(s) correctamente';
-                showNotification(mensaje);
-
-                if (data.needsReload) {
-                    const u = new URL(window.location.href);
-                    u.searchParams.set('page_' + clubType, data.newPage);
-                    setFilterParam('filter_' + clubType, filterValue, true, data.newPage);
-                } else {
-                    ids.forEach(id => { const tr = document.querySelector('tr[data-id="'+id+'"]'); if (tr) tr.remove(); });
-                }
-              } else {
-                showNotification(data.message || 'No se pudieron eliminar los registros.', 'error');
-              }
-            } catch (err) {
-              console.error(err);
-              showNotification('Error al eliminar. Revisa la consola.', 'error');
-            }
-          }
-        );
-      });
-
-      function showConfirmationModal(title, message, onConfirm) {
-        const modal = document.getElementById('confirmationModal');
-        if (!modal) return;
-
-        modal.querySelector('#confirmationModalTitle').textContent = title;
-        modal.querySelector('#confirmationModalMessage').textContent = message;
-
-        const confirmBtn = modal.querySelector('.btn-confirm');
-        const cancelBtn = modal.querySelector('.btn-cancel');
-
-        const confirmHandler = () => {
-          onConfirm();
-          closeModal();
-        };
-
-        const closeModal = () => {
-          modal.classList.remove('show');
-          document.body.style.overflow = '';
-          confirmBtn.removeEventListener('click', confirmHandler);
-        };
-
-        confirmBtn.addEventListener('click', confirmHandler);
-        cancelBtn.addEventListener('click', closeModal, { once: true });
-        
-        modal.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', closeModal, { once: true });
-        });
-
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-      }
-
-      document.addEventListener('change', (e) => {
-        const cb = e.target.closest('.row-checkbox');
-        if (!cb) return;
-        const tr = cb.closest('tr');
-        if (!tr) return;
-        tr.classList.toggle('row-selected', cb.checked);
-      });
-      document.addEventListener('click', (e) => {
-        const tr = e.target.closest('tr[data-id]');
-        if (!tr) return;
-        if (e.target.closest('button, input, a, select, textarea')) return;
-        
-        if (editMode) {
-            const cb = tr.querySelector('.row-checkbox');
-            if (!cb) return;
-            cb.checked = !cb.checked;
-            tr.classList.toggle('row-selected', cb.checked);
-        } else {
-            // --- Open Student Profile Modal ---
-            const modal = document.getElementById('studentProfileModal');
-            if (!modal) return;
-
-            const studentData = tr.dataset;
-
-            // Populate modal
-            modal.querySelector('.student-name').textContent = studentData.nombres || 'N/A';
-            modal.querySelector('#profile-student-name').textContent = `${studentData.nombres || ''} ${studentData.paterno || ''} ${studentData.materno || ''}`;
-            
-            const profilePic = modal.querySelector('.profile-pic');
-            const defaultPicPath = `${BASE_PATH}/assets/profile_pics/default.png`;
-            profilePic.src = defaultPicPath; // Reset to default
-
-            if (studentData.memberId) {
-                const profilePicPath = `${BASE_PATH}/assets/profile_pics/${studentData.memberId}.jpg`;
-                const img = new Image();
-                img.src = profilePicPath;
-                img.onload = () => { profilePic.src = profilePicPath; };
-                img.onerror = () => { profilePic.src = defaultPicPath; }; // Explicitly set default on error
-            }
-
-            modal.querySelector('#profile-club-name').textContent = studentData.clubName || 'N/A';
-            modal.querySelector('#profile-email').textContent = studentData.correo || 'N/A';
-            modal.querySelector('#profile-phone').textContent = studentData.telefono || 'N/A';
-            modal.querySelector('#profile-semester').textContent = studentData.semestre || 'N/A';
-            modal.querySelector('#profile-user-id').textContent = studentData.memberId || 'N/A';
-            modal.querySelector('#profile-carrera').textContent = studentData.carrera || 'N/A';
-            modal.querySelector('#profile-turno').textContent = studentData.turno || 'N/A';
-
-            // Show modal
-            modal.classList.add('show');
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden';
-        }
-      });
-
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-edit');
-        if (!btn) return;
-
-        const type = btn.dataset.type;
-        document.getElementById('edit_type').value = type || '';
-        document.getElementById('edit_id').value = btn.dataset.id || '';
-        document.getElementById('edit_member_id').value = btn.dataset.memberId || '';
-        document.getElementById('edit_paterno').value = btn.dataset.paterno || '';
-        document.getElementById('edit_materno').value = btn.dataset.materno || '';
-        document.getElementById('edit_nombres').value = btn.dataset.nombres || '';
-        document.getElementById('edit_correo').value = btn.dataset.correo || '';
-        document.getElementById('edit_telefono').value = btn.dataset.telefono || '';
-        
-        const semestreField = document.getElementById('field_edit_semestre');
-        const carreraField = document.getElementById('field_edit_carrera');
-        const maestroField = document.getElementById('field_edit_maestro');
-
-        if (type === 'asesoria') {
-            semestreField.style.display = 'none';
-            carreraField.style.display = 'flex';
-            maestroField.style.display = 'flex';
-            document.getElementById('edit_carrera').value = btn.dataset.carrera || '';
-            document.getElementById('edit_maestro').value = btn.dataset.maestro || '';
-        } else {
-            semestreField.style.display = 'flex';
-            carreraField.style.display = 'none';
-            maestroField.style.display = 'none';
-            document.getElementById('edit_semestre').value = btn.dataset.semestre || '';
-        }
-
-        const modal = document.getElementById('editMemberModal');
-        modal.classList.add('show');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      });
-
-      document.querySelectorAll('.close-modal, .close-btn').forEach(b => b.addEventListener('click', (e) => {
-        const panel = e.target.closest('.modal');
-        if(panel) {
-          panel.classList.remove('show');
-          panel.setAttribute('aria-hidden', 'true');
-          if (document.activeElement) document.activeElement.blur();
-        }
-        document.body.style.overflow = '';
-      }));
-
-      const editForm = document.getElementById('editMemberForm');
-      if (editForm) {
-        editForm.addEventListener('submit', async (ev) => {
-          ev.preventDefault();
-          const form = new FormData(editForm);
-          try {
-            const res = await fetch('../actions/edit_member.php', { method: 'POST', body: new URLSearchParams([...form]) });
-            const data = await res.json();
-            if (data.success) {
-              showNotification('Cambios guardados exitosamente.');
-              const id = form.get('id');
-              const tr = document.querySelector('tr[data-id="'+id+'"]');
-              if (tr) {
-                const type = form.get('type');
-                
-                const updateCell = (col, value) => {
-                    const cell = tr.querySelector(`td[data-col="${col}"]`);
-                    if (cell) cell.textContent = value;
-                };
-
-                updateCell('paterno', form.get('paterno') || '');
-                updateCell('materno', form.get('materno') || '');
-                updateCell('nombres', form.get('nombres') || '');
-                updateCell('correo', form.get('correo') || '');
-                updateCell('telefono', form.get('telefono') || '');
-
-                if (type === 'asesoria') {
-                    updateCell('carrera', form.get('carrera') || '');
-                    updateCell('maestro', form.get('maestro') || '');
-                } else {
-                    updateCell('semestre', form.get('semestre') || '');
-                }
-
-                const editBtn = tr.querySelector('.btn-edit');
-                if (editBtn) {
-                  editBtn.dataset.paterno = form.get('paterno') || '';
-                  editBtn.dataset.materno = form.get('materno') || '';
-                  editBtn.dataset.nombres = form.get('nombres') || '';
-                  editBtn.dataset.correo = form.get('correo') || '';
-                  editBtn.dataset.telefono = form.get('telefono') || '';
-                  if (type === 'asesoria') {
-                    editBtn.dataset.carrera = form.get('carrera') || '';
-                    editBtn.dataset.maestro = form.get('maestro') || '';
-                  } else {
-                    editBtn.dataset.semestre = form.get('semestre') || '';
-                  }
-                }
-              } else {
-                location.reload();
-              }
-              const editModal = document.getElementById('editMemberModal');
-              if (editModal) {
-                editModal.classList.remove('show');
-                editModal.setAttribute('aria-hidden', 'true');
-              }
-              document.body.style.overflow = '';
-            } else {
-              showNotification(data.message || 'No se pudo guardar.', 'error');
-            }
-          } catch (err) { console.error(err); showNotification('Error al guardar.', 'error'); }
-        });
-      }
-
-    });
-  </script>
-  <script src="../js/notification.js?v=<?= time() ?>"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const addClubForm = document.getElementById('addClubForm');
-      if (addClubForm) {
-        addClubForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const formData = new FormData(addClubForm);
-          const response = await fetch('../actions/agregar_club.php', {
-            method: 'POST',
-            body: formData
-          });
-          const result = await response.json();
-          if (result.success) {
-            showNotification(result.message, 'success');
-            addClubForm.reset();
-            document.getElementById('modal').classList.remove('show');
-            document.body.style.overflow = '';
-            // Optionally, you can reload the page or update the club list dynamically
-            location.reload();
-          } else {
-            showNotification(result.message, 'error');
-          }
-        });
-      }
-    });
-  </script>
-  <?php
-    // Recuperar datos del formulario y errores si existen
-    $form_data = $_SESSION['form_data'] ?? [];
-    $form_errors = ($_SESSION['flash']['is_form_error'] ?? false) ? ($_SESSION['flash']['messages'] ?? []) : [];
-    unset($_SESSION['form_data']);
-
-    // Limpiar flash solo si no es un error de formulario, para que los errores se puedan mostrar
-    if (!($_SESSION['flash']['is_form_error'] ?? false)) {
-        unset($_SESSION['flash']);
-    }
-  ?>
 </head>
 <body class="fade-in-content">
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Si la URL tiene `modal=show`, abre el modal automáticamente.
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('modal') === 'show') {
-        const modal = document.getElementById('modal');
-        if (modal) {
-          modal.classList.add('show');
-          document.body.style.overflow = 'hidden';
-        }
-        // Limpia el parámetro de la URL para que no se vuelva a abrir al recargar
-        urlParams.delete('modal');
-        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    });
-  </script>
  <header class="main-header">
     <div class="logo">
         <img src="../admin/assets/img/logo.png" alt="Logo EduClubs" style="height: 80px; margin-right: 10px;">
@@ -1171,7 +589,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
   <div class="header-actions">
     <a href="../view_clubs.php" class="btn">Ver base de clubs</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
-    <button id="toggleEditBtn" class="btn" type="button">Editar</button>
+    <button id="toggleEditBtn" class="btn" type="button">Seleccionar Alumnos</button>
     
     <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         <?php include '../includes/teacher_menu.php'; ?>
@@ -1191,7 +609,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       <div class="edit-active">
         <strong>Modo edición activo</strong>
         <button id="bulkDeleteBtn" class="btn btn-icon" title="Eliminar" style="background-color: #c62828; color: white;"><i class="fas fa-trash"></i></button>
-        <small style="margin-left:8px;color:#666;">Selecciona filas para dar de baja o usa el icono de lápiz para editar una fila.</small>
+        <small style="margin-left:8px;color:#666;">Selecciona las filas de los alumnos que deseas dar de baja.</small>
       </div>
     </div>
 
@@ -1200,44 +618,22 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         $flash = $_SESSION['flash'];
         unset($_SESSION['flash']);
         $type = $flash['type'] ?? 'info';
-        $message_html = '';
-
-        if (!empty($flash['messages']) && is_array($flash['messages'])) {
-            $message_html = '<ul>';
-            foreach ($flash['messages'] as $msg) {
-                $message_html .= '<li>' . htmlspecialchars($msg) . '</li>';
-            }
-            $message_html .= '</ul>';
-        } elseif (!empty($flash['msg'])) {
-            $message_html = htmlspecialchars($flash['msg']);
-        }
-
+        $message_html = !empty($flash['msg']) ? htmlspecialchars($flash['msg']) : '';
         if ($message_html) {
-            echo "<script>";
-            echo "document.addEventListener('DOMContentLoaded', () => {";
-            echo "showNotification(" . json_encode($message_html) . ", '" . htmlspecialchars($type) . "');";
-            echo "});";
-            echo "</script>";
+            echo "<script>document.addEventListener('DOMContentLoaded', () => { showNotification(" . json_encode($message_html) . ", '" . htmlspecialchars($type) . "'); });</script>";
         }
     }
-    // Limpiar el flash de error de formulario después de haberlo usado
-    if (!empty($_SESSION['flash']['is_form_error'])) {
-        unset($_SESSION['flash']);
-    }
+    if (!empty($_SESSION['flash']['is_form_error'])) unset($_SESSION['flash']);
     ?>
 
     <?php
-    // Render table with optional filter select
     function renderTable($title, $data, $columns, $pageParam, $filterParam = null, $filterOptions = []) {
       $currentParams = $_GET; unset($currentParams['success'], $currentParams['error'], $currentParams['ajax'], $currentParams['type']);
       $cardId = strtolower(str_replace(['í', ' '], ['i', '-'], $title));
       echo "<div class='card fade-in-content' id='card-" . htmlspecialchars($cardId) . "' data-card='" . htmlspecialchars($title) . "'>";
-      
       echo "<h3 class='card-section-title'>" . htmlspecialchars($title) . "</h3>";
 
-      if ($filterParam !== null) {
-        renderClubFilterButtons($filterOptions, $filterParam);
-      }
+      if ($filterParam !== null) renderClubFilterButtons($filterOptions, $filterParam);
 
       echo "<div class='printable-area'>";
       echo "<h2 class='printable-title' style='display:none;'>" . htmlspecialchars($title) . " - Reporte de Miembros</h2>";
@@ -1246,171 +642,87 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         echo "<p>No hay registros disponibles.</p>";
       } else {
         echo "<div class='table-container'>";
-        
         echo "<table class='styled-table'><thead><tr>";
         echo "<th class='edit-col'></th>";
-        foreach ($columns as $key => $label) echo "<th>" . htmlspecialchars($label) . "</th>";
+        foreach ($columns as $label) echo "<th>" . htmlspecialchars($label) . "</th>";
         echo "<th class='edit-action'>Acciones</th>";
         echo "</tr></thead><tbody>";
         foreach ($data['rows'] as $r) {
           $id = htmlspecialchars($r['id'] ?? '');
-          $member_id = htmlspecialchars($r['user_id'] ?? '');
-          $paterno = htmlspecialchars($r['paterno'] ?? '');
-          $materno = htmlspecialchars($r['materno'] ?? '');
           $nombres = htmlspecialchars($r['nombres'] ?? '');
-          $correo = htmlspecialchars($r['correo'] ?? '');
-          $semestre = htmlspecialchars($r['semestre'] ?? '');
-          $telefono = htmlspecialchars($r['telefono'] ?? '');
-          $club_name = htmlspecialchars($r['club_name'] ?? $r['materia'] ?? ''); // Handle both club and asesoria
-          $carrera = htmlspecialchars($r['carrera'] ?? '');
-          $turno = htmlspecialchars($r['turno'] ?? '');
-          
-          $tr_data_attrs = "data-id='$id' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-telefono='$telefono' data-club-name='$club_name' data-carrera='$carrera' data-turno='$turno'";
-
+          $tr_data_attrs = "data-id='$id' " . implode(' ', array_map(function($k, $v) { return "data-" . htmlspecialchars(str_replace('_', '-', $k)) . "='" . htmlspecialchars($v ?? '') . "'"; }, array_keys($r), $r));
           echo "<tr $tr_data_attrs>";
           echo "<td class='edit-col'><input type='checkbox' class='row-checkbox' data-id='$id'></td>";
-          foreach ($columns as $key => $label) {
-            if ($key === 'fecha') {
-              echo "<td data-label='" . htmlspecialchars($label) . "'><small class='gray'>" . htmlspecialchars($r['created_at'] ?? '') . "</small></td>";
-            } else {
-              echo "<td data-label='" . htmlspecialchars($label) . "' data-col='".htmlspecialchars($key)."'>" . htmlspecialchars($r[$key] ?? '') . "</td>";
-            }
+          foreach (array_keys($columns) as $key) {
+            $value = ($key === 'fecha') ? "<small class='gray'>" . htmlspecialchars($r['created_at'] ?? '') . "</small>" : htmlspecialchars($r[$key] ?? '');
+            echo "<td data-label='" . htmlspecialchars($columns[$key]) . "'>$value</td>";
           }
-          $btnAttrs = "";
-          if ($id !== '') {
-            $type_slug = strtolower($title);
-            if ($type_slug === 'asesorías') $type_slug = 'asesoria';
-            $carrera = htmlspecialchars($r['carrera'] ?? '');
-            $maestro = htmlspecialchars($r['maestro'] ?? '');
-            $btnAttrs = "class='btn-edit btn btn-icon' data-id='$id' data-type='$type_slug' data-member-id='$member_id' data-paterno='$paterno' data-materno='$materno' data-nombres='$nombres' data-correo='$correo' data-semestre='$semestre' data-telefono='$telefono' data-carrera='$carrera' data-maestro='$maestro'";
-            echo "<td class='edit-action' data-label='Acciones'><button $btnAttrs type='button'>✎</button></td>";
-          } else {
-            echo "<td class='edit-action' data-label='Acciones'></td>";
-          }
+          echo "<td class='edit-action'>";
+          echo "<button class='btn small btn-icon btn-delete' data-id='$id' data-nombres='$nombres' title='Dar de baja'><i class='fas fa-user-slash'></i></button>";
+          echo "</td>";
           echo "</tr>";
         }
         echo "</tbody></table>";
         echo "</div>";
 
-        $totalPages = max(1, ceil(intval($data['total']) / max(1, intval($data['limit'] ?? 10))));
-        $currentPage = max(1, intval($data['page'] ?? 1));
+        $totalPages = ceil($data['total'] / $data['limit']);
         if ($totalPages > 1) {
           echo "<div class='pagination'>";
-          $params = $currentParams;
-          if ($currentPage > 1) {
-            $params[$pageParam] = $currentPage - 1;
-            echo "<a href='?" . http_build_query($params) . "' class='ajax-page-link'>&laquo; Anterior</a>";
-          }
           for ($i = 1; $i <= $totalPages; $i++) {
-            $params[$pageParam] = $i;
-            $active = ($currentPage == $i) ? 'active' : '';
-            echo "<a href='?" . http_build_query($params) . "' class='$active ajax-page-link'>$i</a>";
-          }
-          if ($currentPage < $totalPages) {
-            $params[$pageParam] = $currentPage + 1;
-            echo "<a href='?" . http_build_query($params) . "' class='ajax-page-link'>Siguiente &raquo;</a>";
+            $currentParams[$pageParam] = $i;
+            $url = $_SERVER['PHP_SELF'] . '?' . http_build_query($currentParams);
+            $activeClass = ($i == $data['page']) ? 'active' : '';
+            echo "<a href='$url' class='ajax-page-link $activeClass'>$i</a>";
           }
           echo "</div>";
         }
       }
-      echo "</div>"; // Cierre de .printable-area
+      echo "</div>";
       $selectedValue = $_GET[$filterParam] ?? '';
       $visibleClass = (!empty($selectedValue) && !empty($data['rows'])) ? 'visible' : '';
       echo '<div class="print-report-btn-container ' . $visibleClass . '"><button class="print-report-btn" data-card-id="' . htmlspecialchars($cardId) . '"><i class="fas fa-print"></i> Imprimir Reporte</button></div>';
       echo "</div>";
     }
 
-    renderTable('Cultural', $culturalData, [
-      'club_name' => 'Club',
-      'nombres' => 'Nombres',
-      'paterno' => 'Ap. Paterno',
-      'materno' => 'Ap. Materno',
-      'telefono' => 'Teléfono',
-      'semestre' => 'Semestre',
-      'correo' => 'Correo',
-      'user_id' => 'Registró',
-      'fecha' => 'Fecha'
-    ], 'page_cultural', 'filter_cultural', $culturales);
-
-    renderTable('Deportivo', $deportivoData, [
-      'club_name' => 'Club',
-      'nombres' => 'Nombres',
-      'paterno' => 'Ap. Paterno',
-      'materno' => 'Ap. Materno',
-      'telefono' => 'Teléfono',
-      'semestre' => 'Semestre',
-      'correo' => 'Correo',
-      'user_id' => 'Registró',
-      'fecha' => 'Fecha'
-    ], 'page_deportivo', 'filter_deportivo', $deportivos);
-
-    renderTable('Civil', $civilData, [
-      'club_name' => 'Club',
-      'nombres' => 'Nombres',
-      'paterno' => 'Ap. Paterno',
-      'materno' => 'Ap. Materno',
-      'telefono' => 'Teléfono',
-      'semestre' => 'Semestre',
-      'correo' => 'Correo',
-      'user_id' => 'Registró',
-      'fecha' => 'Fecha'
-    ], 'page_civil', 'filter_civil', $civiles);
-
-    // Asesorías: registros de tutoría (filtro por materia). El select de clubes de tipo 'asesoria' está disponible en $asesorias_clubs si se necesita.
-    renderTable('Asesorías', $asesoriasData, [
-      'materia' => 'Materia',
-      'nombres' => 'Nombres',
-      'paterno' => 'Ap. Paterno',
-      'materno' => 'Ap. Materno',
-      'carrera' => 'Carrera',
-      'maestro' => 'Maestro',
-      'telefono' => 'Teléfono',
-      'correo' => 'Correo',
-      'user_id' => 'Registró',
-      'fecha' => 'Fecha'
-    ], 'page_asesoria', 'filter_asesoria', $materias_asesoria);
+    renderTable('Cultural', $culturalData, ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'page_cultural', 'filter_cultural', $culturales);
+    renderTable('Deportivo', $deportivoData, ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'page_deportivo', 'filter_deportivo', $deportivos);
+    renderTable('Civil', $civilData, ['club_name' => 'Club', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'telefono' => 'Teléfono', 'semestre' => 'Semestre', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'page_civil', 'filter_civil', $civiles);
+    renderTable('Asesorías', $asesoriasData, ['materia' => 'Materia', 'nombres' => 'Nombres', 'paterno' => 'Ap. Paterno', 'materno' => 'Ap. Materno', 'carrera' => 'Carrera', 'maestro' => 'Maestro', 'telefono' => 'Teléfono', 'correo' => 'Correo', 'user_id' => 'Registró', 'fecha' => 'Fecha'], 'page_asesoria', 'filter_asesoria', $materias_asesoria);
     ?>
   </div>
 
-  <!-- Modal Agregar Club -->
   <div id="modal" class="modal" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-header">
         <h3 id="modal-title">Nuevo Club</h3>
         <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
       </div>
-
       <form id="addClubForm" method="post" action="../actions/agregar_club.php" novalidate>
         <div class="form-row">
           <div class="field">
             <label class="form-label">Nombre del club</label>
-            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica" pattern=".*[a-zA-Z]+.*" title="El nombre del club debe contener al menos una letra." value="<?= htmlspecialchars($form_data['club_name'] ?? '') ?>">
-            <?php if (isset($form_errors['club_name'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['club_name']) ?></div><?php endif; ?>
+            <input type="text" name="club_name" required placeholder="Ej. Club de Robótica">
           </div>
           <div class="field">
             <label class="form-label">Tipo de club</label>
             <select name="club_type" required>
               <option value="">Selecciona una opción</option>
-              <option value="cultural" <?= ($form_data['club_type'] ?? '') === 'cultural' ? 'selected' : '' ?>>Cultural</option>
-              <option value="deportivo" <?= ($form_data['club_type'] ?? '') === 'deportivo' ? 'selected' : '' ?>>Deportivo</option>
-              <option value="asesoria" <?= ($form_data['club_type'] ?? '') === 'asesoria' ? 'selected' : '' ?>>Asesorías</option>
-              <option value="civil" <?= ($form_data['club_type'] ?? '') === 'civil' ? 'selected' : '' ?>>Civil</option>
+              <option value="cultural">Cultural</option>
+              <option value="deportivo">Deportivo</option>
+              <option value="asesoria">Asesorías</option>
+              <option value="civil">Civil</option>
             </select>
-            <?php if (isset($form_errors['club_type'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['club_type']) ?></div><?php endif; ?>
           </div>
         </div>
-
         <div class="form-row">
           <div class="field">
             <label class="form-label">Nombre del creador</label>
-            <input type="text" name="creator_name" required placeholder="Nombre completo" pattern="[a-zA-Z\s]+" title="El nombre del creador solo puede contener letras y espacios." value="<?= htmlspecialchars($form_data['creator_name'] ?? '') ?>">
-            <?php if (isset($form_errors['creator_name'])): ?><div class="form-error"><?= htmlspecialchars($form_errors['creator_name']) ?></div><?php endif; ?>
+            <input type="text" name="creator_name" required placeholder="Nombre completo">
           </div>
           <div class="field" style="flex:0 0 120px; align-self:flex-end;">
             <button type="button" class="btn alt close-modal" style="width:100%;">Cancelar</button>
           </div>
         </div>
-
         <div class="actions">
           <button type="submit" class="btn">Guardar club</button>
         </div>
@@ -1418,86 +730,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     </div>
   </div>
 
-  <!-- Edit member modal -->
-  <div id="editMemberModal" class="modal" aria-hidden="true">
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="editTitle">
-      <div class="modal-header">
-        <h3 id="editTitle">Editar miembro</h3>
-        <button type="button" class="close-btn close-modal" aria-label="Cerrar">✕</button>
-      </div>
-
-      <form id="editMemberForm" novalidate>
-        <input type="hidden" id="edit_id" name="id" value="">
-        <input type="hidden" id="edit_type" name="type" value="">
-        <div class="form-row">
-          <div class="field">
-            <label class="form-label">ID socio</label>
-            <input id="edit_member_id" name="member_id" type="text" required readonly>
-          </div>
-          <div class="field">
-            <label class="form-label">Nombres</label>
-            <input id="edit_nombres" name="nombres" type="text">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label class="form-label">Paterno</label>
-            <input id="edit_paterno" name="paterno" type="text">
-          </div>
-          <div class="field">
-            <label class="form-label">Materno</label>
-            <input id="edit_materno" name="materno" type="text">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label class="form-label">Correo</label>
-            <input id="edit_correo" name="correo" type="email">
-          </div>
-          <div class="field" id="field_edit_semestre">
-            <label class="form-label">Semestre</label>
-            <select id="edit_semestre" name="semestre">
-              <option value="">Selecciona semestre</option>
-              <option value="1er semestre">1er semestre</option>
-              <option value="2do semestre">2do semestre</option>
-              <option value="3er semestre">3er semestre</option>
-              <option value="4to semestre">4to semestre</option>
-              <option value="5to semestre">5to semestre</option>
-              <option value="6to semestre">6to semestre</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row" id="field_edit_carrera" style="display: none;">
-            <div class="field">
-                <label class="form-label">Carrera</label>
-                <input id="edit_carrera" name="carrera" type="text">
-            </div>
-        </div>
-        <div class="form-row" id="field_edit_maestro" style="display: none;">
-            <div class="field">
-                <label class="form-label">Maestro</label>
-                <input id="edit_maestro" name="maestro" type="text">
-            </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label class="form-label">Teléfono</label>
-            <input id="edit_telefono" name="telefono" type="text">
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="btn">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Confirmation Modal -->
   <div id="confirmationModal" class="modal" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="confirmationModalTitle">
       <div class="modal-header">
@@ -1514,7 +746,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     </div>
   </div>
 
-  <!-- Student Profile Modal -->
   <div id="studentProfileModal" class="modal" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" style="max-width: 650px;">
       <div class="modal-header">
@@ -1523,51 +754,256 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       </div>
       <div class="profile-modal-content">
         <div class="profile-pic-container">
-          <img src="../assets/profile_pics/default.png" alt="Foto de perfil" class="profile-pic">
+          <div class="profile-pic"></div>
           <div class="student-name"></div>
         </div>
         <div class="profile-details">
           <h4 id="profile-student-name"></h4>
-          <div class="detail-item">
-            <i class="fas fa-university icon"></i>
-            <span class="label">Club/Materia:</span>
-            <span class="value" id="profile-club-name"></span>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-id-card icon"></i>
-            <span class="label">Matrícula:</span>
-            <span class="value" id="profile-user-id"></span>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-envelope icon"></i>
-            <span class="label">Correo:</span>
-            <span class="value" id="profile-email"></span>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-phone icon"></i>
-            <span class="label">Teléfono:</span>
-            <span class="value" id="profile-phone"></span>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-graduation-cap icon"></i>
-            <span class="label">Semestre:</span>
-            <span class="value" id="profile-semester"></span>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-briefcase icon"></i>
-            <span class="label">Carrera:</span>
-            <span class="value" id="profile-carrera"></span>
-          </div>
-          <div class="detail-item">
-            <i class="far fa-clock icon"></i>
-            <span class="label">Turno:</span>
-            <span class="value" id="profile-turno"></span>
-          </div>
+          <div class="detail-item"><i class="fas fa-university icon"></i><span class="label">Club/Materia:</span><span class="value" id="profile-club-name"></span></div>
+          <div class="detail-item"><i class="fas fa-id-card icon"></i><span class="label">Matrícula:</span><span class="value" id="profile-user-id"></span></div>
+          <div class="detail-item"><i class="fas fa-envelope icon"></i><span class="label">Correo:</span><span class="value" id="profile-email"></span></div>
+          <div class="detail-item"><i class="fas fa-phone icon"></i><span class="label">Teléfono:</span><span class="value" id="profile-phone"></span></div>
+          <div class="detail-item"><i class="fas fa-graduation-cap icon"></i><span class="label">Semestre:</span><span class="value" id="profile-semester"></span></div>
+          <div class="detail-item"><i class="fas fa-briefcase icon"></i><span class="label">Carrera:</span><span class="value" id="profile-carrera"></span></div>
+          <div class="detail-item"><i class="far fa-clock icon"></i><span class="label">Turno:</span><span class="value" id="profile-turno"></span></div>
         </div>
       </div>
     </div>
   </div>
 
+<script src="../js/notification.js?v=<?= time() ?>"></script>
 <script src="../js/menu.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.container');
+    let editMode = false;
+
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = message;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }, 10);
+    }
+
+    function showConfirmationModal(title, message, onConfirm) {
+        const modal = document.getElementById('confirmationModal');
+        if (!modal) return;
+        modal.querySelector('#confirmationModalTitle').textContent = title;
+        modal.querySelector('#confirmationModalMessage').textContent = message;
+        const confirmBtn = modal.querySelector('.btn-confirm');
+        const closeModal = () => {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true)); // Remove listeners
+        };
+        confirmBtn.addEventListener('click', () => { onConfirm(); closeModal(); }, { once: true });
+        modal.querySelectorAll('.close-modal, .btn-cancel').forEach(btn => btn.addEventListener('click', closeModal, { once: true }));
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function handleAjaxNavigation(url, card) {
+        history.pushState(null, '', url.toString());
+        card.style.opacity = '0.5';
+        card.style.pointerEvents = 'none';
+        const fetchUrl = new URL(url.toString());
+        fetchUrl.searchParams.set('ajax', '1');
+        fetchUrl.searchParams.set('type', card.id.replace('card-', ''));
+        fetch(fetchUrl.toString())
+            .then(response => response.text())
+            .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const newCard = tempDiv.firstChild;
+                if (newCard) card.parentNode.replaceChild(newCard, card);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                showNotification('Error al cargar los datos.', 'error');
+                if(card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
+            });
+    }
+
+    function setEditMode(on) {
+        editMode = !!on;
+        document.body.classList.toggle('edit-mode-active', on);
+        document.querySelectorAll('.card').forEach(c => c.classList.toggle('editing', on));
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        if (!on) document.querySelectorAll('tr.row-selected').forEach(tr => tr.classList.remove('row-selected'));
+        document.getElementById('editToolbar').style.display = on ? 'flex' : 'none';
+        document.getElementById('toggleEditBtn').textContent = on ? 'Cancelar Selección' : 'Seleccionar Alumnos';
+    }
+
+    container.addEventListener('click', e => {
+        const ajaxLink = e.target.closest('.ajax-page-link');
+        if (ajaxLink) {
+            e.preventDefault();
+            handleAjaxNavigation(new URL(ajaxLink.href), ajaxLink.closest('.card'));
+            return;
+        }
+
+        const filterBtn = e.target.closest('.club-filter-btn');
+        if (filterBtn) {
+            e.preventDefault();
+            const param = filterBtn.dataset.filterParam;
+            const value = filterBtn.dataset.filterValue;
+            filterBtn.closest('.club-filters').querySelectorAll('.club-filter-btn').forEach(b => b.classList.remove('active'));
+            filterBtn.classList.add('active');
+            const url = new URL(window.location.href);
+            if (value) url.searchParams.set(param, value); else url.searchParams.delete(param);
+            const pageParam = `page_${param.split('_')[1]}`;
+            url.searchParams.set(pageParam, '1');
+            handleAjaxNavigation(url, filterBtn.closest('.card'));
+            return;
+        }
+
+        const printBtn = e.target.closest('.print-report-btn');
+        if (printBtn) {
+            const card = printBtn.closest('.card');
+            const type = card.id.replace('card-', '');
+            const filterValue = card.querySelector('.club-filter-btn.active')?.dataset.filterValue || '';
+            if (type && filterValue) {
+                window.open(`print_report.php?type=${encodeURIComponent(type)}&filter_value=${encodeURIComponent(filterValue)}`, '_blank');
+            } else {
+                showNotification('Por favor, selecciona un club para generar el reporte.', 'error');
+            }
+            return;
+        }
+
+        const tr = e.target.closest('tr[data-id]');
+        if (tr && !e.target.closest('button, input, a, select, textarea')) {
+            if (editMode) {
+                const cb = tr.querySelector('.row-checkbox');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    tr.classList.toggle('row-selected', cb.checked);
+                }
+            } else {
+                const modal = document.getElementById('studentProfileModal');
+                if (!modal) return;
+                const studentData = tr.dataset;
+                const getData = (key) => (studentData[key] || 'N/A').toUpperCase();
+                
+                modal.querySelector('.student-name').textContent = getData('nombres');
+                modal.querySelector('#profile-student-name').textContent = `${getData('nombres')} ${getData('paterno')} ${getData('materno')}`.trim();
+                
+                const profilePicContainer = modal.querySelector('.profile-pic');
+                profilePicContainer.innerHTML = '';
+                const picPath = studentData.profilePicPath;
+                if (picPath && picPath.trim() !== '') {
+                    const img = document.createElement('img');
+                    img.src = `${BASE_PATH}/${picPath}`;
+                    img.alt = 'Foto de perfil';
+                    img.onerror = () => { profilePicContainer.textContent = 'NO CUENTA CON FOTO DE PERFIL'; };
+                    profilePicContainer.appendChild(img);
+                } else {
+                    profilePicContainer.textContent = 'NO CUENTA CON FOTO DE PERFIL';
+                }
+
+                modal.querySelector('#profile-club-name').textContent = getData('clubName');
+                modal.querySelector('#profile-user-id').textContent = getData('userId');
+                modal.querySelector('#profile-email').textContent = (studentData.correo || 'N/A').toUpperCase();
+                modal.querySelector('#profile-phone').textContent = getData('telefono');
+                modal.querySelector('#profile-semester').textContent = getData('semestre');
+                modal.querySelector('#profile-carrera').textContent = getData('carrera');
+                modal.querySelector('#profile-turno').textContent = getData('turno');
+
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            return;
+        }
+
+        const deleteBtn = e.target.closest('.btn-delete');
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
+            const nombre = deleteBtn.dataset.nombres || 'este alumno';
+            showConfirmationModal('Confirmar baja', `¿Estás seguro de que quieres dar de baja a ${nombre}?`, async () => {
+                try {
+                    const res = await fetch('../actions/bulk_delete_members.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: [id] })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showNotification('Alumno dado de baja.');
+                        const tr = document.querySelector(`tr[data-id="${id}"]`);
+                        if (tr) {
+                            tr.style.opacity = '0';
+                            setTimeout(() => tr.remove(), 300);
+                        }
+                    } else {
+                        showNotification(data.message || 'Error al dar de baja.', 'error');
+                    }
+                } catch (err) {
+                    showNotification('Error de conexión.', 'error');
+                }
+            });
+        }
+    });
+
+    document.getElementById('toggleEditBtn')?.addEventListener('click', () => setEditMode(!editMode));
+    document.getElementById('bulkDeleteBtn')?.addEventListener('click', () => {
+        const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.dataset.id);
+        if (!ids.length) return showNotification('Selecciona al menos un alumno.', 'error');
+        showConfirmationModal(`Confirmar baja`, `¿Dar de baja a ${ids.length} alumno(s)?`, async () => {
+            try {
+                const res = await fetch('../actions/bulk_delete_members.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showNotification(`${ids.length} alumno(s) dado(s) de baja.`);
+                    ids.forEach(id => {
+                        const tr = document.querySelector(`tr[data-id="${id}"]`);
+                        if (tr) tr.remove();
+                    });
+                } else {
+                    showNotification(data.message || 'Error al dar de baja.', 'error');
+                }
+            } catch (err) {
+                showNotification('Error de conexión.', 'error');
+            }
+        });
+    });
+
+    document.querySelectorAll('.close-modal, .close-btn').forEach(b => b.addEventListener('click', e => {
+        const panel = e.target.closest('.modal');
+        if(panel) {
+            panel.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }));
+
+    const addClubForm = document.getElementById('addClubForm');
+    if (addClubForm) {
+        addClubForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const formData = new FormData(addClubForm);
+            const res = await fetch('../actions/agregar_club.php', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.success) {
+                showNotification(result.message, 'success');
+                addClubForm.reset();
+                document.getElementById('modal').classList.remove('show');
+                document.body.style.overflow = '';
+                location.reload();
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
