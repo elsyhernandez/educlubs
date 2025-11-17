@@ -16,7 +16,29 @@ $rows = [];
 $report_title = '';
 $is_asesoria = false;
 
-$params = [$filter_value];
+$db_filter_value = $filter_value;
+
+if ($type === 'asesorias') {
+    // This mapping logic is needed to convert display names like "matematicas aula 1" 
+    // back to the actual database value like "matemáticas 1"
+    $materias_stmt = $pdo->query("SELECT DISTINCT materia FROM tutoring_registrations ORDER BY materia ASC");
+    $materias_db = $materias_stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $materias_map = [];
+    foreach ($materias_db as $materia) {
+        $display_name = $materia;
+        if (stripos($materia, 'matemáticas') !== false || stripos($materia, 'matematicas') !== false) {
+            $display_name = preg_replace('/(matemáticas|matematicas)/i', 'matematicas aula', $materia);
+        }
+        $materias_map[$display_name] = $materia;
+    }
+
+    if (isset($materias_map[$filter_value])) {
+        $db_filter_value = $materias_map[$filter_value];
+    }
+}
+
+$params = [$db_filter_value];
 
 if ($type === 'asesorias') {
     $is_asesoria = true;
@@ -28,7 +50,7 @@ if ($type === 'asesorias') {
                 tr.materno,
                 u.semestre, 
                 u.carrera, 
-                u.grupo, 
+                u.grupo,
                 u.turno 
             FROM tutoring_registrations tr
             LEFT JOIN users u ON tr.user_id = u.user_id
@@ -40,7 +62,7 @@ if ($type === 'asesorias') {
                 cr.club_name, 
                 cr.semestre, 
                 u.carrera, 
-                u.grupo, 
+                u.grupo,
                 u.turno,
                 cr.nombres,
                 cr.paterno,
@@ -210,11 +232,11 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <thead>
                 <tr>
                     <th><?php echo $is_asesoria ? 'Materia' : 'Club'; ?></th>
-                    <th>Nombre Completo</th>
                     <th>Semestre</th>
                     <th>Carrera</th>
                     <th>Grupo</th>
                     <th>Turno</th>
+                    <th>Nombre Completo</th>
                 </tr>
             </thead>
             <tbody>
@@ -226,11 +248,11 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach ($rows as $row): ?>
                         <tr>
                             <td><?php echo strtoupper(htmlspecialchars(($is_asesoria ? $row['materia'] : $row['club_name']) ?? '')); ?></td>
-                            <td><?php echo strtoupper(htmlspecialchars(($row['nombres'] ?? '') . ' ' . ($row['paterno'] ?? '') . ' ' . ($row['materno'] ?? ''))); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($row['semestre'] ?? '')); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($row['carrera'] ?? '')); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($row['grupo'] ?? '')); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($row['turno'] ?? '')); ?></td>
+                            <td><?php echo strtoupper(htmlspecialchars(($row['nombres'] ?? '') . ' ' . ($row['paterno'] ?? '') . ' ' . ($row['materno'] ?? ''))); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

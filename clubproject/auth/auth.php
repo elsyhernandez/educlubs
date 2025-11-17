@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($errors)) {
             $_SESSION['user'] = [
                 'user_id' => $user['user_id'], 
+                'username' => $user['username'],
                 'email' => $user['email'], 
                 'role' => $user['role'],
                 'carrera' => $user['carrera']

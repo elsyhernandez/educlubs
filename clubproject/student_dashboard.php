@@ -2,7 +2,7 @@
 <title>Panel - Alumno</title>
 
   <div class="main-container">
-    <h2>Selecciona un tipo de club</h2>
+    <h2>Selecciona un tipo de club o asesoria</h2>
     <div class="club-grid">
       <a href="club.php?type=cultural" class="club-card">
         <div class="icon-wrapper">
@@ -22,7 +22,7 @@
         <div class="icon-wrapper">
           <i class="fas fa-flag"></i>
         </div>
-        <h3>Civil</h3>
+        <h3>Civismo</h3>
         <p>Fomenta valores cívicos y patriotismo.</p>
       </a>
       <a href="club.php?type=asesoria" class="club-card">

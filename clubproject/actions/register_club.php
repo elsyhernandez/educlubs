@@ -66,7 +66,7 @@ try {
     }
 
     // --- Business Logic: Fetch User Data for Validation ---
-    $stmt_user = $pdo->prepare("SELECT paterno, materno, nombres, semestre, email, turno, telefono FROM users WHERE user_id = :user_id");
+    $stmt_user = $pdo->prepare("SELECT paterno, materno, nombres, semestre, email, turno, telefono, carrera FROM users WHERE user_id = :user_id");
     $stmt_user->execute([':user_id' => $user_id]);
     $user_data = $stmt_user->fetch(PDO::FETCH_ASSOC);
 
@@ -82,11 +82,14 @@ try {
     // --- Branch Logic Based on Club Type ---
     if ($club_type === 'asesoria') {
         // --- Asesoría Registration Logic ---
-        $carrera = $_POST['carrera'] ?? null;
         $maestro = $_POST['maestro'] ?? null;
+        $carrera = $user_data['carrera'] ?? null; // Se obtiene la carrera directamente del perfil del usuario.
 
-        if (empty($carrera) || empty($maestro)) {
-            send_json_response(false, 'La carrera y el nombre del maestro son obligatorios para las asesorías.');
+        if (empty($carrera)) {
+            send_json_response(false, 'Tu carrera no está especificada en tu perfil. Por favor, actualiza tu información antes de inscribirte a una asesoría.');
+        }
+        if (empty($maestro)) {
+            send_json_response(false, 'El nombre del maestro es obligatorio para las asesorías.');
         }
 
         // Check for duplicates in tutoring_registrations

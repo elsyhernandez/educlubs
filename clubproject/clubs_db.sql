@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-11-2025 a las 20:02:30
+-- Tiempo de generación: 16-11-2025 a las 23:00:54
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -88,6 +88,15 @@ CREATE TABLE `club_registrations` (
   `telefono` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `club_registrations`
+--
+
+INSERT INTO `club_registrations` (`id`, `club_type`, `club_name`, `paterno`, `materno`, `nombres`, `semestre`, `carrera`, `correo`, `turno`, `user_id`, `created_at`, `telefono`) VALUES
+(64, 'cultural', 'Fotografía/Video', 'vazquez', 'tovar', 'jaret', '6to Semestre', 'PROGRAMACIÓN', 'ajarettovar@gmail.com', 'Matutino', '@al55770615', '2025-11-16 19:08:33', '2234567890'),
+(65, 'civil', 'Banda de guerra', 'vazquez', 'tovar', 'jaret', '6to Semestre', 'PROGRAMACIÓN', 'ajarettovar@gmail.com', 'Matutino', '@al55770615', '2025-11-16 19:08:41', '2234567890'),
+(66, 'civil', 'Escolta', 'vazquez', 'tovar', 'jaret', '6to Semestre', 'PROGRAMACIÓN', 'ajarettovar@gmail.com', 'Matutino', '@al55770615', '2025-11-16 19:20:02', '2234567890');
+
 -- --------------------------------------------------------
 
 --
@@ -124,6 +133,15 @@ CREATE TABLE `tutoring_registrations` (
   `correo` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `tutoring_registrations`
+--
+
+INSERT INTO `tutoring_registrations` (`id`, `materia`, `paterno`, `materno`, `nombres`, `carrera`, `turno`, `maestro`, `telefono`, `user_id`, `created_at`, `correo`) VALUES
+(21, 'Matemáticas 1', 'vazquez', 'tovar', 'jaret', 'PROGRAMACION', 'matutino', 'Maestra Mónica León', '2234567890', '@al55770615', '2025-11-16 19:49:37', 'ajarettovar@gmail.com'),
+(22, 'Matemáticas 2', 'vazquez', 'tovar', 'jaret', 'PROGRAMACIÓN', 'Matutino', 'Maestra Ana González', '2234567890', '@al55770615', '2025-11-16 20:04:57', 'ajarettovar@gmail.com'),
+(23, 'Matemáticas 3', 'vazquez', 'tovar', 'jaret', 'PROGRAMACIÓN', 'Matutino', 'Maestra Ana González', '2234567890', '@al55770615', '2025-11-16 20:48:44', 'ajarettovar@gmail.com');
+
 -- --------------------------------------------------------
 
 --
@@ -143,11 +161,19 @@ CREATE TABLE `users` (
   `materno` varchar(255) DEFAULT NULL,
   `telefono` varchar(10) DEFAULT NULL,
   `semestre` varchar(255) DEFAULT NULL,
+  `grupo` varchar(10) DEFAULT NULL,
   `carrera` varchar(255) DEFAULT NULL,
   `turno` varchar(255) DEFAULT NULL,
-  `tipo_sangre` varchar(10) DEFAULT NULL,
   `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `users`
+--
+
+INSERT INTO `users` (`id`, `user_id`, `email`, `username`, `password_hash`, `role`, `created_at`, `nombres`, `paterno`, `materno`, `telefono`, `semestre`, `grupo`, `carrera`, `turno`, `profile_picture`) VALUES
+(134, '@ma14927016', 'alberto.vazquez.alp@cbtis258.edu.mx', 'jaret vazquez', '$2y$10$EHPutC5gG.pk8NHEYZKl1.TH2ZbTmYeM3ZhabdF7lYqUNIOHpzyKW', 'teacher', '2025-11-16 19:07:17', 'jaret', 'vazquez', 'tovar', '1234567890', '', NULL, '', '', NULL),
+(135, '@al55770615', 'ajarettovar@gmail.com', 'jaret vazquez', '$2y$10$Qwu0eOHOaEcUerVeHVfQIuib0zdx/HMKw3znthx.UqncmsTwpJRUO', 'student', '2025-11-16 19:08:07', 'jaret', 'vazquez', 'tovar', '2234567890', '6to Semestre', 'A', 'PROGRAMACIÓN', 'Matutino', 'assets/profile_pics/user_135_691a2396be2db3.82094161.png');
 
 --
 -- Índices para tablas volcadas
@@ -192,7 +218,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `club_registrations`
 --
 ALTER TABLE `club_registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT de la tabla `password_resets`
@@ -204,13 +230,13 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT de la tabla `tutoring_registrations`
 --
 ALTER TABLE `tutoring_registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

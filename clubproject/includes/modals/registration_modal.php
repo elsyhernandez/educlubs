@@ -8,7 +8,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const BASE_URL = '<?php echo BASE_URL; ?>';
-    const userCarrera = '<?php echo htmlspecialchars($_SESSION['user']['carrera'] ?? ''); ?>';
     // ==========================================================
     // --- Lógica del Nuevo Modal de Registro ---
     // ==========================================================
@@ -53,10 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <form id="registrationForm">
                         <div class="modal-body">
                             <p>Estás a punto de inscribirte a la asesoría de <strong>${clubName}</strong>.</p>
-                            <div class="form-group">
-                                <label for="carrera">Carrera:</label>
-                                <input type="text" id="carrera" name="carrera" value="${userCarrera}" readonly required>
-                            </div>
                             <div class="form-group">
                                 <label for="maestro">Maestro que imparte:</label>
                                 <input type="text" id="maestro" name="maestro" placeholder="Nombre del maestro" required>
@@ -146,13 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Si es una asesoría, añadir los campos extra
         if (clubType === 'asesoria') {
-            const carrera = document.getElementById('carrera').value;
             const maestro = document.getElementById('maestro').value;
-            if (!carrera || !maestro) {
-                renderModalContent('error', { message: 'Por favor, completa todos los campos.' });
+            if (!maestro) {
+                renderModalContent('error', { message: 'Por favor, ingresa el nombre del maestro.' });
                 return;
             }
-            formData.append('carrera', carrera);
             formData.append('maestro', maestro);
         }
 

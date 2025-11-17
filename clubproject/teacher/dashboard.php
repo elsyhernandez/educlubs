@@ -1,8 +1,9 @@
 <?php
 require '../includes/config.php';
-// if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') redirect('../auth/index.php');
-// $user = $_SESSION['user'];
-$_SESSION['user'] = ['user_id' => 'test_teacher', 'username' => 'Test Teacher', 'role' => 'teacher'];
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') {
+    header('Location: ../auth/index.php');
+    exit;
+}
 $user = $_SESSION['user'];
 
 // Handle flash messages via session and Post-Redirect-Get
@@ -111,8 +112,8 @@ function getPaginatedWithColumnFilter(PDO $pdo, string $table, string $whereBase
     }
 
     $selectSql = "SELECT 
-                    reg.id, reg.materia, reg.maestro, reg.created_at,
-                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.carrera, u.turno, u.profile_picture AS profile_pic_path
+                    reg.id, reg.materia, reg.maestro, reg.created_at, u.carrera,
+                    u.user_id, u.nombres, u.paterno, u.materno, u.email AS correo, u.telefono, u.semestre, u.turno, u.profile_picture AS profile_pic_path
                   FROM `$table` reg
                   LEFT JOIN `users` u ON reg.user_id = u.user_id
                   WHERE $where $orderBy LIMIT ? OFFSET ?";
@@ -166,19 +167,40 @@ $culturales = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'cultural
 $deportivos = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'deportivo'");
 $civiles    = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'civil'");
 $asesorias_clubs = getUniqueValues($pdo, 'clubs', 'club_name', "club_type = 'asesoria'");
-$materias_asesoria = getUniqueValues($pdo, 'tutoring_registrations', 'materia');
+$materias_asesoria_db = getUniqueValues($pdo, 'tutoring_registrations', 'materia', "LOWER(materia) IN ('matemáticas 1', 'matemáticas 2', 'matemáticas 3', 'inglés', 'matematicas 1', 'matematicas 2', 'matematicas 3', 'ingles')");
+
+$materias_map = [];
+foreach ($materias_asesoria_db as $materia) {
+    if (stripos($materia, 'matemáticas') !== false || stripos($materia, 'matematicas') !== false) {
+        $newName = preg_replace('/(matemáticas|matematicas)/i', 'matematicas aula', $materia);
+        $materias_map[$newName] = $materia;
+    } else {
+        $materias_map[$materia] = $materia;
+    }
+}
+$materias_asesoria = array_keys($materias_map);
 
 $filter_cultural = trim($_GET['filter_cultural'] ?? '');
 $filter_deportivo = trim($_GET['filter_deportivo'] ?? '');
 $filter_civil     = trim($_GET['filter_civil'] ?? '');
 $filter_asesoria  = trim($_GET['filter_asesoria'] ?? '');
+$db_filter_asesoria = $materias_map[$filter_asesoria] ?? $filter_asesoria;
 
 $orderBy = " ORDER BY u.nombres ASC, u.paterno ASC, u.materno ASC";
 
 $culturalData = getPaginated($pdo, 'club_registrations', "club_type = 'cultural'", 'page_cultural', $filter_cultural, $orderBy);
 $deportivoData = getPaginated($pdo, 'club_registrations', "club_type = 'deportivo'", 'page_deportivo', $filter_deportivo, $orderBy);
 $civilData     = getPaginated($pdo, 'club_registrations', "club_type = 'civil'", 'page_civil', $filter_civil, $orderBy);
-$asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $filter_asesoria, $orderBy);
+$asesoriasData = getPaginatedWithColumnFilter($pdo, 'tutoring_registrations', "1=1", 'page_asesoria', 'materia', $db_filter_asesoria, $orderBy);
+
+foreach ($asesoriasData['rows'] as &$row) {
+    if (isset($row['materia'])) {
+        if (stripos($row['materia'], 'matemáticas') !== false || stripos($row['materia'], 'matematicas') !== false) {
+            $row['materia'] = preg_replace('/(matemáticas|matematicas)/i', 'matematicas aula', $row['materia']);
+        }
+    }
+}
+unset($row);
 
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     $type = $_GET['type'];
@@ -197,6 +219,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     
     exit;
 }
+$materias_asesoria_json = json_encode(array_values($materias_asesoria));
 ?>
 <!doctype html>
 <html lang="es">
@@ -340,7 +363,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       --bg2: #e8d1d1;
       --card-bg: rgba(255,255,255,0.9);
       --primary: var(--secondary-color);
-      --button-bg: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+      --button-bg: #4D0011;
       --button-hover-bg: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
       --muted: #888;
       --glass: rgba(255,255,255,0.6); 
@@ -352,24 +375,22 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     header { background: var(--primary-color); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     header h2 { margin: 0; font-size: 28px; color:#fff; }
-    .header-actions { display:flex; align-items:center; gap:12px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
     .header-actions .btn {
-        margin-right: 1.5rem;
-        background: transparent;
+        margin-right: 0;
+        background: var(--primary-color);
         border: 1px solid var(--white-color);
         color: var(--white-color);
-        padding: 0.5rem 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
         border-radius: 5px;
         text-decoration: none;
-        box-shadow: none;
         transition: all 0.3s ease;
-        font-size: 16px;
     }
 
     .header-actions .btn:hover {
         background: var(--white-color);
-        color: var(--primary-color);
-        box-shadow: none;
+        color: #333;
     }
     .btn.alt { background:#fff;color:#333;border:1px solid #e6e9ef; box-shadow:none; }
     a.btn { text-decoration: none; }
@@ -385,7 +406,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
     .btn { 
-        padding: 10px 20px; 
+        height: 40px;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
         background: var(--button-bg); 
         color: #fff; 
         border: none; 
@@ -399,7 +425,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     .btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        background: var(--button-hover-bg);
+        background: var(--white-color);
+        color: #333;
     }
     .btn.small { padding:6px 10px; font-size:13px; }
     .btn-icon {
@@ -489,11 +516,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     }
     .detail-item .label {
         font-weight: 600;
-        color: #555;
+        color: #333;
     }
     .detail-item .value {
-        color: #333;
+        color: #555;
         margin-left: 8px;
+        font-weight: 500;
     }
     .styled-table tbody tr {
         cursor: pointer;
@@ -539,6 +567,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
     }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e6e9ef; }
     .modal-header h3 { margin: 0; color: #333; }
+    #studentProfileModal .modal-header h3 {
+        color: white !important;
+    }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
     #confirmationModalMessage { color: #333; font-size: 16px; line-height: 1.5; }
     @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -587,19 +618,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         <span>EduClubs - Panel de Maestro</span>
     </div>
   <div class="header-actions">
-    <a href="../view_clubs.php" class="btn">Ver base de clubs</a>
+    <a href="../view_clubs.php" class="btn">clubs</a>
     <button id="openModalBtn" class="btn" type="button" aria-haspopup="dialog" onclick="document.getElementById('modal').classList.add('show');document.body.style.overflow='hidden'"> Agregar club</button>
-    <button id="toggleEditBtn" class="btn" type="button">Seleccionar Alumnos</button>
+    <button id="toggleEditBtn" class="btn" type="button">Dar de baja</button>
     
     <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         <?php include '../includes/teacher_menu.php'; ?>
-        <div class="usericon">
-          <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
-          <div class="user-menu">
-            <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-            <a href="../auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
-          </div>
-        </div>
     </div>
   </div>
  </header>
@@ -699,8 +723,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
       </div>
       <form id="addClubForm" method="post" action="../actions/agregar_club.php" novalidate>
         <div class="form-row">
-          <div class="field">
-            <label class="form-label">Nombre del club</label>
+          <div class="field" id="club_name_field">
+            <label class="form-label" id="club_name_label">Nombre del club</label>
             <input type="text" name="club_name" required placeholder="Ej. Club de Robótica">
           </div>
           <div class="field">
@@ -716,7 +740,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
         </div>
         <div class="form-row">
           <div class="field">
-            <label class="form-label">Nombre del creador</label>
+            <label class="form-label" id="creator_name_label">Nombre del creador</label>
             <input type="text" name="creator_name" required placeholder="Nombre completo">
           </div>
           <div class="field" style="flex:0 0 120px; align-self:flex-end;">
@@ -764,7 +788,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1' && !empty($_GET['type'])) {
           <div class="detail-item"><i class="fas fa-envelope icon"></i><span class="label">Correo:</span><span class="value" id="profile-email"></span></div>
           <div class="detail-item"><i class="fas fa-phone icon"></i><span class="label">Teléfono:</span><span class="value" id="profile-phone"></span></div>
           <div class="detail-item"><i class="fas fa-graduation-cap icon"></i><span class="label">Semestre:</span><span class="value" id="profile-semester"></span></div>
-          <div class="detail-item"><i class="fas fa-briefcase icon"></i><span class="label">Carrera:</span><span class="value" id="profile-carrera"></span></div>
+          <div class="detail-item" id="profile-carrera-container"><i class="fas fa-briefcase icon"></i><span class="label">Carrera:</span><span class="value" id="profile-carrera"></span></div>
           <div class="detail-item"><i class="far fa-clock icon"></i><span class="label">Turno:</span><span class="value" id="profile-turno"></span></div>
         </div>
       </div>
@@ -807,6 +831,29 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.querySelectorAll('.close-modal, .btn-cancel').forEach(btn => btn.addEventListener('click', closeModal, { once: true }));
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
+    }
+
+    function printReport(url) {
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        iframe.onload = function() {
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (e) {
+                console.error('Error printing report:', e);
+                showNotification('No se pudo imprimir el reporte.', 'error');
+            }
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
     }
 
     function handleAjaxNavigation(url, card) {
@@ -870,7 +917,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = card.id.replace('card-', '');
             const filterValue = card.querySelector('.club-filter-btn.active')?.dataset.filterValue || '';
             if (type && filterValue) {
-                window.open(`print_report.php?type=${encodeURIComponent(type)}&filter_value=${encodeURIComponent(filterValue)}`, '_blank');
+                const reportUrl = `print_report.php?type=${encodeURIComponent(type)}&filter_value=${encodeURIComponent(filterValue)}`;
+                printReport(reportUrl);
             } else {
                 showNotification('Por favor, selecciona un club para generar el reporte.', 'error');
             }
@@ -889,10 +937,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const modal = document.getElementById('studentProfileModal');
                 if (!modal) return;
                 const studentData = tr.dataset;
-                const getData = (key) => (studentData[key] || 'N/A').toUpperCase();
+                const getData = (key) => studentData[key] || 'N/A';
                 
-                modal.querySelector('.student-name').textContent = getData('nombres');
-                modal.querySelector('#profile-student-name').textContent = `${getData('nombres')} ${getData('paterno')} ${getData('materno')}`.trim();
+                modal.querySelector('.student-name').textContent = getData('nombres').toUpperCase();
+                modal.querySelector('#profile-student-name').textContent = `${getData('nombres').toUpperCase()} ${getData('paterno').toUpperCase()} ${getData('materno').toUpperCase()}`.trim();
                 
                 const profilePicContainer = modal.querySelector('.profile-pic');
                 profilePicContainer.innerHTML = '';
@@ -907,13 +955,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     profilePicContainer.textContent = 'NO CUENTA CON FOTO DE PERFIL';
                 }
 
-                modal.querySelector('#profile-club-name').textContent = getData('clubName');
+                const clubOrMateria = studentData.clubName || studentData.materia;
+                modal.querySelector('#profile-club-name').textContent = (clubOrMateria || 'N/A').toUpperCase();
                 modal.querySelector('#profile-user-id').textContent = getData('userId');
-                modal.querySelector('#profile-email').textContent = (studentData.correo || 'N/A').toUpperCase();
-                modal.querySelector('#profile-phone').textContent = getData('telefono');
-                modal.querySelector('#profile-semester').textContent = getData('semestre');
-                modal.querySelector('#profile-carrera').textContent = getData('carrera');
-                modal.querySelector('#profile-turno').textContent = getData('turno');
+                modal.querySelector('#profile-email').textContent = getData('correo');
+                modal.querySelector('#profile-phone').textContent = getData('telefono').toUpperCase();
+                modal.querySelector('#profile-semester').textContent = getData('semestre').toUpperCase();
+                modal.querySelector('#profile-carrera').textContent = getData('carrera').toUpperCase();
+                modal.querySelector('#profile-turno').textContent = getData('turno').toUpperCase();
+
+                const carreraContainer = modal.querySelector('#profile-carrera-container');
+                carreraContainer.style.display = 'flex';
 
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
@@ -987,10 +1039,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addClubForm = document.getElementById('addClubForm');
     if (addClubForm) {
+        const materiasAsesoria = <?php echo $materias_asesoria_json; ?>;
+        const clubTypeSelect = addClubForm.querySelector('[name="club_type"]');
+        const clubNameContainer = document.getElementById('club_name_field');
+        const creatorNameLabel = document.getElementById('creator_name_label');
+        const modalTitle = document.getElementById('modal-title');
+        
+        const originalClubNameHTML = clubNameContainer.innerHTML;
+        const originalCreatorNameLabel = creatorNameLabel.textContent;
+        const originalAction = addClubForm.action;
+        const originalTitle = modalTitle.textContent;
+
+        clubTypeSelect.addEventListener('change', () => {
+            const selectedType = clubTypeSelect.value;
+            if (selectedType === 'asesoria') {
+                modalTitle.textContent = 'Asignar Maestro a Asesoría';
+                
+                let selectHTML = '<label class="form-label" id="club_name_label">Materia</label><select name="club_name" required>';
+                selectHTML += '<option value="">Selecciona una materia</option>';
+                materiasAsesoria.forEach(materia => {
+                    selectHTML += `<option value="${materia}">${materia}</option>`;
+                });
+                selectHTML += '</select>';
+                clubNameContainer.innerHTML = selectHTML;
+
+                creatorNameLabel.textContent = 'Nombre del Maestro';
+                addClubForm.action = '../actions/asignar_maestro.php';
+            } else {
+                modalTitle.textContent = originalTitle;
+                clubNameContainer.innerHTML = originalClubNameHTML;
+                creatorNameLabel.textContent = originalCreatorNameLabel;
+                addClubForm.action = originalAction;
+            }
+        });
+
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (clubTypeSelect.value !== '') {
+                    clubTypeSelect.value = '';
+                    clubTypeSelect.dispatchEvent(new Event('change'));
+                }
+                addClubForm.reset();
+            });
+        });
+
         addClubForm.addEventListener('submit', async e => {
             e.preventDefault();
             const formData = new FormData(addClubForm);
-            const res = await fetch('../actions/agregar_club.php', { method: 'POST', body: formData });
+            const res = await fetch(addClubForm.action, { method: 'POST', body: formData });
             const result = await res.json();
             if (result.success) {
                 showNotification(result.message, 'success');

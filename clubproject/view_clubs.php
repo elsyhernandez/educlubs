@@ -95,13 +95,14 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #FFFF; color: #333; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     header { background: var(--glass2); backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px 24px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     header h2 { margin: 0; font-size: 28px; color:#fff; }
-    .header-actions { display:flex; align-items:center; gap:12px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
     .header-actions .btn {
-        margin-right: 1.5rem;
+        margin-right: 0;
         background: transparent;
         border: 1px solid var(--white-color);
         color: var(--white-color);
-        padding: 0.5rem 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
         border-radius: 5px;
         text-decoration: none;
         box-shadow: none;
@@ -129,7 +130,12 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .pagination a { padding: 8px 12px; border-radius: 8px; background: #fff; border: 1px solid #e0e7ef; color: var(--primary); text-decoration: none; font-weight:600; }
     .pagination a.active { background-color: var(--primary); color: white; border-color: var(--primary); }
     .btn { 
-        padding: 10px 20px; 
+        height: 40px;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
         background: var(--button-bg); 
         color: #fff; 
         border: none; 
@@ -346,13 +352,6 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <button id="toggleEditBtn" class="btn" type="button">Editar</button>
     <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         <?php include 'includes/teacher_menu.php'; ?>
-        <div class="usericon">
-          <div class="avatar"><?=strtoupper($user['username'][0] ?? 'U')?></div>
-          <div class="user-menu">
-            <div><?=htmlspecialchars($user['user_id'] ?? '')?></div>
-            <a href="auth/logout.php?redirect=index.php" class="logout">Cerrar sesión</a>
-          </div>
-        </div>
     </div>
   </div>
  </header>

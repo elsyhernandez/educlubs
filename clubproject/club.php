@@ -85,27 +85,19 @@ if (!isset($lists[$type])) {
         <?php foreach($lists[$type] as $club): 
             $id = clubToFile($club); 
             $icon = getClubIcon($club);
-            if ($type === 'asesoria' || $type === 'civil'): ?>
-                <a href="<?=$type?>/<?=$id?>.php" class="club-card">
-                    <i class="<?=$icon?>"></i>
-                    <h3><?=htmlspecialchars($club)?></h3>
-                </a>
-            <?php else: ?>
-                <div class="club-card" onclick="abrirModal('<?=$id?>')">
-                    <i class="<?=$icon?>"></i>
-                    <h3><?=htmlspecialchars($club)?></h3>
-                </div>
-            <?php endif;
-        endforeach; ?>
+            ?>
+            <div class="club-card" onclick="abrirModal('<?=$id?>')">
+                <i class="<?=$icon?>"></i>
+                <h3><?=htmlspecialchars($club)?></h3>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>
 
-  <?php if ($type !== 'asesoria' && $type !== 'civil'): ?>
   <?php foreach($lists[$type] as $club): 
     $id = clubToFile($club); 
     @include "{$type}/modals/{$id}-modal.php";
   endforeach; ?>
-  <?php endif; ?>
 
   <script>
     function abrirModal(id) {
